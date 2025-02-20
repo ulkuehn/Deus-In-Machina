@@ -1,0 +1,24 @@
+diff --git a/node_modules/rtf-parser/rtf-interpreter.js b/node_modules/rtf-parser/rtf-interpreter.js
+index 09a89dd..d0b99cc 100644
+--- a/node_modules/rtf-parser/rtf-interpreter.js
++++ b/node_modules/rtf-parser/rtf-interpreter.js
+@@ -188,8 +188,17 @@ class RTFInterpreter extends Writable {
+     var charBuf = Buffer.alloc ? Buffer.alloc(2) : new Buffer(2)
+     // RTF, for reasons, represents unicode characters as signed integers
+     // thus managing to match literally no one.
+-    charBuf.writeInt16LE(num, 0)
+-    this.group.addContent(new RTFSpan({value: iconv.decode(charBuf, 'ucs2')}))
++    // ... additionally provide for positive values>32767 
++    if (num<=32767) {
++      charBuf.writeInt16LE(num, 0);
++    }
++    else {
++      charBuf.writeUInt16LE(num, 0);
++    }
++    // \u.... has an additional substitution char as in pl\u246\'f6tzlich ("plötzlich")
++    // here, the substitution char will be emitted additionally as an RTFSpan
++    // as a hack we prepend the value with "\0" so it's possible to skip the next RTFSpan
++    this.group.addContent(new RTFSpan({value: "\0" + iconv.decode(charBuf, 'ucs2')}))
+   }
+   ctrl$super () {
+     this.group.style.valign = 'super'

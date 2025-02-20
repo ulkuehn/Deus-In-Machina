@@ -1,0 +1,42 @@
+<!-- 
+DIM - Deus In Machina
+Ulrich Kühn 2024
+-->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="../node_modules/bootstrap/dist/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="../css/dim.css" />
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const $ = require("jquery");
+      const { ipcRenderer } = require("electron");
+      const i18n = require("roddeh-i18n");
+      const nodePath = require("path");
+      const fs = require("fs");
+      const { v4, NIL } = require("uuid");
+      // define uuid, UUID0 so they always start with a letter like symbol, never with a digit
+      const uuid = () => {
+        return "_" + v4();
+      };
+      const UUID0 = "_" + NIL;
+      const Quill = require("quill");
+      const Parchment = Quill.import("parchment");
+    </script>
+    <script src="../include/Logger.js"></script>
+    <script src="../include/Util.js"></script>
+    <script src="../include/Timestamp.js"></script>
+    <script src="../include/StylingControls.js"></script>
+    <script src="../include/StyledObject.js"></script>
+    <script src="../include/Formats.js"></script>
+    <script src="../include/Fonts.js"></script>
+    <script src="../include/Exporter.js"></script>
+    <script src="exportPreviewWindow.js"></script>
+  </head>
+
+  <body spellcheck="false"></body>
+</html>

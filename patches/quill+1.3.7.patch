@@ -1,0 +1,30 @@
+diff --git a/node_modules/quill/dist/quill.js b/node_modules/quill/dist/quill.js
+index 811b3d0..e276fdc 100644
+--- a/node_modules/quill/dist/quill.js
++++ b/node_modules/quill/dist/quill.js
+@@ -1315,6 +1315,9 @@ var Quill = function () {
+       } else {
+         bounds = this.selection.getBounds(index.index, index.length);
+       }
++      ////
++      if (!bounds) return null;
++      ////
+       var containerBounds = this.container.getBoundingClientRect();
+       return {
+         bottom: bounds.bottom - containerBounds.top,
+@@ -3010,7 +3013,14 @@ var Selection = function () {
+           }
+           rect = range.getBoundingClientRect();
+         } else {
+-          rect = leaf.domNode.getBoundingClientRect();
++          ////
++          let dNode = leaf.domNode;
++          while (dNode && !(dNode instanceof Element)){
++            dNode = dNode.parentNode;
++          }
++          if (!dNode) return null;
++          rect = dNode.getBoundingClientRect();
++          ////
+           if (offset > 0) side = 'right';
+         }
+         return {

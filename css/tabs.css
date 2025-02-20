@@ -1,0 +1,43 @@
+/* 
+DIM - Deus In Machina 
+Ulrich Kühn 2024
+
+css rules for tabs
+*/
+
+.nav-pills .nav-link {
+  border-radius: unset;
+}
+
+.nav-item.nav-link {
+  background-color: lightgray;
+  font-weight: bold;
+  color: #606060;
+  margin-right:2px;
+  height:40px;
+}
+
+.nav-item.nav-link.active {
+  color: var(--foreground-color);
+  background-color: transparent;
+}
+
+.tab-navigation {
+  position: relative;
+  overflow: hidden;
+  height: 50px;
+}
+
+.nav {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  min-width: 5000px;
+  margin-top: 0px;
+}
+
+.tab-content {
+  overflow-x: hidden;
+  overflow-y: auto;
+  margin: 20px;
+}

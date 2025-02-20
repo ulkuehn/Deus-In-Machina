@@ -1,0 +1,627 @@
+/* 
+DIM - Deus In Machina 
+Ulrich Kühn 2024
+*/
+
+/* define font "ui" for user interface */
+@font-face {
+  font-family: "ui";
+  src: url(../fonts/ui/FiraSans-Regular.woff2);
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "ui";
+  src: url(../fonts/ui/FiraSans-Bold.woff2);
+  font-weight: bold;
+  font-style: normal;
+}
+@font-face {
+  font-family: "ui";
+  src: url(../fonts/ui/FiraSans-Italic.woff2);
+  font-weight: normal;
+  font-style: italic;
+}
+@font-face {
+  font-family: "ui";
+  src: url(../fonts/ui/FiraSans-BoldItalic.woff2);
+  font-weight: bold;
+  font-style: italic;
+}
+
+:root {
+  --foreground-color: #000000;
+  /* override bootstrap's very light gray */
+  --bs-border-color: #767676;
+  /* real indent is set programatically where needed */
+  --first-line-indent: 0;
+}
+
+body * {
+  scrollbar-width: var(--scrollbar-width);
+  scrollbar-color: var(--scrollbar-fore) var(--scrollbar-back);
+}
+
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "ui", sans-serif;
+  font-size: 16px;
+  line-height: 26px;
+  user-select: none;
+}
+
+body,
+#TT,
+#OT,
+#TCL,
+#OR,
+#OR table,
+#TEE {
+  color: var(--foreground-color);
+  background-color: var(--background-color);
+}
+
+/* TE has another div within where overflow is handled */
+#TE {
+  padding: 0px;
+  overflow: hidden;
+}
+
+/* main div */
+.dim-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+/* unset max-width to allow for larger palettes */
+.sp-palette {
+  max-width: unset;
+}
+
+/* split pane div */
+.dim-split {
+  width: 100%;
+  height: 100%;
+  padding: 5px;
+  overflow: auto;
+}
+
+/* split gutters */
+.gutter {
+  background-color: black;
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+
+.gutter:hover {
+  filter: invert(0.75);
+}
+
+.gutter.gutter-horizontal {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==");
+  height: 100%;
+  cursor: col-resize;
+}
+
+.gutter.gutter-vertical {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=");
+  width: 100%;
+  cursor: row-resize;
+}
+
+*:focus {
+  outline: none;
+}
+
+.preWrap {
+  white-space: pre-wrap;
+}
+
+.leaflet-div-icon {
+  background: none !important;
+  border: none !important;
+}
+
+/* decorate regular bootstrap buttons */
+.btn:not(.simple-btn) {
+  box-shadow: #ffffff 0px 0px 3px 1px;
+  margin: 2px;
+}
+
+/* shake invalid input and override bootstrap box-shadow*/
+input:invalid {
+  animation-duration: 1s;
+  animation-name: shake;
+  box-shadow: 0 0 0 0.2rem rgba(255, 64, 64, 0.5) !important;
+}
+
+@keyframes shake {
+  from,
+  to {
+    transform: translateX(0);
+  }
+  40%,
+  80% {
+    transform: translateX(-1rem);
+  }
+  20%,
+  60% {
+    transform: translateX(1rem);
+  }
+}
+
+input[type="text"],
+input[type="search"],
+input[type="number"],
+textarea,
+select {
+  font-size: 16px !important;
+}
+
+/* style data tables */
+select,
+option,
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select {
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+}
+
+.dataTables_wrapper .dataTables_filter input {
+  padding: 3px;
+  display: inline-block;
+  width: unset;
+}
+
+table.dataTable tbody td {
+  vertical-align: top;
+}
+
+div.dt-container select.dt-input {
+  margin-right: 3px;
+}
+/* restyle range sliders, see https://css-tricks.com/styling-cross-browser-compatible-range-inputs-css/ */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+}
+input[type="range"]:focus {
+  outline: none;
+}
+/* dark version for light backgrounds */
+input[type="range"].range-dark::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  box-shadow: 0px 0px 2px #ffffff;
+  background: #808080;
+  border-radius: 3px;
+}
+input[type="range"].range-dark::-webkit-slider-thumb {
+  box-shadow: 0px 0px 1px #404040;
+  border: 1px solid #404040;
+  height: 16px;
+  width: 8px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -5px;
+}
+input[type="range"].range-dark:disabled::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  box-shadow: 0px 0px 2px #ffffff;
+  background: #80808060;
+  border-radius: 3px;
+}
+input[type="range"].range-dark:disabled::-webkit-slider-thumb {
+  box-shadow: 0px 0px 1px #404040;
+  border: 1px solid #404040;
+  height: 16px;
+  width: 8px;
+  border-radius: 3px;
+  background: #c0c0c0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -5px;
+}
+/* light version for dark backgrounds */
+input[type="range"].range-light::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  box-shadow: 0px 0px 2px #404040;
+  background: #ffffff;
+  border-radius: 3px;
+}
+input[type="range"].range-light::-webkit-slider-thumb {
+  box-shadow: 0px 0px 1px #ffffff;
+  border: 1px solid #ffffff;
+  height: 16px;
+  width: 8px;
+  border-radius: 3px;
+  background: #404040;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -5px;
+}
+input[type="range"].range-light:disabled::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  box-shadow: 0px 0px 2px #404040;
+  background: #ffffff60;
+  border-radius: 3px;
+}
+input[type="range"].range-light:disabled::-webkit-slider-thumb {
+  box-shadow: 0px 0px 1px #c0c0c0;
+  border: 1px solid #c0c0c0;
+  height: 16px;
+  width: 8px;
+  border-radius: 3px;
+  background: #808080;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -5px;
+}
+
+/* decoration of section header */
+.section-header {
+  font-weight: bold;
+  border-top: dotted 2px var(--foreground-color);
+  border-left: dotted 2px var(--foreground-color);
+  padding: 10px;
+  margin-top: 30px;
+}
+div:first-child.section-header {
+  margin-top: 0px;
+}
+
+/* info at top of tabs */
+.tab-info {
+  font-style: italic;
+  padding: 3px;
+  color: var(--background-color);
+  background-color: var(--foreground-color);
+  opacity: 0.75;
+}
+
+/*
+styles related to editor 
+*/
+
+.edi *::selection {
+  color: var(--selection-foregroundColor);
+  background: var(--selection-backgroundColor);
+}
+
+.ql-editor img {
+  cursor: default;
+}
+
+[id^="edi"] > .ql-editor,
+[id^="edi"].ql-container {
+  height: unset;
+  font-size: unset;
+  font-family: unset;
+  text-align: unset;
+  line-height: unset;
+  overflow: hidden;
+}
+
+/* make text in locked editors still selectable */
+.ql-disabled {
+  user-select: text;
+}
+
+/* styles for highlighting cursor position */
+.whereami-true {
+  animation-duration: 0.75s;
+  animation-timing-function: ease-in-out;
+  animation-name: expand;
+}
+
+@keyframes expand {
+  from,
+  to {
+  }
+  25%,
+  75% {
+    font-size: 300%;
+    color: red;
+    background-color: yellow;
+    box-shadow: 0px 0px 1em 0.5em yellow;
+  }
+}
+
+/* decorate empty editor */
+.emptyEditor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  animation-duration: 20s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-name: emptyeditor;
+}
+
+@keyframes emptyeditor {
+  from,
+  to {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* let selected editor flash */
+.blinkEditor {
+  animation-duration: 0.5s;
+  animation-iteration-count: 2;
+  animation-name: blinkeditor;
+}
+
+@keyframes blinkeditor {
+  from,
+  to {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* export editor */
+.ql-editor div.export-placeholder {
+  display: inline;
+  user-select: all;
+  letter-spacing: 2px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.ql-editor span.placeholder-block {
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+  letter-spacing: 2px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/*
+styles related to context menu
+*/
+
+/* make context menus compacter */
+.context-menu-item {
+  padding: 0.1em 0.5em 0.1em 2em;
+}
+
+/* no wrapping in context menus */
+ul.context-menu-list {
+  white-space: nowrap;
+}
+
+/* color the context menu (almost) black */
+.context-menu-item.context-menu-hover {
+  background-color: #2f2f2f;
+  color: #fff;
+}
+
+.context-menu-icon.context-menu-icon--fa5 i,
+.context-menu-icon.context-menu-icon--fa::before {
+  color: #2f2f2f;
+}
+
+/* context menu items having variable text length and thus needing overflow management */
+.context-menu-overflow {
+  height: 24px;
+}
+
+.context-menu-item.context-menu-overflow {
+  padding-top: 1.6px;
+  padding-bottom: 1.6px;
+}
+
+.context-menu-overflow span {
+  display: inline-block;
+  width: 95%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* indicate empty texts in text tree */
+#TT {
+  --display-leaf-empty-text: none;
+  --display-nonleaf-empty-text: none;
+}
+#TT i.fa-text-slash {
+  display: var(--display-nonleaf-empty-text);
+}
+#TT li.jstree-leaf i.fa-text-slash {
+  display: var(--display-leaf-empty-text);
+}
+
+/* indicate objects not linked to texts in object tree */
+#OT {
+  --display-leaf-empty-object: none;
+  --display-nonleaf-empty-object: none;
+}
+#OT i.fa-link-slash {
+  display: var(--display-nonleaf-empty-object);
+}
+#OT li.jstree-leaf i.fa-link-slash {
+  display: var(--display-leaf-empty-object);
+}
+
+/* animation of distraction free window (un)showing */
+#dfw-outer {
+  animation-duration: 2s;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  margin: auto;
+  overflow: hidden;
+}
+
+#dfw-inner {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+@keyframes dfw-on {
+  0% {
+    width: 10px;
+    height: 10px;
+    opacity: 0;
+  }
+  50% {
+    width: 10px;
+    height: 100%;
+  }
+  100% {
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+  }
+}
+
+@keyframes dfw-off {
+  25% {
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+  }
+  50% {
+    width: 10px;
+    height: 100%;
+  }
+  100% {
+    width: 10px;
+    height: 10px;
+    opacity: 0;
+  }
+}
+
+/*
+styles related to guided tour
+*/
+
+/* transparent overlay */
+.tour-glass {
+  z-index: 100;
+  background: white;
+  opacity: 0;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
+
+.tour-overlay {
+  z-index: 101;
+  background: white;
+  opacity: 0.5;
+  position: absolute;
+}
+
+.tour-highlight {
+  animation-duration: 0.5s;
+  animation-iteration-count: 2;
+  animation-name: tour-blink;
+  background: #7678ed;
+}
+
+@keyframes tour-blink {
+  0%,
+  100% {
+    background: white;
+  }
+  50% {
+    background: #7678ed;
+  }
+}
+
+.tour-info {
+  z-index: 101;
+  position: absolute;
+  background: #7678ed;
+  border-radius: 10px;
+  padding: 15px;
+  color: white;
+  text-align: center;
+  white-space: pre-line;
+  animation-name: info-show;
+  animation-duration: 1s;
+  animation-timing-function: ease-in;
+}
+
+.tour-info-left:after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  background: #7678ed;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.tour-info-right:after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  background: #7678ed;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.tour-info-top:after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  background: #7678ed;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.tour-info-bottom:after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  background: #7678ed;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+@keyframes info-show {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

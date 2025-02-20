@@ -1,0 +1,15 @@
+diff --git a/node_modules/table/dist/src/drawBorder.js b/node_modules/table/dist/src/drawBorder.js
+index 81ede50..8e5a402 100644
+--- a/node_modules/table/dist/src/drawBorder.js
++++ b/node_modules/table/dist/src/drawBorder.js
+@@ -96,7 +96,9 @@ const createSeparatorGetter = (dependencies) => {
+             }
+             /* istanbul ignore next */
+             if (sameRangeCount === 1) {
+-                if (!separator.joinRight || !separator.joinLeft || !separator.joinUp || !separator.joinDown) {
++                // if (!separator.joinRight || !separator.joinLeft || !separator.joinUp || !separator.joinDown)
++                if (separator.joinRight==null || separator.joinLeft==null || separator.joinUp==null || separator.joinDown==null) 
++                {
+                     throw new Error(`Can not get border separator for position [${horizontalBorderIndex}, ${verticalBorderIndex}]`);
+                 }
+                 if (inSameRange(...pairs[0])) {

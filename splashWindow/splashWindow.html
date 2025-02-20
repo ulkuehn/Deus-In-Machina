@@ -1,0 +1,37 @@
+<!-- 
+DIM - Deus In Machina
+Ulrich Kühn 2024
+
+splash window will show until main window comes up
+-->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link
+      href="../node_modules/@fortawesome/fontawesome-free/css/all.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/dim.css" />
+    <style>
+      @keyframes blur {
+        from {
+          filter: blur(0px);
+        }
+        20% {
+          filter: blur(0px);
+        }
+        to {
+          filter: blur(50px);
+        }
+      }
+    </style>
+    <script>
+      const $ = require("jquery");
+      const { ipcRenderer } = require("electron");
+    </script>
+    <script src="../include/Sounds.js"></script>
+    <script src="splashWindow.js"></script>
+  </head>
+  <body></body>
+</html>

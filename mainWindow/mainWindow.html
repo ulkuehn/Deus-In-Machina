@@ -1,0 +1,124 @@
+<!-- 
+DIM - Deus In Machina
+Ulrich Kühn 2024
+-->
+<!-- <!doctype html> split.js needs quirks mode -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <!-- load external css files -->
+    <link
+      rel="stylesheet"
+      href="../node_modules/bootstrap/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="../node_modules/spectrum-colorpicker/spectrum.css"
+    />
+    <link rel="stylesheet" href="../node_modules/quill/dist/quill.core.css" />
+    <link
+      rel="stylesheet"
+      href="../node_modules/@fortawesome/fontawesome-free/css/fontawesome.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="../node_modules/@fortawesome/fontawesome-free/css/all.css"
+    />
+    <link
+      rel="stylesheet"
+      href="../node_modules/datatables.net-dt/css/dataTables.dataTables.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="../node_modules/jquery-contextmenu/dist/jquery.contextMenu.min.css"
+    />
+    <!-- load DIM css files -->
+    <link rel="stylesheet" href="../css/dimspectrum.css" />
+    <link rel="stylesheet" href="../css/jstree/style.css" />
+    <link rel="stylesheet" href="../css/dim.css" />
+    <!-- style sheet for text tree (selection color etc) -->
+    <style id="textTreeSheet"></style>
+    <!-- style sheet for text collections tree (selection color etc) -->
+    <style id="textCollectionTreeSheet"></style>
+    <!-- style sheet for object tree (selection color etc) -->
+    <style id="objectTreeSheet"></style>
+    <!-- style sheet for editor (selection color, text separation etc) -->
+    <style id="editorSheet"></style>
+    <!-- style sheets for all fonts available; initially filled by initializeRenderer.js -->
+    <style id="fontSheet"></style>
+    <!-- style sheets for object related styles; changed when (de)selecting objects -->
+    <style id="objectSheet"></style>
+    <!-- style sheets for paragraph formats; changed when creating and deleting formats -->
+    <style id="formatSheet"></style>
+    <!-- load all necessary scripts -->
+    <script>
+      const $ = require("jquery");
+      const { contextMenu } = require("jquery-contextmenu");
+      const { ipcRenderer, webFrame, shell } = require("electron");
+      const fs = require("fs");
+      const os = require("os");
+      const nodePath = require("path");
+      const i18n = require("roddeh-i18n");
+      const dataTables = require("datatables.net-dt")(window, $);
+      const { v4, NIL } = require("uuid");
+      // define uuid, UUID0 so they always start with a letter like symbol, never with a digit
+      const uuid = () => {
+        return "_" + v4();
+      };
+      const UUID0 = "_" + NIL;
+      const Split = require("split.js");
+      const jstree = require("jstree");
+      const Leaflet = require("leaflet");
+      const leafletImage = require("leaflet-image");
+      const { table, getBorderCharacters } = require("table");
+      const { htmlToText } = require("html-to-text");
+      const parseRTF = require("rtf-parser");
+      const Database = require("better-sqlite3-multiple-ciphers");
+      const Nodehun = require("nodehun");
+      const Quill = require("quill");
+      const Parchment = Quill.import("parchment");
+      const Delta = Quill.import("delta");
+      const log = require("electron-log/main");
+      const moment = require("moment");
+    </script>
+    <script src="../include/palettes.js"></script>
+    <script src="../include/Util.js"></script>
+    <script src="../include/Logger.js"></script>
+    <script src="../include/Languages.js"></script>
+    <script src="../include/TreeDecoration.js"></script>
+    <script src="../include/tableOrder.js"></script>
+    <script src="../include/QuillConfig.js"></script>
+    <script src="../include/Image.js"></script>
+    <script src="../include/Sounds.js"></script>
+    <script src="../include/Filter.js"></script>
+    <script src="../include/Fonts.js"></script>
+    <script src="../include/ipcRenderer.js"></script>
+    <script src="../include/Layout.js"></script>
+    <script src="../include/Categories.js"></script>
+    <script src="../include/Settings.js"></script>
+    <script src="../include/Project.js"></script>
+    <script src="../include/Properties.js"></script>
+    <script src="../include/Timestamp.js"></script>
+    <script src="../include/StylingControls.js"></script>
+    <script src="../include/StyledObject.js"></script>
+    <script src="../include/ObjectTree.js"></script>
+    <script src="../include/StyledText.js"></script>
+    <script src="../include/Collection.js"></script>
+    <script src="../include/TextCollection.js"></script>
+    <script src="../include/TextTree.js"></script>
+    <script src="../include/CollectionTree.js"></script>
+    <script src="../include/Formats.js"></script>
+    <script src="../include/Spellchecker.js"></script>
+    <script src="../include/TextEditor.js"></script>
+    <script src="../include/ObjectReference.js"></script>
+    <script src="../include/ExportEditor.js"></script>
+    <script src="../include/Exporter.js"></script>
+    <script src="../include/Scheme.js"></script>
+    <script src="../include/SchemeMap.js"></script>
+    <script src="../include/GuidedTour.js"></script>
+    <script src="../include/Tests.js"></script>
+    <script src="mainWindow.js"></script>
+  </head>
+
+  <body spellcheck="false"></body>
+</html>

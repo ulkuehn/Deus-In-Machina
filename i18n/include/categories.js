@@ -1,0 +1,251 @@
+/**
+ * DIM - Deus In Machina
+ *
+ * @author Ulrich Kühn 2024
+ * @file i18n translations for text property categories (needed both by settings and project properties window)
+ */
+
+const translationCategories = {
+  // German
+  de: {
+    categories_clearList: "Alle Einträge löschen",
+    categories_deleteEntry: "Eintrag löschen",
+    categories_addEntry: "Eintrag hinzufügen",
+    categories_moveEntryUp: "nach oben schieben",
+    categories_moveEntryDown: "nach unten schieben",
+    categories_example: "Vorschläge",
+    // color schemes
+    colors_traffic: "Ampel",
+    colors_trafficInverse: "Ampel umgedreht",
+    colors_olympic: "Olympisch",
+    colors_rainbow: "Regenbogen",
+    colors_grey5: "5 Graustufen (hell&rarr;dunkel)",
+    colors_grey5Inverse: "5 Graustufen (dunkel&rarr;hell)",
+    colors_random2: "Zufall (2 Farben)",
+    colors_random3: "Zufall (3 Farben)",
+    colors_random5: "Zufall (5 Farben)",
+    colors_random10: "Zufall (10 Farben)",
+    // text status
+    categories_status: "Textstatus",
+    categories_statusInfo: "(z.B. Entwurf, Skizze, Überarbeitung)",
+    categories_noStatus: "kein Status",
+    categories_statusColor: "Farbe",
+    categories_statusName: "Bezeichnung",
+    categories_statusText: "Erläuterung",
+    // suggestions: 2 states
+    categories_2states: "Zwei Stufen",
+    categories_2states_started1: "Begonnen",
+    categories_2states_ended1: "Beendet",
+    // suggestions: 5 states
+    categories_5states: "Fünf Stufen",
+    categories_5states_idea1: "Idee",
+    categories_5states_idea2: "erste Ideen, Skizzen und Notizen",
+    categories_5states_draft1: "Entwurf",
+    categories_5states_draft2: "unredigierte Entwurfsfassung",
+    categories_5states_revise1: "Überarbeitung",
+    categories_5states_revise2: "Überarbeitung des Entwurfs",
+    categories_5states_edit1: "Korrektur",
+    categories_5states_edit2: "korrigierte Fassung",
+    categories_5states_publish1: "Endfassung",
+    categories_5states_publish2: "fertige Version",
+    // text type
+    categories_type: "Texttyp",
+    categories_typeInfo: "(z.B. Kapitel, Abschnitt, Szene)",
+    categories_noType: "kein Typ",
+    categories_typeColor: "Farbe",
+    categories_typeName: "Bezeichnung",
+    categories_typeText: "Erläuterung",
+    categories_2types: "zwei Typen",
+    categories_3types: "drei Typen",
+    categories_typeSceneName: "Szene",
+    categories_typeSceneText: "eine einzelne Szene",
+    categories_typeChapterName: "Kapitel",
+    categories_typeChapterText: "Kapitel, bestehend aus mehreren Szenen",
+    categories_typeSectionName: "Abschnitt",
+    categories_typeSectionText: "Abschnitt, bestehend aus mehreren Kapiteln",
+    // user value
+    categories_user: "Nutzerspezifische Kategorie",
+    categories_userInfo: "(z.B. Plotstruktur, verschiedene Stränge)",
+    categories_noUser: "kein Wert",
+    categories_userColor: "Farbe",
+    categories_userName: "Bezeichnung",
+    categories_userText: "Erläuterung",
+    // suggestions: 3 acts
+    categories_3Act: "Drei-Akt-Struktur",
+    categories_3Act_exposition1: "Einführung",
+    categories_3Act_exposition2: "1. Akt",
+    categories_3Act_inciting1: "Auslösendes Ereignis",
+    categories_3Act_inciting2: "",
+    categories_3Act_pointone1: "Erster Wendepunkt",
+    categories_3Act_pointone2: "",
+    categories_3Act_rising1: "Steigende Handlung",
+    categories_3Act_rising2: "2. Akt",
+    categories_3Act_midpoint1: "Mittelpunkt",
+    categories_3Act_midpoint2: "",
+    categories_3Act_pointtwo1: "Zweiter Wendepunkt",
+    categories_3Act_pointtwo2: "",
+    categories_3Act_preclimax1: "Tiefpunkt",
+    categories_3Act_preclimax2: "3. Akt",
+    categories_3Act_climax1: "Höhepunkt",
+    categories_3Act_climax2: "",
+    categories_3Act_denouement1: "Auflösung",
+    categories_3Act_denouement2: "",
+    // suggestions: hero's journey
+    categories_herosJourney: "Heldenreise (nach Vogler)",
+    categories_HJDepartureA1: "Gewohnte Welt",
+    categories_HJDepartureA2:
+      "AUFBRUCH: Ausgangspunkt ist die gewohnte, langweilige oder unzureichende Welt des Helden",
+    categories_HJDepartureB1: "Ruf des Abenteuers",
+    categories_HJDepartureB2:
+      "Der Held wird von einem Herold zum Abenteuer gerufen",
+    categories_HJDepartureC1: "Weigerung",
+    categories_HJDepartureC2: "Diesem Ruf verweigert er sich zunächst",
+    categories_HJDepartureD1: "Begegnung mit dem Mentor",
+    categories_HJDepartureD2:
+      "Ein Mentor überredet ihn daraufhin, die Reise anzutreten, und das Abenteuer beginnt",
+    categories_HJDepartureE1: "Überschreiten der ersten Schwelle",
+    categories_HJDepartureE2:
+      "Der Held überschreitet die erste Schwelle, nach der es kein Zurück mehr gibt",
+    categories_HJInitiationA1: "Bewährungsproben",
+    categories_HJInitiationA2:
+      "INITIATION: Der Held wird vor erste Bewährungsproben gestellt und trifft dabei auf Verbündete und Feinde",
+    categories_HJInitiationB1: "Vordringen zum empfindlichsten Kern",
+    categories_HJInitiationB2:
+      "Nun dringt er bis zur tiefsten Höhle, zum gefährlichsten Punkt, vor und trifft dabei auf den Gegner",
+    categories_HJInitiationC1: "Entscheidende Prüfung",
+    categories_HJInitiationC2:
+      "Hier findet die entscheidende Prüfung, die Feuerprobe statt: Konfrontation und Überwindung des Gegners",
+    categories_HJInitiationD1: "Belohnung",
+    categories_HJInitiationD2: `Der Held kann sich nun des "Schatzes" oder des "Elixiers" bemächtigen`,
+    categories_HJReturnA1: "Auferstehung",
+    categories_HJReturnA2:
+      "RÜCKKEHR: Er tritt den Rückweg an, während dessen es zu seiner Auferstehung aus der Todesnähe kommt",
+    categories_HJReturnB1: "Wandel des Selbst",
+    categories_HJReturnB2:
+      "Der Feind ist besiegt, das Elixier befindet sich in der Hand des Helden. Er ist durch das Abenteuer zu einer neuen Persönlichkeit gereift",
+    categories_HJReturnC1: "Rückkehr mit dem Schatz",
+    categories_HJReturnC2:
+      "Das Ende der Reise: Der Rückkehrer wird zu Hause mit Anerkennung belohnt",
+  },
+  en: {
+    categories_clearList: "Delete all entries",
+    categories_deleteEntry: "Delete entry",
+    categories_addEntry: "Add entry",
+    categories_moveEntryUp: "Move up",
+    categories_moveEntryDown: "Move down",
+    categories_example: "Suggestions",
+    // color schemes
+    colors_traffic: "Traffic light",
+    colors_trafficInverse: "Traffic light inverse",
+    colors_olympic: "Olympic",
+    colors_rainbow: "Rainbow",
+    colors_grey5: "5 Levels of gray (light&rarr;dark)",
+    colors_grey5Inverse: "5 Levels of gray (dark&rarr;light)",
+    colors_random2: "Random (2 colors)",
+    colors_random3: "Random (3 colors)",
+    colors_random5: "Random (5 colors)",
+    colors_random10: "Random (10 colors)",
+    // text status
+    categories_status: "Text status",
+    categories_statusInfo: "(e.g. Draft, Revision, Final version)",
+    categories_noStatus: "No status",
+    categories_statusColor: "Color",
+    categories_statusName: "Name",
+    categories_statusText: "Comment",
+    // suggestions: 2 states
+    categories_2states: "Two States",
+    categories_2states_started1: "Started",
+    categories_2states_ended1: "Finished",
+    // suggestions: 5 states
+    categories_5states: "Five States",
+    categories_5states_idea1: "Outline",
+    categories_5states_idea2: "Early ideas and notes",
+    categories_5states_draft1: "Draft",
+    categories_5states_draft2: "First version",
+    categories_5states_revise1: "Revision",
+    categories_5states_revise2: "Revised draft",
+    categories_5states_edit1: "Edit",
+    categories_5states_edit2: "Edited version",
+    categories_5states_publish1: "Final version",
+    categories_5states_publish2: "Fully edited and finished",
+    // text type
+    categories_type: "Text type",
+    categories_typeInfo: "(e.g. Chapter, Section, Scene)",
+    categories_noType: "No type",
+    categories_typeColor: "Color",
+    categories_typeName: "Name",
+    categories_typeText: "Comment",
+    categories_2types: "Two Types",
+    categories_3types: "Three Types",
+    categories_typeSceneName: "Scene",
+    categories_typeSceneText: "A single scene",
+    categories_typeChapterName: "Chapter",
+    categories_typeChapterText: "Chapter, having several scenes",
+    categories_typeSectionName: "Section",
+    categories_typeSectionText: "Section, having several chapters",
+    // user value
+    categories_user: "User defined category",
+    categories_userInfo: "(e.g. plot structure, different strands)",
+    categories_noUser: "No value",
+    categories_userColor: "Color",
+    categories_userName: "Name",
+    categories_userText: "Comment",
+    // suggestions: 3 acts
+    categories_3Act: "Three-Act Structure",
+    categories_3Act_exposition1: "Exposition",
+    categories_3Act_exposition2: "ACT 1",
+    categories_3Act_inciting1: "Inciting Incident",
+    categories_3Act_inciting2: "",
+    categories_3Act_pointone1: "Plot Point One",
+    categories_3Act_pointone2: "",
+    categories_3Act_rising1: "Rising Action",
+    categories_3Act_rising2: "ACT 2",
+    categories_3Act_midpoint1: "Midpoint",
+    categories_3Act_midpoint2: "",
+    categories_3Act_pointtwo1: "Plot Point Two",
+    categories_3Act_pointtwo2: "",
+    categories_3Act_preclimax1: "Pre-Climax",
+    categories_3Act_preclimax2: "ACT 3",
+    categories_3Act_climax1: "Climax",
+    categories_3Act_climax2: "",
+    categories_3Act_denouement1: "Denouement",
+    categories_3Act_denouement2: "",
+    // suggestions: hero's journey
+    categories_herosJourney: "Hero's Journey (according to Vogler)",
+    categories_HJDepartureA1: "Ordinary world",
+    categories_HJDepartureA2:
+      "DEPARTURE: The hero is introduced in his/her ordinary world",
+    categories_HJDepartureB1: "Call to adventure",
+    categories_HJDepartureB2:
+      "The hero is presented with a problem, challenge or adventure",
+    categories_HJDepartureC1: "Refusal of the call",
+    categories_HJDepartureC2: "The hero is reluctant at first",
+    categories_HJDepartureD1: "Meeting with the mentor",
+    categories_HJDepartureD2:
+      "The hero is encouraged by the Wise Old Man or Woman",
+    categories_HJDepartureE1: "Crossing the first threshold",
+    categories_HJDepartureE2:
+      "The hero fully enters the special world of the story for the first time",
+    categories_HJInitiationA1: "Tests, allies, and enemies",
+    categories_HJInitiationA2:
+      "INITIATION: The hero encounters tests and helpers",
+    categories_HJInitiationB1: "Approach to the inmost cave",
+    categories_HJInitiationB2:
+      "The hero comes to a dangerous place where the object of the quest is hidden",
+    categories_HJInitiationC1: "The ordeal",
+    categories_HJInitiationC2: "The hero endures the supreme ordeal",
+    categories_HJInitiationD1: "Reward",
+    categories_HJInitiationD2:
+      "The hero now takes possession of the treasure he/she is come seeking",
+    categories_HJReturnA1: "The road back",
+    categories_HJReturnA2: "RETURN: The hero's not out of the woods yet",
+    categories_HJReturnB1: "The resurrection",
+    categories_HJReturnB2:
+      "The hero emerges from the special world, transformed by his/her experience",
+    categories_HJReturnC1: "Return with the elixir",
+    categories_HJReturnC2:
+      "The hero comes back to the ordinary world, bringing back the elixir, treasure, or some lesson from the special world",
+  },
+};
+
+module.exports = { translationCategories };
