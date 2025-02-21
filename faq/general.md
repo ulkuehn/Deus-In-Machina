@@ -14,22 +14,15 @@ DIM is Free and Open Software and can be used freely by anyone. It is licensed u
 
 ### How do I install DIM?
 
-To install,
-
-- for Windows **XXXXXXXX**
-- for Linux **XXXXXXXX**
+Instructions for installing and building on Windows and Linux are available in the README file.
 
 ### Is there a Mac version?
 
-Not for the time being.
-
-### How do I build a DIM executable?
-
-**XXXXXXXX**
+Not for the time being as I don't have access to a Mac based system.
 
 ### Is it safe to use?
 
-While DIM won't set your computer ablaze it still is in an early development phase. There might be errors the project team did not discover yet. So, please save your work frequently and help improving DIM by your feedback.
+While DIM most certainly won't set your computer ablaze it still is in an early development phase. There might be errors not yet discovered. So, please save your work frequently and help improving DIM by your feedback.
 
 ### Is there a user's manual?
 
@@ -41,7 +34,7 @@ It's short for _Deus In Machina_, Latin for "God in the machine". This term is a
 
 ### I have a suggestion, run into an error, found a flaw, want to contribute.
 
-You are welcome! Please use the feedback **XXXXXXXX**
+You are welcome!
 
 In case of error reporting please provide the logfile that is linked in the tab _Runtime Info_ of the _About Window_ (to open use menu item _Help &rarr; About DIM_). If possible, activate the setting _start in Debug Mode_ which makes logging much more detailed.
 
@@ -51,4 +44,4 @@ Currently, English and German are supported. What language is used depends on yo
 
 ### Could a French, Spanish, Ukrainian, ... version be provided?
 
-Certainly -- DIM is i18n-ready and, translators volunteering, could be easily adapted to additional languages.
+Certainly -- DIM is i18n-ready and, translators volunteering, could be extended to additional languages.

@@ -19,5 +19,3 @@ Enter a password in the project properties window (tab _Project information_). A
 ### It is possible to open project files with other programs?
 
 Absolutely. Project files are, in essence, SQLite files that can be handeled by tools like [DB Browser for SQLite](https://sqlitebrowser.org/). For password protected projects you need the version with SQLCipher support.
-
-Be aware that while it is possible to not only view a project file using additional software changing its content is not recommended.
