@@ -379,23 +379,6 @@ class StyledObject {
                 }
               }
               style[StylingControls.controls[area][i].css["prop"]] = result;
-              // StylingControls.controls[area][i].controls.reduce(
-              //   (result, ctrl, index) => {
-              //     console.log("toCSS", result, ctrl, index);
-              //     return (
-              //       result +
-              //       " " +
-              //       ("unit" in ctrl &&
-              //       ["pt", "px", "pc", "cm", "mm"].includes(ctrl.unit)
-              //         ? Math.round(
-              //             (zoom / 10) * this.#styleProperties[area][key][index],
-              //           ) / 10
-              //         : this.#styleProperties[area][key][index]) +
-              //       ("unit" in ctrl ? ctrl.unit : "")
-              //     );
-              //   },
-              //   "",
-              // );
             }
 
             if (StylingControls.controls[area][i].type == "check") {
@@ -732,18 +715,6 @@ class StyledObject {
                           .join(""),
                     ],
                   });
-                  // result.push({
-                  //   type: "searchValues",
-                  //   info: schemeEntry.type,
-                  //   name: Util.escapeHTML(schemeEntry.name),
-                  //   value: [
-                  //     Util.escapeHTML(value.substring(0, r.indices[0][0])),
-                  //     Util.escapeHTML(
-                  //       value.substring(r.indices[0][0], r.indices[0][1]),
-                  //     ),
-                  //     Util.escapeHTML(value.substring(r.indices[0][1])),
-                  //   ],
-                  // });
                 }
               }
             });

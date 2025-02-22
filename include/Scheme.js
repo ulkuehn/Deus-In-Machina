@@ -1197,8 +1197,6 @@ class Scheme {
     );
   }
 
-  //
-  //
   /**
    * update an existing leaflet map (containers must be in DOM tree)
    * @todo instead of new SchemeMap better update existing object?

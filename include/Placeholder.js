@@ -21,19 +21,17 @@ class Placeholder extends Parchment.Embed {
     let m = theSettings.exportPlaceholderStuffing.match(/^(\S*)\s.+\s(\S*)$/);
     let isBlock = Boolean(Exporter.placeholders[type].block);
     let node = super.create(); // this is a div
-    $(node).attr({ type: type, class: "export-placeholder", contenteditable :false});
-    // node.setAttribute("type", type);
-    // node.setAttribute("class", "export-placeholder");
-    // node.setAttribute("contenteditable", "false");
+    $(node).attr({
+      type: type,
+      class: "export-placeholder",
+      contenteditable: false,
+    });
     if (isBlock) {
       // block placeholders use a span within the div node
-      let $span = $("<span>"); //document.createElement("span");
-$span.append((m ? m[1] : "") + _(`placeholders_${type}`) + (m ? m[2] : ""));
-      // span.appendChild(
-      //   document.createTextNode(
-      //     (m ? m[1] : "") + _(`placeholders_${type}`) + (m ? m[2] : ""),
-      //   ),
-      // );
+      let $span = $("<span>");
+      $span.append(
+        (m ? m[1] : "") + _(`placeholders_${type}`) + (m ? m[2] : ""),
+      );
       $span.attr("class", "placeholder-block");
       // span.setAttribute("class", "placeholder-block");
       if (
@@ -73,7 +71,7 @@ $span.append((m ? m[1] : "") + _(`placeholders_${type}`) + (m ? m[2] : ""));
         );
       $(node).append(
         // document.createTextNode(
-          (m ? m[1] : "") + _(`placeholders_${type}`) + (m ? m[2] : ""),
+        (m ? m[1] : "") + _(`placeholders_${type}`) + (m ? m[2] : ""),
         // ),
       );
     }

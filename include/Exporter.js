@@ -862,25 +862,7 @@ class Exporter {
                     });
                   }
                 });
-
-              // for (let [textID, reference] of Object.entries(
-              //   theObjectTree.getObject(objectID).textReferences(),
-              // )) {
-              //   if (useCitationTexts.includes(textID)) {
-              //     reference.citations.map((citation) => {
-              //       rtf += `${
-              //         Exporter.#rtfRow
-              //       }${cell1Def}${cell2Def}\\pard\\intbl ${
-              //         prevName == reference.name
-              //           ? ""
-              //           : Exporter.#escapeRTF(reference.name)
-              //       }\\cell \\pard\\intbl ${Exporter.#escapeRTF(
-              //         citation.text,
-              //       )}\\cell\\row\n`;
-              //       prevName = reference.name;
-              //     });
-              //   }
-              // }
+              
               return { insert: rtf, isCooked: true, isBlock: true };
             }
             break;
@@ -932,14 +914,6 @@ class Exporter {
               // isCooked: true,
             };
             break;
-          // case "rtf":
-          //   return {
-          //     insert: theObjectTree
-          //       .getParents(objectID)
-          //       .map((x) => Exporter.#escapeRTF(x))
-          //       .join(" \\u10142? "),
-          //     isCooked: true,
-          //   };
         }
       },
     },
@@ -1055,9 +1029,6 @@ class Exporter {
               return {
                 insert: theObjectTree.getObject(content).name,
               };
-            // inverse object relation
-            // case "schemeTypes_irelation":
-            //   return { insert: content, isCooked: true };
             // checkbox
             case "schemeTypes_checkbox":
               return {

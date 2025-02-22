@@ -1406,20 +1406,6 @@ ipcRenderer.on(
     theObjectTree.getObject(id).properties = properties;
     theObjectTree.updateName(id, name);
     theObjectTree.buildObjectSheet();
-    // theObjectTree.getParents(id, false).forEach((pID) => {
-    //   console.log("parent", theObjectTree.getObject(pID));
-    //   let itemNo = 0;
-    //   theObjectTree.getObject(pID).scheme.forEach((item) => {
-    //     if (
-    //       item.type == "schemeTypes_relation" &&
-    //       item.params[0] &&
-    //       properties[pID][itemNo]
-    //     ) {
-    //       console.log("rev", properties[pID][itemNo]);
-    //     }
-    //     itemNo++;
-    //   });
-    // });
   },
 );
 
@@ -1718,15 +1704,7 @@ ipcRenderer.on(
       { searchRegex },
       { filters },
     ]);
-    // let searchCollection = new Collection(uuid(), searchText, [], {
-    //   text: searchText,
-    //   case: searchCase,
-    //   word: searchWord,
-    //   regex: searchRegex,
-    //   filters: filters,
-    // });
-    // theTextCollectionTree.addCollection(searchCollection, 0);
-    // theTextCollectionTree.checkSome(searchCollection.id, true);
+    
     theTextCollectionTree.newSearchCollection({
       text: searchText,
       case: searchCase,

@@ -593,8 +593,4 @@ class Util {
     }
     return cols.map((x) => Util.#hsv2rgb(x, 1, 1));
   }
-
-  //---------------
-
-  // console.log(mix_hexes("#3890b9", "#f6ff00")); // #8cc46f
 }
