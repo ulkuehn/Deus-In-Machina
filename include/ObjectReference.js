@@ -176,11 +176,13 @@ class ObjectReference {
       fnRowCallback: function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
         $("td:eq(0)", nRow).attr({
           onclick: `theObjectTree.selectSome('${aData[3]}',true)`,
+          ondblclick: `theObjectTree.editProps('${aData[3]}')`,
           style: "cursor:pointer",
           title: _("objectReferences_selectObject"),
         });
         $("td:eq(1)", nRow).attr({
           onclick: `theTextTree.selectSome('${aData[4]}',true); theTextEditor.blinkText('${aData[4]}')`,
+          ondblclick: `theTextTree.editProps('${aData[4]}')`,
           style: "cursor:pointer",
           title: _("objectReferences_selectText"),
         });
