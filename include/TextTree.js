@@ -1221,6 +1221,7 @@ class TextTree {
     // only scroll and blink if this is not a checkbox click and text is already checked
     if (
       event.target.nodeName != "I" &&
+      !event.ctrlKey &&
       this.#treeDiv.jstree().is_selected(event.target) &&
       this.#treeDiv.jstree().is_checked(event.target)
     ) {
