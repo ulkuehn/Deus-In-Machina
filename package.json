@@ -2,7 +2,7 @@
   "name": "dim",
   "productName": "DeusInMachina",
   "//software version - semver system": "<major version>.<minor version>.<patch version>+<db scheme version>",
-  "version": "0.1.0+35",
+  "version": "0.1.0+1",
   "description": "DIM - Deus In Machina",
   "main": "dim.js",
   "scripts": {
