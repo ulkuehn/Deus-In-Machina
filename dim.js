@@ -157,12 +157,6 @@ while (args.length > 0) {
   }
 }
 
-// set the app's default ui language (may be orverriden by global state)
-theLanguage = app.getLocale().toLowerCase().split("-")[0];
-if (!Languages.languages.includes(theLanguage)) {
-  theLanguage = Languages.languages[0]; // system default
-}
-
 /*
 we set the app's language to English, no matter what the system's language is
 so the keyboard shortcut infos in the app's menu is always the same (in English, e.g. using "Ctrl")
@@ -177,6 +171,11 @@ app.whenReady().then(() => {
   theTmpDir = fs.mkdtempSync(`${os.tmpdir()}${path.sep}`);
   // load state info
   getGlobalState();
+  // set the app's default ui language (may be orverriden by global state)
+  theLanguage = app.getLocale().toLowerCase().split("-")[0];
+  if (!Languages.languages.includes(theLanguage)) {
+    theLanguage = Languages.languages[0]; // system default
+  }
   // try to load global settings
   let settings = {};
   try {
