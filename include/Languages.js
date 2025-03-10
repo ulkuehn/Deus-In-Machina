@@ -5,7 +5,7 @@
  * @file definition of available languages for i18n
  */
 class Languages {
-  static languages = ["de", "en"];
+  static languages = ["en", "de"];
 }
 
 module.exports = { Languages };
