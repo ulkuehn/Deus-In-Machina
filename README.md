@@ -58,12 +58,53 @@ npm run windows   <-- create an installable exe file in dist folder
 Make sure you have git and node. You also need node-gyp and a supported python version. For details see https://www.npmjs.com/package/node-gyp.
 
 Clone the repo, install the dependencies and run:
+
 ```
 git clone https://github.com/ulkuehn/DeusInMachina.git
 npm install
 npm run dim     <-- run directly from repo
-npm run linux   <-- create AppImage and deb packages in dist folder  
+npm run linux   <-- create AppImage and deb packages in dist folder
 ```
+
+#### Python 3.12
+
+When running or building the application with Python 3.12, you may encounter the
+following error:
+
+> ...  
+> npm ERR! ModuleNotFoundError: No module named 'distutils'  
+> npm ERR! gyp ERR! configure error  
+> npm ERR! gyp ERR! stack Error: `gyp` failed with exit code: 1  
+> ...
+
+This is due to `distutils` being removed in Python v3.12. To fix this, simply
+install setuptools: `pip install setuptools`
+
+#### chrome-sandbox configuration
+
+You may encounter the following error while running the app:
+
+> The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /path/to/node_modules/electron/dist/chrome-sandbox is owned by root and has mode 4755.
+
+This can be fixed by changing ownership for `chrome-sandbox` to root:
+
+```
+sudo chown root:root node_modules/electron/dist/chrome-sandbox
+sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+```
+
+#### AppImage
+
+Note that trying to launch the AppImage in Ubuntu 24.04 (or later) will fail
+with the following error:
+
+> The SUID sandbox helper binary was found, but is not configured correctly.
+> Rather than run without sandboxing I'm aborting now.
+
+This is a known issue with AppImages compiled from Electron: https://github.com/electron/electron/issues/42510
+
+We recommend installing the `.deb` package instead, which does not face this
+issue and works properly.
 
 ## License
 
