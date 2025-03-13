@@ -186,7 +186,10 @@ ipcRenderer.on(
 
     // disable or enable preview button according to export type
     $("#exportType").on("change", () => {
-      $("#previewButton").prop("disabled", $("#exportType").val() == "rtf");
+      $("#previewButton").prop(
+        "disabled",
+        $("#exportType").val() == "rtf" || $("#exportType").val() == "docx",
+      );
     });
 
     // save profile on tab switch
@@ -376,10 +379,11 @@ function applyProfile() {
     });
   });
 
-  // disable preview button for rtf export
+  // disable preview button for rtf or docx export
   $("#previewButton").prop(
     "disabled",
-    theProfiles[theProfileID].exportType == "rtf",
+    theProfiles[theProfileID].exportType == "rtf" ||
+      theProfiles[theProfileID].exportType == "docx",
   );
 
   // update Exporter

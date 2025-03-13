@@ -31,6 +31,7 @@
     "bootstrap": "^5.3.3",
     "datatables.net-dt": "^2.2.1",
     "daterangepicker": "^3.1.0",
+    "docx": "^9.2.0",
     "electron-log": "^5.2.4",
     "html-to-text": "^9.0.5",
     "jquery": "^3.7.1",

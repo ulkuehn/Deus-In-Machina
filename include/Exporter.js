@@ -220,6 +220,11 @@ class Exporter {
                 .join(" \\u10142? "),
               isCooked: true,
             };
+            break;
+          case "docx":
+            return {
+              insert: theTextTree.getParents(textID).join(" ➞"),
+            };
         }
       },
     },
@@ -862,7 +867,7 @@ class Exporter {
                     });
                   }
                 });
-              
+
               return { insert: rtf, isCooked: true, isBlock: true };
             }
             break;
@@ -906,6 +911,7 @@ class Exporter {
             break;
           case "html":
           case "rtf":
+          case "docx":
             return {
               insert: theObjectTree
                 .getParents(objectID)
@@ -931,6 +937,7 @@ class Exporter {
             break;
           case "html":
           case "rtf":
+          case "docx":
             return {
               insert: theObjectTree
                 .getParents(objectID)
@@ -1309,11 +1316,12 @@ class Exporter {
           name: "exportType",
           i18n: "exportWindow_exportType",
           type: "select",
-          values: ["txt", "html", "rtf"],
+          values: ["txt", "html", "rtf", "docx"],
           i18nValues: [
             "exportWindow_typeTXT",
             "exportWindow_typeHTML",
             "exportWindow_typeRTF",
+            "exportWindow_typeDOCX",
           ],
           default: "html",
         },
@@ -1943,6 +1951,29 @@ class Exporter {
                         Exporter.#exportFileFinal(fd, file, profile);
                       });
                       break;
+                    case "docx":
+                      ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
+                      this.#export(profile).then((result) => {
+                        ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
+                        const theDoc = new docx.Document({
+                          creator: theProperties.author,
+                          description: theProperties.info,
+                          title: theProperties.fulltitle,
+                          revision: theProject.version,
+                          sections: [
+                            {
+                              properties: {},
+                              children: result,
+                            },
+                          ],
+                        });
+
+                        docx.Packer.toBuffer(theDoc).then((buffer) => {
+                          fs.writeSync(fd, buffer);
+                          Exporter.#exportFileFinal(fd, file, profile);
+                        });
+                      });
+                      break;
                   }
                 } catch (err) {}
               }
@@ -2554,6 +2585,34 @@ class Exporter {
             });
           }
           break;
+
+        case "docx":
+          // texts
+          let textsExport = [];
+          useTexts.forEach((textID) => {
+            let textContents = Exporter.#textContentPlacegiver(
+              profile.exportType,
+              theTextTree.getText(textID).delta,
+              useTextObjects,
+              profile.objectStartEditor.ops,
+              profile.objectEndEditor.ops,
+            );
+            // each (non empty) text
+            if (textContents.length || !profile.ignoreEmptyTexts) {
+              textsExport = textsExport.concat(
+                Exporter.#deltaToDocx(
+                  Exporter.#textPlacegiver(
+                    profile.exportType,
+                    profile.textEditor.ops,
+                    textID,
+                    textContents,
+                  ),
+                ),
+              );
+            }
+          });
+          resolve(textsExport, profile.textFormats, profile.objectFormats);
+          break;
       }
     });
   }
@@ -2658,6 +2717,18 @@ class Exporter {
             op.insert.placeholder,
           )
         ) {
+          if (Array.isArray(textContents)) {
+            for (let i = 0; i < textContents.length - 1; i++) {
+              newOps.push(
+                Exporter.#textPlaceholders[op.insert.placeholder].function(
+                  textID,
+                  textContents[i],
+                  exportType,
+                ),
+              );
+            }
+            textContents = textContents[textContents.length];
+          }
           Object.assign(
             newOp,
             Exporter.#textPlaceholders[op.insert.placeholder].function(
@@ -3164,7 +3235,7 @@ class Exporter {
    *
    * @param {String} text
    * @param {Object} format
-   * @returns {String}
+   * @returns {String[]}
    */
   static #textToHTML(text, format) {
     let blocks = [];
@@ -3181,6 +3252,49 @@ class Exporter {
       }
       for (let i = paras.length - 1; i >= 0; i--) {
         blocks.unshift(`<p>${paras[i] ? paras[i] : "<br>"}</p>`);
+      }
+    }
+    return blocks;
+  }
+
+  /**
+   * convert delta to docx structure
+   *
+   * @param {Object[]} deltaOps
+   * @param {Boolean} doFormats
+   * @param {Boolean} doObjects
+   * @returns {docx.Paragraph[]} suitable as children element of a docx section
+   */
+  static #deltaToDocx(deltaOps, doFormats = true, doObjects = true) {
+    let text = "";
+    deltaOps.forEach((op) => {
+      // if (Array.isArray(op.insert)) {
+      //   op.insert.forEach((op1) => {
+      //     if (typeof op1.insert != "object") {
+      //       text += op1.insert;
+      //     }
+      //   });
+      // } else
+      if (typeof op.insert != "object") {
+        text += op.insert;
+      }
+    });
+    return Exporter.#textToDocx(text);
+  }
+
+  static #textToDocx(text) {
+    let blocks = [];
+    if (text) {
+      if (text.endsWith("\n")) {
+        text = text.substring(0, text.length - 1);
+      }
+      let paras = text.split("\n");
+      for (let i = paras.length - 1; i >= 0; i--) {
+        blocks.unshift(
+          new docx.Paragraph({
+            children: [new docx.TextRun(paras[i])],
+          }),
+        );
       }
     }
     return blocks;

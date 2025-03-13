@@ -28,6 +28,7 @@ const softwareList = {
     license: "MIT",
   },
   "daterangepicker": { url: "http://www.daterangepicker.com/", license: "MIT" },
+  "docx": { url: "https://github.com/dolanmiu/docx", license: "MIT" },
   "Electron": { url: "https://www.electronjs.org/", license: "MIT" },
   "electron-log": {
     url: "https://github.com/megahertz/electron-log",
@@ -417,8 +418,8 @@ function showDir(path) {
 
 /**
  * open a file in the os with the standard app
- * 
- * @param {String} path 
+ *
+ * @param {String} path
  */
 function openFile(path) {
   ipcRenderer.invoke("mainProcess_openPath", decodeURI(path));
