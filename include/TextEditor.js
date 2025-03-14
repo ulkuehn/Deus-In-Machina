@@ -959,6 +959,51 @@ class TextEditor {
   }
 
   /**
+   * (un)set bold
+   */
+  bold() {
+    if (this.#selectedEditor) {
+      let bold =
+        "bold" in this.#editors[this.#selectedEditor].quill.getFormat();
+      $("#formatBold").prop("checked", !bold);
+      this.#editors[this.#selectedEditor].quill.format("bold", !bold);
+    }
+  }
+  /**
+   * (un)set italic
+   */
+  italic() {
+    if (this.#selectedEditor) {
+      let italic =
+        "italic" in this.#editors[this.#selectedEditor].quill.getFormat();
+      $("#formatItalic").prop("checked", !italic);
+      this.#editors[this.#selectedEditor].quill.format("italic", !italic);
+    }
+  }
+  /**
+   * (un)set underline
+   */
+  underline() {
+    if (this.#selectedEditor) {
+      let underline =
+        "underline" in this.#editors[this.#selectedEditor].quill.getFormat();
+      $("#formatUnderline").prop("checked", !underline);
+      this.#editors[this.#selectedEditor].quill.format("underline", !underline);
+    }
+  }
+  /**
+   * (un)set strike
+   */
+  strike() {
+    if (this.#selectedEditor) {
+      let strike =
+        "strike" in this.#editors[this.#selectedEditor].quill.getFormat();
+      $("#formatStrike").prop("checked", !strike);
+      this.#editors[this.#selectedEditor].quill.format("strike", !strike);
+    }
+  }
+
+  /**
    * go to current selection / cursor position and highlight it
    */
   showWhere() {

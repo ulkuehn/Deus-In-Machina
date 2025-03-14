@@ -8,13 +8,13 @@
 const translationEditorBars = {
   // German
   de: {
-    editorBars_boldTitle: "Fett",
+    editorBars_boldTitle: "Fett (Strg+F)",
     editorBars_boldLabel: "F",
-    editorBars_italicTitle: "Kursiv",
+    editorBars_italicTitle: "Kursiv (Strg+I)",
     editorBars_italicLabel: "K",
-    editorBars_underlineTitle: "Unterstrichen",
+    editorBars_underlineTitle: "Unterstrichen (Strg+U)",
     editorBars_underlineLabel: "&thinsp;U&thinsp;",
-    editorBars_strikeTitle: "Durchgestrichen",
+    editorBars_strikeTitle: "Durchgestrichen (Strg+S)",
     editorBars_strikeLabel: "&thinsp;D&thinsp;",
     editorBars_symbolsTitle: "Sonderzeichen",
     editorBars_formatsTitle: "Absatzformat auswählen",
@@ -60,13 +60,13 @@ const translationEditorBars = {
   },
   // English
   en: {
-    editorBars_boldTitle: "Bold",
+    editorBars_boldTitle: "Bold (Ctrl+B)",
     editorBars_boldLabel: "B",
-    editorBars_italicTitle: "Italic",
+    editorBars_italicTitle: "Italic (Ctrl+I)",
     editorBars_italicLabel: "I",
-    editorBars_underlineTitle: "Underline",
+    editorBars_underlineTitle: "Underline (Ctrl+U)",
     editorBars_underlineLabel: "&thinsp;U&thinsp;",
-    editorBars_strikeTitle: "Strikethrough",
+    editorBars_strikeTitle: "Strikethrough (Ctrl+S)",
     editorBars_strikeLabel: "&thinsp;S&thinsp;",
     editorBars_symbolsTitle: "Special characters",
     editorBars_formatsTitle: "Select paragraph format",

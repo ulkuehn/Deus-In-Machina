@@ -1286,6 +1286,39 @@ ipcRenderer.on(
 );
 
 /**
+ * (un)set bold
+ */
+function bold() {
+  let bold = "bold" in theEditors[selectedEditor].quill.getFormat();
+  $("#formatBold").prop("checked", !bold);
+  theEditors[selectedEditor].quill.format("bold", !bold);
+}
+/**
+ * (un)set italic
+ */
+function italic() {
+  let italic = "italic" in theEditors[selectedEditor].quill.getFormat();
+  $("#formatItalic").prop("checked", !italic);
+  theEditors[selectedEditor].quill.format("italic", !italic);
+}
+/**
+ * (un)set underline
+ */
+function underline() {
+  let underline = "underline" in theEditors[selectedEditor].quill.getFormat();
+  $("#formatUnderline").prop("checked", !underline);
+  theEditors[selectedEditor].quill.format("underline", !underline);
+}
+/**
+ * (un)set strike
+ */
+function strike() {
+  let strike = "strike" in theEditors[selectedEditor].quill.getFormat();
+  $("#formatStrike").prop("checked", !strike);
+  theEditors[selectedEditor].quill.format("strike", !strike);
+}
+
+/**
  * context menu
  *
  * @param {String} textID
