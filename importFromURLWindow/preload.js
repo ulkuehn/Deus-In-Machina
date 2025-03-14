@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file preload for web page import window
  */
 const { contextBridge, ipcRenderer } = require("electron");
@@ -31,6 +31,5 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("mainProcess_browserOpenURL", url);
   },
   stop: () => ipcRenderer.invoke("mainProcess_browserStop"),
-  import: () =>
-    ipcRenderer.invoke("mainProcess_browserContent"),
+  import: () => ipcRenderer.invoke("mainProcess_browserContent"),
 });

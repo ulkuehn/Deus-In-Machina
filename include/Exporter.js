@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file implementation of Exporter class
  */
 
@@ -862,7 +862,7 @@ class Exporter {
                     });
                   }
                 });
-              
+
               return { insert: rtf, isCooked: true, isBlock: true };
             }
             break;

@@ -1,13 +1,13 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file i18n translations for SchemeMap class
  */
 
 const translationSchemeMap = {
   // German
-  "de": {
+  de: {
     schemeMap_color: "Farbe",
     schemeMap_longitude: "Länge",
     schemeMap_latitude: "Breite",
@@ -18,7 +18,7 @@ const translationSchemeMap = {
     schemeMap_showLocation: "auf diese Markierung zoomen",
   },
   // English
-  "en": {
+  en: {
     schemeMap_color: "Color",
     schemeMap_longitude: "Longitude",
     schemeMap_latitude: "Latitude",

@@ -1,6 +1,6 @@
 /* 
 DIM - Deus In Machina 
-Ulrich Kühn 2024
+Ulrich Kühn 2024, 2025
 
 css rules for tabs
 */
@@ -13,8 +13,8 @@ css rules for tabs
   background-color: lightgray;
   font-weight: bold;
   color: #606060;
-  margin-right:2px;
-  height:40px;
+  margin-right: 2px;
+  height: 40px;
 }
 
 .nav-item.nav-link.active {

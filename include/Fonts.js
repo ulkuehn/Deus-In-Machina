@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file implementation of Fonts class
  */
 
@@ -91,7 +91,7 @@ class Fonts {
 
   /**
    * load all fonts provided in fonts dir
-   * 
+   *
    * @param {String} baseDir necessary
    * @param {Boolean} uiOnly
    * @returns {Promise} resolves when all fonts are loaded
@@ -133,7 +133,7 @@ class Fonts {
 
   /**
    * retreive locally available fonts
-   * 
+   *
    * @returns {Promise} resolves to a list of available fonts on the system
    */
   getAvailableFamilies() {

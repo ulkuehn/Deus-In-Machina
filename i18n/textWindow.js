@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file i18n translations for text window
  */
 
@@ -19,7 +19,7 @@ const { translationWordcloud } = require("./include/wordcloud.js");
 
 const translationTextWindow = {
   // German
-  "de": i18n.create({
+  de: i18n.create({
     values: {
       ...translationGeneral.de,
       ...translationColorPicker.de,
@@ -46,7 +46,7 @@ const translationTextWindow = {
     },
   }),
   // English
-  "en": i18n.create({
+  en: i18n.create({
     values: {
       ...translationGeneral.en,
       ...translationColorPicker.en,

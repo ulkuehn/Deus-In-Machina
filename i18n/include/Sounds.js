@@ -1,13 +1,13 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file i18n translations for Sounds class
  */
 
 const translationSounds = {
   // German
-  "de": {
+  de: {
     Sounds_backgroundWind: "Wind",
     Sounds_backgroundRain: "Regen",
     Sounds_backgroundFire: "Kaminfeuer",
@@ -24,7 +24,7 @@ const translationSounds = {
     Sounds_pause: "An/Aus",
   },
   // English
-  "en": {
+  en: {
     Sounds_backgroundWind: "Wind",
     Sounds_backgroundRain: "Rain",
     Sounds_backgroundFire: "Fireplace",

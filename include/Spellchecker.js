@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file implementation of Spellchecker class
  */
 
@@ -21,20 +21,23 @@ class Spellchecker {
     this.#dirty = true;
 
     new Promise((resolve, reject) => {
-       let path = nodePath.join(__dirname, "..", "dictionaries",language);
+      let path = nodePath.join(__dirname, "..", "dictionaries", language);
       try {
-        fs.access(nodePath.join(path,"index.aff"), fs.R_OK, (err) => {
+        fs.access(nodePath.join(path, "index.aff"), fs.R_OK, (err) => {
           if (!err) {
-            fs.access(nodePath.join(path,"index.dic"), fs.R_OK, (err) => {
+            fs.access(nodePath.join(path, "index.dic"), fs.R_OK, (err) => {
               if (!err) {
-                fs.readFile(nodePath.join(path,"index.dic"), (err, dic) => {
+                fs.readFile(nodePath.join(path, "index.dic"), (err, dic) => {
                   if (!err) {
-                    fs.readFile(nodePath.join(path,"index.aff"), (err, aff) => {
-                      if (!err) {
-                        this.#spell = new Nodehun(aff, dic);
-                        resolve("ready");
-                      }
-                    });
+                    fs.readFile(
+                      nodePath.join(path, "index.aff"),
+                      (err, aff) => {
+                        if (!err) {
+                          this.#spell = new Nodehun(aff, dic);
+                          resolve("ready");
+                        }
+                      },
+                    );
                   }
                 });
               }

@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file provide Timestamp Class
  */
 
@@ -100,7 +100,7 @@ class Timestamp {
 
   /**
    * Provide a i18n human readable value of a Timestamp taking account of the Timezone
-   * @param {String} format 
+   * @param {String} format
    * @returns {String} formatted Timestamp
    */
   toLocalString(format = "[YYYY]-[MM]-[DD], [hh]:[mm]:[ss]") {
@@ -174,7 +174,7 @@ class Timestamp {
 
   /**
    * calculate time difference to right now in i18n human readable form
-   * @returns {String} 
+   * @returns {String}
    */
   timeToNow() {
     let secondsPassed = Math.floor((new Date().getTime() - this.#now) / 1000);

@@ -1,13 +1,13 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file i18n translations for import from URL window
  */
 
 const translationImportFromURLWindow = {
   // German
-  "de": i18n.create({
+  de: i18n.create({
     values: {
       importFromURLWindow_back: `eine Seite zurück (%{url})`,
       importFromURLWindow_forward: `eine Seite vor (%{url}`,
@@ -19,7 +19,7 @@ const translationImportFromURLWindow = {
     },
   }),
   // English
-  "en": i18n.create({
+  en: i18n.create({
     values: {
       importFromURLWindow_back: "page back (%{url})",
       importFromURLWindow_forward: "page forward (%{url})",

@@ -1,13 +1,13 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file i18n translations for general terms
  */
 
 const translationGeneral = {
   // German
-  "de": {
+  de: {
     general_answerNo: "Nein",
     general_answerYes: "Ja",
     general_saveButton: "Speichern",
@@ -15,7 +15,7 @@ const translationGeneral = {
     general_closeButton: "Schließen",
   },
   // English
-  "en": {
+  en: {
     general_answerNo: "No ", // for some reason we need to add a trailing space so that the value is not just "No" (which irritatingly leads to a non i18n-messageDialog)
     general_answerYes: "Yes ",
     general_saveButton: "Save",

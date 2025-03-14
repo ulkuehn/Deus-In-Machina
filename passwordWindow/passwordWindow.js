@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file implementation of password window -- shown when opening crypted projects; password processing is done in main renderer by Project.js
  */
 

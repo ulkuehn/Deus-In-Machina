@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file i18n translations for text collections
  */
 
@@ -36,7 +36,8 @@ const translationTextCollections = {
   en: {
     // text collection
     textCollections_newCollection: "New Collection %{count}",
-    textCollections_newSearchCollection: "Search and Filter Collection %{count}",
+    textCollections_newSearchCollection:
+      "Search and Filter Collection %{count}",
     textCollections_deleteTitle: "Delete Collection",
     textCollections_deleteMessage: 'Really delete "%{name}"?',
     textCollections_collectionCopy: `Copy of "%{name}"`,

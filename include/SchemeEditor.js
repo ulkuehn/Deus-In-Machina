@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file implementation of SchemeEditor class
  */
 
@@ -194,9 +194,9 @@ class SchemeEditor {
     // editor
     let $editorDiv = $("<div>").attr({
       "data-type": "editor",
-      id: `property${id}`,
-      style: `background-color:#fff; border:1px solid black; height:${height}`,
-      spellcheck: false,
+      "id": `property${id}`,
+      "style": `background-color:#fff; border:1px solid black; height:${height}`,
+      "spellcheck": false,
     });
 
     // putting all together

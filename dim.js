@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file electron main process
  */
 
@@ -1123,13 +1123,19 @@ function menuList(left, right, bottom) {
         {
           label: _("mainProcess_menuTestSampleProjectDE"),
           click(item, focusedWindow) {
-            focusedWindow.webContents.send("rendererProcess_sampleProject", "de");
+            focusedWindow.webContents.send(
+              "rendererProcess_sampleProject",
+              "de",
+            );
           },
         },
         {
           label: _("mainProcess_menuTestSampleProjectEN"),
           click(item, focusedWindow) {
-            focusedWindow.webContents.send("rendererProcess_sampleProject","en");
+            focusedWindow.webContents.send(
+              "rendererProcess_sampleProject",
+              "en",
+            );
           },
         },
       ],

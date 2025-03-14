@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file implementation of Layout class
  */
 
@@ -348,7 +348,7 @@ class Layout {
       "--foreground-color": "#000000",
       "--background-color":
         settings.TEBackgroundColor || settings.generalBackgroundColor,
-    })
+    });
     $("#TE").css({
       "--scrollbar-back": Util.scrollbarBack(
         settings.scrollbarStyle,

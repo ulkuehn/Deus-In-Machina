@@ -1,13 +1,13 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file i18n translations for language relative default settings
  */
 
 const translationSettingDefaults = {
   // German
-  "de": {
+  de: {
     settingDefaults_importSearchURL: "https://duckduckgo.com/?q=$",
     settingDefaults_webtools:
       "Suche mit DuckDuckGo::https://duckduckgo.com/?q=$\n" +
@@ -22,7 +22,7 @@ const translationSettingDefaults = {
       "[ DDDD ], [ DD ].[ MM ].[ YYYY ], [ hh ]:[ mm ]:[ ss ]",
   },
   // English
-  "en": {
+  en: {
     settingDefaults_importSearchURL: "https://duckduckgo.com/?q=$",
     settingDefaults_webtools:
       "Search on DuckDuckGo::https://duckduckgo.com/?q=$\n" +

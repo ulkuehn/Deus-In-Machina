@@ -1,13 +1,13 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file i18n translations for text search
  */
 
 const translationSearch = {
   // German
-  "de": {
+  de: {
     search_tab: "Suchfilter",
     search_search: "Suche",
     search_withCase: "Groß-/Kleinschreibung relevant",
@@ -18,7 +18,7 @@ const translationSearch = {
     search_withoutRegex: "kein regulärer Ausdruck",
   },
   // English
-  "en": {
+  en: {
     search_tab: "Search and Filter",
     search_search: "Search",
     search_withCase: "Match case",

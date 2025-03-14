@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file implementation of "about" menu item
  */
 
@@ -417,8 +417,8 @@ function showDir(path) {
 
 /**
  * open a file in the os with the standard app
- * 
- * @param {String} path 
+ *
+ * @param {String} path
  */
 function openFile(path) {
   ipcRenderer.invoke("mainProcess_openPath", decodeURI(path));

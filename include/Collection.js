@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file implementation of Collection class
  */
 
@@ -164,7 +164,7 @@ class Collection {
     if (this.#search) {
       // pure filter
       if (!this.#search.text) {
-        result += `<i class="fa-solid fa-filter" style="margin-right:5px;" title="${(_("textCollections_withFilter", this.#search.filters.length, { filters: this.#search.filters.length }))}"></i>`;
+        result += `<i class="fa-solid fa-filter" style="margin-right:5px;" title="${_("textCollections_withFilter", this.#search.filters.length, { filters: this.#search.filters.length })}"></i>`;
       } else {
         result +=
           this.#search.filters && this.#search.filters.length

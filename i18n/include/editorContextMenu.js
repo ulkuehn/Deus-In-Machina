@@ -1,13 +1,13 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file i18n translations for editor context menu
  */
 
 const translationEditorContextMenu = {
   // German
-  "de": {
+  de: {
     editorContextMenu_imageInfo: "Bild %{width} breit, %{height} hoch",
     editorContextMenu_imageProperties: "Bildeigenschaften ...",
     editorContextMenu_selectImage: "Bild selektieren",
@@ -74,7 +74,7 @@ const translationEditorContextMenu = {
     editorContextMenu_changed: "verändert: %{changed} (vor %{relative})",
   },
   // English
-  "en": {
+  en: {
     editorContextMenu_imageInfo: "Image %{width} wide, %{height} high",
     editorContextMenu_imageProperties: "Image properties ...",
     editorContextMenu_selectImage: "Select Image",
@@ -85,7 +85,7 @@ const translationEditorContextMenu = {
     editorContextMenu_italic: `<span style="display:inline-block; width:25px; font-style:italic">I</span> Italic`,
     editorContextMenu_underline: `<span style="display:inline-block; width:28px; margin-left:-3px; text-decoration:underline">&thinsp;U&thinsp;</span> Underline`,
     editorContextMenu_strike: `<span style="display:inline-block; width:28px; margin-left:-3px; text-decoration:line-through">&thinsp;S&thinsp;</span> Strikethrough`,
-        editorContextMenu_editMenu: "Edit",
+    editorContextMenu_editMenu: "Edit",
     editorContextMenu_copy: "Copy",
     editorContextMenu_cut: "Cut",
     editorContextMenu_paste: "Insert",

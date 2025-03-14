@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file i18n translations for color picker
  */
 
@@ -11,7 +11,7 @@ const translationColorPicker = {
     colorpicker_cancel: "Abbrechen",
     colorpicker_choose: "Auswählen",
     colorpicker_empty: "Farbe entfernen",
-    colorpicker_nocolor: ""
+    colorpicker_nocolor: "",
   },
   // English
   en: {

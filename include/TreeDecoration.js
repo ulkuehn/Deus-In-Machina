@@ -1,12 +1,12 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file implementation of TreeDecoration class
  */
 class TreeDecoration {
   /**
-   * names of font awesome icon used for tree decoration 
+   * names of font awesome icon used for tree decoration
    * @static
    */
   static treeItemIcons = [
@@ -250,7 +250,7 @@ class TreeDecoration {
   };
 
   /**
-   * opening and closing html tags for name display variants 
+   * opening and closing html tags for name display variants
    * @static
    */
   static modTags = {

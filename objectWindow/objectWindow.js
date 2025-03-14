@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file implementation of object window
  */
 
@@ -1524,7 +1524,7 @@ function restyleSample() {
             }
             value.push($(`#${control.controls[i].name}Field`).val());
           }
-            console.log("multi", control.name, value);
+          console.log("multi", control.name, value);
           theStyledObject.setStyleProperty(area, control.name, value);
         } else {
           if (theInheritedStyle.getStyleProperty(area, control.name) != null) {

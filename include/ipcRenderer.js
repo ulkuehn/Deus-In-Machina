@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file collection of all ipcRenderer event listeners
  */
 
@@ -1704,7 +1704,7 @@ ipcRenderer.on(
       { searchRegex },
       { filters },
     ]);
-    
+
     theTextCollectionTree.newSearchCollection({
       text: searchText,
       case: searchCase,

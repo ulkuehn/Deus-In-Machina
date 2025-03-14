@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file i18n translations for scheme map window
  */
 
@@ -11,7 +11,7 @@ const { translationColorPicker } = require("./include/colorpicker.js");
 
 const translationSchemeMapWindow = {
   // German
-  "de": i18n.create({
+  de: i18n.create({
     values: {
       ...translationGeneral.de,
       ...translationColorPicker.de,
@@ -19,7 +19,7 @@ const translationSchemeMapWindow = {
     },
   }),
   // English
-  "en": i18n.create({
+  en: i18n.create({
     values: {
       ...translationGeneral.en,
       ...translationColorPicker.en,

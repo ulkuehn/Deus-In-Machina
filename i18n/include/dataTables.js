@@ -1,13 +1,13 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024
+ * @author Ulrich Kühn 2024, 2025
  * @file i18n translations for data tables
  */
 
 const translationDataTables = {
   // German
-  "de": {
+  de: {
     dataTables_filtered: "(aus insgesamt _MAX_ Einträgen gefiltert)",
     dataTables_info: "Zeile _START_ bis _END_ von ingesamt _TOTAL_ Zeilen",
     dataTables_empty: "",
@@ -19,7 +19,7 @@ const translationDataTables = {
     dataTables_lengthAll: "alle",
   },
   // English
-  "en": {
+  en: {
     dataTables_filtered: "(filtered from _MAX_ entries)",
     dataTables_info: "Showing _START_ to _END_ of _TOTAL_ entries",
     dataTables_empty: "",
