@@ -174,7 +174,7 @@ class TextEditor {
     let $menuBar = $("<div>").attr({
       id: "MB",
       style:
-        "display:grid; column-gap:5px; grid-template-columns:min-content min-content min-content min-content min-content 160px min-content auto min-content min-content min-content max-content min-content min-content min-content min-content min-content",
+        "display:grid; column-gap:5px; grid-template-columns:min-content min-content min-content min-content min-content 160px min-content min-content auto min-content min-content min-content max-content min-content min-content min-content min-content min-content",
     });
 
     // basic styling controls (bold, italic etc)
@@ -238,9 +238,7 @@ class TextEditor {
         .html(
           `<input type="button" class="btn-check" id="formatSymbols"><label class="btn btn-outline-light btn-sm simple-btn" style="width:40px; padding:0; margin:0" for="formatSymbols" title="${_(
             "editorBars_symbolsTitle",
-          )}"><span style="font-size:18px;">${_(
-            "editorBars_symbolsLabel",
-          )}</span></label>`,
+          )}"><span style="font-size:18px;">&alpha;&Omega;</span></label>`,
         ),
     );
 
@@ -251,14 +249,26 @@ class TextEditor {
           style: "grid-column:6; align-self:center;",
         })
         .html(
-          `<select id="formatSelector" style="height:calc(100% - 6px); width:100%"></select>`,
+          `<select id="formatSelector" style="height:calc(100% - 6px); width:100%" title="${_("editorBars_formatsTitle")}"></select>`,
+        ),
+    );
+    // format editor
+    $menuBar.append(
+      $("<div>")
+        .attr({
+          style: "grid-column:7; align-self:center",
+        })
+        .html(
+          `<button type="button" class="btn btn-outline-light btn-sm simple-btn" id="formatsEditor" style="height:calc(100% - 8px); padding:0; width:30px" title="${_(
+            "editorBars_formatsEditorTitle",
+          )}"><i class="fa-solid fa-paragraph"></i></button>`,
         ),
     );
     // separator
     $menuBar.append(
       $("<div>")
         .attr({
-          style: "grid-column:7",
+          style: "grid-column:8",
         })
         .html(barSeparator),
     );
@@ -268,7 +278,7 @@ class TextEditor {
       $("<div>")
         .attr({
           style:
-            "grid-column:8; align-self:center; background-color:white; border:1px solid black",
+            "grid-column:9; align-self:center; background-color:white; border:1px solid black",
         })
         .html(
           `<div><input type="text" spellcheck="false" id="searchText" style="border:none; background-color:#00000000; width:calc(100% - 25px)"><i class="fa-solid fa-magnifying-glass fa-fw" id="searchIcon" title="${_(
@@ -281,7 +291,7 @@ class TextEditor {
     $menuBar.append(
       $("<div>")
         .attr({
-          style: "grid-column:9; align-self:center; justify-self:center",
+          style: "grid-column:10; align-self:center; justify-self:center",
         })
         .html(
           `<input type="checkbox" class="btn-check" id="searchCase"><label class="btn btn-outline-light btn-sm simple-btn" style="padding:0; width:35px" for="searchCase" title="${_(
@@ -292,7 +302,7 @@ class TextEditor {
     $menuBar.append(
       $("<div>")
         .attr({
-          style: "grid-column:10; align-self:center; justify-self:center",
+          style: "grid-column:11; align-self:center; justify-self:center",
         })
         .html(
           `<input type="checkbox" class="btn-check" id="searchWord"><label class="btn btn-outline-light btn-sm simple-btn" style="padding:0; width:35px" for="searchWord" title="${_(
@@ -303,7 +313,7 @@ class TextEditor {
     $menuBar.append(
       $("<div>")
         .attr({
-          style: "grid-column:11; align-self:center; justify-self:center",
+          style: "grid-column:12; align-self:center; justify-self:center",
         })
         .html(
           `<input type="checkbox" class="btn-check" id="searchRegex"><label class="btn btn-outline-light btn-sm simple-btn" style="padding:0; width:35px; ${
@@ -317,7 +327,7 @@ class TextEditor {
       $("<div>")
         .attr({
           style:
-            "grid-column:12; place-self:center center; min-width:40px; text-align:center",
+            "grid-column:13; place-self:center center; min-width:40px; text-align:center",
           id: "searchCount",
         })
         .html(_("editorBars_noSearchResults")),
@@ -325,7 +335,7 @@ class TextEditor {
     $menuBar.append(
       $("<div>")
         .attr({
-          style: "grid-column:13; align-self:center",
+          style: "grid-column:14; align-self:center",
         })
         .html(
           `<button type="button" class="btn btn-outline-light btn-sm simple-btn" style="height:calc(100% - 8px); padding:0; width:30px" id="searchPrev" title="${_(
@@ -336,7 +346,7 @@ class TextEditor {
     $menuBar.append(
       $("<div>")
         .attr({
-          style: "grid-column:14; align-self:center; justify-self:center;",
+          style: "grid-column:15; align-self:center; justify-self:center;",
         })
         .html(
           `<button type="button" class="btn btn-outline-light btn-sm simple-btn" style="height:calc(100% - 8px); padding:0; width:30px" id="searchNext" title="${_(
@@ -348,7 +358,7 @@ class TextEditor {
     $menuBar.append(
       $("<div>")
         .attr({
-          style: "grid-column:15",
+          style: "grid-column:16",
         })
         .html(barSeparator),
     );
@@ -356,7 +366,7 @@ class TextEditor {
     $menuBar.append(
       $("<div>")
         .attr({
-          style: "grid-column:16; align-self:center; justify-self:center",
+          style: "grid-column:17; align-self:center; justify-self:center",
         })
         .html(
           `<button type="button" class="btn btn-outline-light btn-sm simple-btn" style="height:calc(100% - 8px); padding:0; width:30px" id="replaceNext" title="${_(
@@ -368,7 +378,7 @@ class TextEditor {
       $("<div>")
         .attr({
           style:
-            "grid-column:17; align-self:center; justify-self:center; margin-right:3px",
+            "grid-column:18; align-self:center; justify-self:center; margin-right:3px",
         })
         .html(
           `<button type="button" class="btn btn-outline-light btn-sm simple-btn" style="height:calc(100% - 8px); padding:0; width:30px" id="replaceAll" title="${_(
@@ -728,6 +738,22 @@ class TextEditor {
       }
     });
 
+    // open formats window
+    $("#formatsEditor").on("click", () => {
+      ipcRenderer.invoke("mainProcess_openWindow", [
+        "formats",
+        settings.closingType,
+        true,
+        0,
+        0,
+        _("windowTitles_formatsWindow"),
+        "./formatsWindow/formatsWindow.html",
+        "formatsWindow_init",
+        null,
+        [settings, theFormats.formats, theFonts.availableFamilies],
+      ]);
+    });
+
     // insert symbol
     $("#formatSymbols").on("click", () => {
       if (
@@ -883,12 +909,16 @@ class TextEditor {
       ]);
       $(`${control} + label`).addClass(buttonClass);
     });
-    ["#searchNext", "#searchPrev", "#replaceNext", "#replaceAll"].forEach(
-      (control) => {
-        $(control).removeClass(["btn-outline-light", "btn-outline-dark"]);
-        $(control).addClass(buttonClass);
-      },
-    );
+    [
+      "#formatsEditor",
+      "#searchNext",
+      "#searchPrev",
+      "#replaceNext",
+      "#replaceAll",
+    ].forEach((control) => {
+      $(control).removeClass(["btn-outline-light", "btn-outline-dark"]);
+      $(control).addClass(buttonClass);
+    });
 
     // status bar and zoom value text color
     $("#SB").css("color", Util.blackOrWhite(barColor));

@@ -226,9 +226,7 @@ ipcRenderer.on(
         .html(
           `<input type="button" class="btn-check" id="formatSymbols"><label class="btn btn-outline-light btn-sm simple-btn" style="width:40px; padding:0; margin:0" for="formatSymbols" title="${_(
             "editorBars_symbolsTitle",
-          )}"><span style="font-size:18px;">${_(
-            "editorBars_symbolsLabel",
-          )}</span></label>`,
+          )}"><span style="font-size:18px;">&alpha;&Omega;</span></label>`,
         ),
     );
 
