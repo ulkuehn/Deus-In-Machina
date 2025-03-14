@@ -236,9 +236,9 @@ class TextEditor {
           style: "grid-column:5; align-self:center",
         })
         .html(
-          `<input type="button" class="btn-check" id="formatSymbols"><label class="btn btn-outline-light btn-sm simple-btn" style="width:40px; padding:0; margin:0" for="formatSymbols" title="${_(
+          `<button type="button" id="formatSymbols" class="btn btn-outline-light btn-sm simple-btn" style="width:40px; padding:0; margin:0" title="${_(
             "editorBars_symbolsTitle",
-          )}"><span style="font-size:18px;">&alpha;&Omega;</span></label>`,
+          )}"><span style="font-size:18px;">&alpha;&Omega;</span></button>`,
         ),
     );
 
@@ -259,7 +259,7 @@ class TextEditor {
           style: "grid-column:7; align-self:center",
         })
         .html(
-          `<button type="button" class="btn btn-outline-light btn-sm simple-btn" id="formatsEditor" style="height:calc(100% - 8px); padding:0; width:30px" title="${_(
+          `<button type="button" id="formatsEditor" class="btn btn-outline-light btn-sm simple-btn" style="height:calc(100% - 8px); width:30px; padding:6px" title="${_(
             "editorBars_formatsEditorTitle",
           )}"><i class="fa-solid fa-paragraph"></i></button>`,
         ),
@@ -896,7 +896,6 @@ class TextEditor {
       "#formatItalic",
       "#formatUnderline",
       "#formatStrike",
-      "#formatSymbols",
       "#searchCase",
       "#searchWord",
       "#searchRegex",
@@ -910,6 +909,7 @@ class TextEditor {
       $(`${control} + label`).addClass(buttonClass);
     });
     [
+      "#formatSymbols",
       "#formatsEditor",
       "#searchNext",
       "#searchPrev",

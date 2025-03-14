@@ -224,9 +224,9 @@ ipcRenderer.on(
           style: "grid-column:5; align-self:center",
         })
         .html(
-          `<input type="button" class="btn-check" id="formatSymbols"><label class="btn btn-outline-light btn-sm simple-btn" style="width:40px; padding:0; margin:0" for="formatSymbols" title="${_(
+          `<button type="button" id="formatSymbols" class="btn btn-outline-light btn-sm simple-btn" style="width:40px; padding:0; margin:0" title="${_(
             "editorBars_symbolsTitle",
-          )}"><span style="font-size:18px;">&alpha;&Omega;</span></label>`,
+          )}"><span style="font-size:18px;">&alpha;&Omega;</span></button>`,
         ),
     );
 
@@ -237,7 +237,7 @@ ipcRenderer.on(
           style: "grid-column:6; align-self:center;",
         })
         .html(
-          `<select id="formatSelector" class="form-select form-select-sm" style="height:30px; width:100%"></select>`,
+          `<select id="formatSelector" class="form-select form-select-sm" style="height:30px; width:100%" title="${_("editorBars_formatsTitle")}"></select>`,
         ),
     );
     // separator
@@ -868,7 +868,6 @@ ipcRenderer.on(
       "#formatItalic",
       "#formatUnderline",
       "#formatStrike",
-      "#formatSymbols",
       "#searchCase",
       "#searchWord",
       "#searchRegex",
@@ -879,12 +878,16 @@ ipcRenderer.on(
       ]);
       $(`${control} + label`).addClass(buttonClass);
     });
-    ["#searchNext", "#searchPrev", "#replaceNext", "#replaceAll"].forEach(
-      (control) => {
-        $(control).removeClass(["btn-outline-light", "btn-outline-dark"]);
-        $(control).addClass(buttonClass);
-      },
-    );
+    [
+      "#formatSymbols",
+      "#searchNext",
+      "#searchPrev",
+      "#replaceNext",
+      "#replaceAll",
+    ].forEach((control) => {
+      $(control).removeClass(["btn-outline-light", "btn-outline-dark"]);
+      $(control).addClass(buttonClass);
+    });
     $(`#pauseSounds + label`).removeClass([
       "btn-outline-light",
       "btn-outline-dark",
