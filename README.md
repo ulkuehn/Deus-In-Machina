@@ -1,8 +1,8 @@
 # Deus In Machina - DIM
 
-DIM is a writing tool intended for small, medium and large projects such as novels, short stories, and non-fiction. 
+DIM is a writing tool intended for small, medium and large projects such as novels, short stories, and non-fiction.
 
-While offering editing and formatting tools well known from other text editors DIM features powerful methods to add a semantic level to your project. It is as much a world building and research tool as it is a writing tool. 
+While offering editing and formatting tools well known from other text editors DIM features powerful methods to add a semantic level to your project. It is as much a world building and research tool as it is a writing tool.
 
 The real magic happens when you connect both levels, syntactic (text) and semantic (world). You can tag any text passage with any world item (called object), resulting in a list of quotes that are connected to that item. When you edit one of these text passages the respective quote is updated automatically.
 
@@ -25,31 +25,19 @@ In the text editor you can easily inspect what objects are connected to a text. 
 
 ## FAQ
 
-- [General](./faq/general.md)
-- [Texts](./faq/texts.md)
-- [Editing and Formatting Texts](./faq/editing.md)
-- [Paragraph formats](./faq/formats.md)
-- [Spellchecking](./faq/spellcheck.md)
-- [Images](./faq/Images.md)
-- [Editing in Focus Mode](./faq/focus.md)
-- [Text Collections](./faq/collections.md)
-- [Objects](./faq/objects.md)
-- [Object Schemes and Properties](./faq/scheme.md)
-- [Object References](./faq/references.md)
-- [Projects](./faq/project.md)
-- [Imports](./faq/import.md)
-- [Export](./faq/export.md)
-- [Program settings](./faq/settings.md)
+See DIM's webpage linked above.
+
 
 ## Building
 
 ### Windows
 
-Make sure you have git (install from github.com), node (install from node.js) and python 3.10 (from python.org - do not use a higher version than 3.10). You also need Visual Studio (from visualstudio.microsoft.com,  Community edition will do fine), having the "Desktop development with C++" workload (include Windows 10 or 11 SDK, MSVC, and C++ CMake Tools). Next, clone the repo, install the dependencies and run:
+Make sure you have git (install from github.com), node (install from node.js) and python 3.10 (from python.org - do not use a higher version than 3.10). You also need Visual Studio (from visualstudio.microsoft.com, Community edition will do fine), having the "Desktop development with C++" workload (include Windows 10 or 11 SDK, MSVC, and C++ CMake Tools). Next, clone the repo, install the dependencies and run:
+
 ```
 git clone https://github.com/ulkuehn/DeusInMachina.git
 npm install
-npm run dim       <-- run directly from repo 
+npm run dim       <-- run directly from repo
 npm run windows   <-- create an installable exe file in dist folder
 ```
 
@@ -105,6 +93,26 @@ This is a known issue with AppImages compiled from Electron: https://github.com/
 
 We recommend installing the `.deb` package instead, which does not face this
 issue and works properly.
+
+
+## Future Enhancements
+
+There is a lot on my to-do and wish list, including:
+- Exporting to DOCX format
+- Support for tables in text processor
+- Support for notes/comments in text processor
+- Writing goals and statistics
+- Project or single text snapshots/history
+- Mirror a webpage as object property (for research)
+- Links between texts
+- Text bookmarks
+- Syntactical objects (connected text passages not manually set but determined by regexp)
+- Custom sounds in focus mode
+- Whiteboard/outline mode for rearranging texts
+- Storyline
+
+There is no specific ordering intended in this list. Also, it's just ideas, and whether the project will develop in any of these directions or some other (or maybe not at all) is totally open.
+
 
 ## License
 
