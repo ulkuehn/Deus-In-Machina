@@ -108,7 +108,7 @@ class Settings {
         {
           type: "check",
           name: "debug",
-          default: true, // @TODO change to false for production
+          default: false,
         },
         {
           type: "separator",

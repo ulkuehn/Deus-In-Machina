@@ -213,7 +213,7 @@ const translationSettingsWindow = {
       "settingsWindow_focusEditorInfo":
         "Diese Einstellungen betreffen den Editor im ablenkungsfreien Modus. Die Konfiguration des integrierten Editors erfolgt in einem gesonderten Tab.",
       "settingsWindow_focusEditorGeneral": "Verhalten und Aussehen",
-      "settingsWindow_focusEditorAnimation": "langsames Öffnen und Schließen",
+      "settingsWindow_focusEditorAnimation": "animiertes Öffnen und Schließen",
       "settingsWindow_focusEditorWidth": "relative Breite des Editors",
       "settingsWindow_focusEditorHeight": "relative Höhe des Editors",
       "settingsWindow_focusEditorObjects": "Objektmarkierungen anzeigen",
