@@ -1323,7 +1323,7 @@ class Exporter {
             "exportWindow_typeRTF",
             "exportWindow_typeDOCX",
           ],
-          default: "html",
+          default: "docx",
         },
         {
           name: "documentEditor",
