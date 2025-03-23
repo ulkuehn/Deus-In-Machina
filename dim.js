@@ -257,7 +257,7 @@ function menuList(left, right, bottom) {
   // populate recent exports menu item
   let exportItems = [];
   theState.recentExports.forEach((exported) => {
-    if ([".txt", ".html", ".rtf"].includes(path.parse(exported.path).ext)) {
+    if ([".txt", ".html", ".rtf", ".docx"].includes(path.parse(exported.path).ext)) {
       exportItems.push({
         label: `${exported.path}  [ ${exported.time} / ${exported.type} ]`,
         click() {

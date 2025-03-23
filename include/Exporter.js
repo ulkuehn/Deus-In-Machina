@@ -5,6 +5,8 @@
  * @file implementation of Exporter class
  */
 
+const { Alignment, AlignmentType } = require("docx");
+
 /**
  * @classdesc Exporter combines all functionality to export a project's information to common formats like RTF
  */
@@ -170,6 +172,7 @@ class Exporter {
     textsBlockPlaceholder: {
       block: true,
       function: (exportType, statistics, textsExport) => {
+        if (exportType == "docx") return textsExport;
         return { insert: textsExport, isCooked: true, isBlock: true };
       },
     },
@@ -328,8 +331,9 @@ class Exporter {
     // text contents
     textContentBlockPlaceholder: {
       block: true,
-      function: (textID, textContents) => {
-        return { insert: textContents, isCooked: true, isBlock: true };
+      function: (textID, textContents, exportType) => {
+        if (exportType == "docx") return textContents;
+        else return { insert: textContents, isCooked: true, isBlock: true };
       },
     },
   };
@@ -1966,6 +1970,29 @@ class Exporter {
                               children: result,
                             },
                           ],
+                          styles: {
+                            paragraphStyles: [
+                              {
+                                id: "test",
+                                name: "My Test Style",
+                                basedOn: "Normal",
+                                next: "Normal",
+                                quickFormat: true,
+                                run: {
+                                  italics: true,
+                                  color: "999999",
+                                },
+                                paragraph: {
+                                  spacing: {
+                                    line: 276,
+                                  },
+                                  indent: {
+                                    left: 720,
+                                  },
+                                },
+                              },
+                            ],
+                          },
                         });
 
                         docx.Packer.toBuffer(theDoc).then((buffer) => {
@@ -2600,18 +2627,29 @@ class Exporter {
             // each (non empty) text
             if (textContents.length || !profile.ignoreEmptyTexts) {
               textsExport = textsExport.concat(
-                Exporter.#deltaToDocx(
-                  Exporter.#textPlacegiver(
-                    profile.exportType,
-                    profile.textEditor.ops,
-                    textID,
-                    textContents,
-                  ),
+                // Exporter.#deltaToDocx(
+                Exporter.#textPlacegiver(
+                  profile.exportType,
+                  profile.textEditor.ops,
+                  textID,
+                  textContents,
                 ),
+                // ),
               );
             }
           });
-          resolve(textsExport, profile.textFormats, profile.objectFormats);
+          resolve(
+            Exporter.#deltaToDocx(
+              Exporter.#documentPlacegiver(
+                profile.documentEditor.ops,
+                profile.exportType,
+                documentStatistics,
+                textsExport,
+              ),
+            ),
+            profile.textFormats,
+            profile.objectFormats,
+          );
           break;
       }
     });
@@ -2673,6 +2711,7 @@ class Exporter {
     textsExport,
     objectsExport,
   ) {
+    console.log("docPG",deltaOps,textsExport)
     let newOps = [];
     deltaOps.forEach((op) => {
       let newOp = JSON.parse(JSON.stringify(op));
@@ -2682,18 +2721,36 @@ class Exporter {
             op.insert.placeholder,
           )
         ) {
-          Object.assign(
-            newOp,
-            Exporter.#documentPlaceholders[op.insert.placeholder].function(
-              exportType,
-              statistics,
-              textsExport,
-              objectsExport,
-            ),
-          );
+          if (Array.isArray(textsExport)) {
+            let d = Exporter.#documentPlaceholders[
+              op.insert.placeholder
+            ].function(exportType, statistics, textsExport, objectsExport);
+            if (Array.isArray(d))
+              d.forEach((dd) => newOps.push(dd)); else newOps.push(d);
+            // for (let i = 0; i < textsExport.length; i++) {
+              // newOps.push(
+              //   ...Exporter.#documentPlaceholders[op.insert.placeholder].function(
+              //     exportType,
+              //     statistics,
+              //     textsExport,
+              //     objectsExport,
+              //   ),
+              // );
+            // }
+          } else {
+            Object.assign(
+              newOp,
+              Exporter.#documentPlaceholders[op.insert.placeholder].function(
+                exportType,
+                statistics,
+                textsExport,
+                objectsExport,
+              ),
+            );
+            newOps.push(newOp);
+          }
         }
       }
-      newOps.push(newOp);
     });
     return newOps;
   }
@@ -2708,6 +2765,8 @@ class Exporter {
    * @returns {Object[]}
    */
   static #textPlacegiver(exportType, deltaOps, textID, textContents) {
+    console.log("dOps", deltaOps);
+    console.log("tC", textContents);
     let newOps = [];
     deltaOps.forEach((op) => {
       let newOp = JSON.parse(JSON.stringify(op));
@@ -2718,7 +2777,7 @@ class Exporter {
           )
         ) {
           if (Array.isArray(textContents)) {
-            for (let i = 0; i < textContents.length - 1; i++) {
+            for (let i = 0; i < textContents.length; i++) {
               newOps.push(
                 Exporter.#textPlaceholders[op.insert.placeholder].function(
                   textID,
@@ -2727,20 +2786,21 @@ class Exporter {
                 ),
               );
             }
-            textContents = textContents[textContents.length];
+          } else {
+            Object.assign(
+              newOp,
+              Exporter.#textPlaceholders[op.insert.placeholder].function(
+                textID,
+                textContents,
+                exportType,
+              ),
+            );
+            newOps.push(newOp);
           }
-          Object.assign(
-            newOp,
-            Exporter.#textPlaceholders[op.insert.placeholder].function(
-              textID,
-              textContents,
-              exportType,
-            ),
-          );
         }
       }
-      newOps.push(newOp);
     });
+    console.log("nO", newOps);
     return newOps;
   }
 
@@ -3266,20 +3326,123 @@ class Exporter {
    * @returns {docx.Paragraph[]} suitable as children element of a docx section
    */
   static #deltaToDocx(deltaOps, doFormats = true, doObjects = true) {
-    let text = "";
+    let paras = [];
+    let children = [];
+    let formatID = "test";
     deltaOps.forEach((op) => {
-      // if (Array.isArray(op.insert)) {
-      //   op.insert.forEach((op1) => {
-      //     if (typeof op1.insert != "object") {
-      //       text += op1.insert;
-      //     }
-      //   });
-      // } else
+      let textRun = {};
       if (typeof op.insert != "object") {
-        text += op.insert;
+        if ("attributes" in op) {
+          Object.keys(op.attributes).forEach((attr) => {
+            switch (attr) {
+              case "bold":
+                textRun.bold = true;
+                break;
+              case "italic":
+                textRun.italics = true;
+                break;
+              case "underline":
+                textRun.underline = {};
+                break;
+              case "strike":
+                textRun.strike = true;
+                break;
+              default:
+                if (attr.startsWith("format") && doFormats) {
+                  formatID = attr.substring("format".length);
+                }
+                break;
+            }
+          });
+        }
+        let text = op.insert;
+        if (text.endsWith("\n")) {
+          text = text.substring(0, text.length - 1);
+        }
+        let chunks = text.split("\n");
+        for (let i = 0; i < chunks.length - 1; i++) {
+          textRun.text = chunks[i];
+          children.push(new docx.TextRun(textRun));
+          paras.push(
+            new docx.Paragraph({
+              children: children,
+              style: formatID,
+            }),
+          );
+          children = [];
+        }
+        textRun.text = chunks[chunks.length - 1];
+        children.push(new docx.TextRun(textRun));
+      } else {
+        switch (op.attributes.alignment) {
+          case "image_alignmentBottom":
+          case "image_alignmentMiddle":
+          case "image_alignmentTop":
+            children.push(
+              new docx.ImageRun({
+                data: Buffer.from(op.insert.image.split(",")[1], "base64"),
+                transformation: {
+                  width: parseInt(op.attributes.width),
+                  height: parseInt(op.attributes.height),
+                },
+                altText: {
+                  title: op.attributes.title,
+                },
+              }),
+            );
+            break;
+          default:
+            let alignment;
+            switch (op.attributes.alignment) {
+              case "image_alignmentLeft":
+                alignment = AlignmentType.LEFT;
+                break;
+              case "image_alignmentCenter":
+                alignment = AlignmentType.CENTER;
+                break;
+              case "image_alignmentRight":
+                alignment = AlignmentType.RIGHT;
+                break;
+            }
+            paras.push(
+              new docx.Paragraph({
+                children: children,
+                style: formatID,
+              }),
+            );
+            children = [];
+            paras.push(
+              new docx.Paragraph({
+                children: [
+                  new docx.ImageRun({
+                    type: "jpeg",
+                    data: Buffer.from(op.insert.image.split(",")[1], "base64"),
+                    transformation: {
+                      width: parseInt(op.attributes.width),
+                      height: parseInt(op.attributes.height),
+                    },
+                    altText: {
+                      title: op.attributes.title,
+                    },
+                  }),
+                ],
+                alignment: alignment,
+                style: formatID,
+              }),
+            );
+        }
       }
     });
-    return Exporter.#textToDocx(text);
+    if (children.length) {
+      paras.push(
+        new docx.Paragraph({
+          children: children,
+          style: formatID,
+        }),
+      );
+    }
+    console.log("paras", paras);
+    return paras;
   }
 
   static #textToDocx(text) {
