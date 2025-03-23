@@ -69,19 +69,19 @@ class Exporter {
     // document title
     projectTitlePlaceholder: {
       function: () => {
-        return { insert: theProperties.title };
+        return [{ insert: theProperties.title }];
       },
     },
     // document subtitle
     projectSubtitlePlaceholder: {
       function: () => {
-        return { insert: theProperties.subtitle };
+        return [{ insert: theProperties.subtitle }];
       },
     },
     // document author
     projectAuthorPlaceholder: {
       function: () => {
-        return { insert: theProperties.author };
+        return [{ insert: theProperties.author }];
       },
     },
     // document infos (multiple paragraphs)
@@ -89,23 +89,23 @@ class Exporter {
       function: (exportType) => {
         switch (exportType) {
           case "txt":
-            return { insert: theProperties.info };
+            return [{ insert: theProperties.info }];
             break;
           case "html":
-            return {
+            return [{
               insert: Util.escapeHTML(theProperties.info)
                 .split("\n")
                 .join("<br>"),
               isCooked: true,
-            };
+            }];
             break;
           case "rtf":
-            return {
+            return [{
               insert: Exporter.#escapeRTF(theProperties.info)
                 .split("\n")
                 .join("\\line "),
               isCooked: true,
-            };
+            }];
             break;
         }
       },
@@ -113,67 +113,72 @@ class Exporter {
     // creation time
     projectCreatedPlaceholder: {
       function: () => {
-        return {
-          insert: theProject.created
-            ? theProject.created.toLocalString(
-                theSettings.effectiveSettings().dateTimeFormatLong,
-              )
-            : "---",
-        };
+        return [
+          {
+            insert: theProject.created
+              ? theProject.created.toLocalString(
+                  theSettings.effectiveSettings().dateTimeFormatLong,
+                )
+              : "---",
+          },
+        ];
       },
     },
     // last changed time
     projectChangedPlaceholder: {
       function: () => {
-        return {
-          insert: theProject.changed
-            ? theProject.changed.toLocalString(
-                theSettings.effectiveSettings().dateTimeFormatLong,
-              )
-            : "---",
-        };
+        return [
+          {
+            insert: theProject.changed
+              ? theProject.changed.toLocalString(
+                  theSettings.effectiveSettings().dateTimeFormatLong,
+                )
+              : "---",
+          },
+        ];
       },
     },
     // current time
     projectNowPlaceholder: {
       function: () => {
-        return {
-          insert: new Timestamp().toLocalString(
-            theSettings.effectiveSettings().dateTimeFormatLong,
-          ),
-        };
+        return [
+          {
+            insert: new Timestamp().toLocalString(
+              theSettings.effectiveSettings().dateTimeFormatLong,
+            ),
+          },
+        ];
       },
     },
     // storage version
     projectVersionPlaceholder: {
       function: () => {
-        return { insert: theProject.version ? theProject.version : "---" };
+        return [{ insert: theProject.version ? theProject.version : "---" }];
       },
     },
     // storage path
     projectPathPlaceholder: {
       function: (exportType) => {
-        return { insert: theProject.path ? theProject.path : "---" };
+        return [{ insert: theProject.path ? theProject.path : "---" }];
       },
     },
     // character count
     projectCharactersPlaceholder: {
       function: (exportType, statistics) => {
-        return { insert: statistics.characters };
+        return [{ insert: statistics.characters }];
       },
     },
     // word count
     projectWordsPlaceholder: {
       function: (exportType, statistics) => {
-        return { insert: statistics.words };
+        return [{ insert: statistics.words }];
       },
     },
     // exported texts (see textPlaceholders)
     textsBlockPlaceholder: {
       block: true,
       function: (exportType, statistics, textsExport) => {
-        if (exportType == "docx") return textsExport;
-        return { insert: textsExport, isCooked: true, isBlock: true };
+        return textsExport;
       },
     },
     // exported objects (see objectPlaceholders)
@@ -181,7 +186,7 @@ class Exporter {
       block: true,
       html: true,
       function: (exportType, statistics, textsExport, objectsExport) => {
-        return { insert: objectsExport, isCooked: true, isBlock: true };
+        return objectsExport;
       },
     },
   };
@@ -194,9 +199,11 @@ class Exporter {
     // text name
     textNamePlaceholder: {
       function: (textID) => {
-        return {
-          insert: theTextTree.getText(textID).name,
-        };
+        return [
+          {
+            insert: theTextTree.getText(textID).name,
+          },
+        ];
       },
     },
     // text path in tree
@@ -204,25 +211,25 @@ class Exporter {
       function: (textID, textContents, exportType) => {
         switch (exportType) {
           case "txt":
-            return { insert: theTextTree.getParents(textID).join(" --> ") };
+            return [{ insert: theTextTree.getParents(textID).join(" --> ") }];
             break;
           case "html":
-            return {
+            return [{
               insert: theTextTree
                 .getParents(textID)
                 .map((x) => Util.escapeHTML(x))
                 .join(" &#10142; "),
               isCooked: true,
-            };
+            }];
             break;
           case "rtf":
-            return {
+            return [{
               insert: theTextTree
                 .getParents(textID)
                 .map((x) => Exporter.#escapeRTF(x))
                 .join(" \\u10142? "),
               isCooked: true,
-            };
+            }];
             break;
           case "docx":
             return {
@@ -243,11 +250,13 @@ class Exporter {
             theProperties.categories.categories_status[i].id ==
             theTextTree.getText(textID).status
           ) {
-            return {
-              insert:
-                theProperties.categories.categories_status[i]
-                  .categories_statusName,
-            };
+            return [
+              {
+                insert:
+                  theProperties.categories.categories_status[i]
+                    .categories_statusName,
+              },
+            ];
           }
         }
       },
@@ -264,10 +273,13 @@ class Exporter {
             theProperties.categories.categories_type[i].id ==
             theTextTree.getText(textID).type
           ) {
-            return {
-              insert:
-                theProperties.categories.categories_type[i].categories_typeName,
-            };
+            return [
+              {
+                insert:
+                  theProperties.categories.categories_type[i]
+                    .categories_typeName,
+              },
+            ];
           }
         }
       },
@@ -284,10 +296,13 @@ class Exporter {
             theProperties.categories.categories_user[i].id ==
             theTextTree.getText(textID).userValue
           ) {
-            return {
-              insert:
-                theProperties.categories.categories_user[i].categories_userName,
-            };
+            return [
+              {
+                insert:
+                  theProperties.categories.categories_user[i]
+                    .categories_userName,
+              },
+            ];
           }
         }
       },
@@ -295,45 +310,48 @@ class Exporter {
     // creation time
     textCreatedPlaceholder: {
       function: (textID) => {
-        return {
-          insert: theTextTree
-            .getText(textID)
-            .created.toLocalString(
-              theSettings.effectiveSettings().dateTimeFormatLong,
-            ),
-        };
+        return [
+          {
+            insert: theTextTree
+              .getText(textID)
+              .created.toLocalString(
+                theSettings.effectiveSettings().dateTimeFormatLong,
+              ),
+          },
+        ];
       },
     },
     // last changed time
     textChangedPlaceholder: {
       function: (textID) => {
-        return {
-          insert: theTextTree
-            .getText(textID)
-            .changed.toLocalString(
-              theSettings.effectiveSettings().dateTimeFormatLong,
-            ),
-        };
+        return [
+          {
+            insert: theTextTree
+              .getText(textID)
+              .changed.toLocalString(
+                theSettings.effectiveSettings().dateTimeFormatLong,
+              ),
+          },
+        ];
       },
     },
     // character count
     textCharactersPlaceholder: {
       function: (textID) => {
-        return { insert: theTextTree.getText(textID).characters };
+        return [{ insert: theTextTree.getText(textID).characters }];
       },
     },
     // word count
     textWordsPlaceholder: {
       function: (textID) => {
-        return { insert: theTextTree.getText(textID).words };
+        return [{ insert: theTextTree.getText(textID).words }];
       },
     },
     // text contents
     textContentBlockPlaceholder: {
       block: true,
       function: (textID, textContents, exportType) => {
-        if (exportType == "docx") return textContents;
-        else return { insert: textContents, isCooked: true, isBlock: true };
+        return textContents;
       },
     },
   };
@@ -346,9 +364,11 @@ class Exporter {
     // object name
     objNamePlaceholder: {
       function: (objectID) => {
-        return {
-          insert: theObjectTree.getObject(objectID).name,
-        };
+        return [
+          {
+            insert: theObjectTree.getObject(objectID).name,
+          },
+        ];
       },
     },
     // object path in tree
@@ -356,59 +376,65 @@ class Exporter {
       function: (objectID, exportType) => {
         switch (exportType) {
           case "txt":
-            return {
-              insert: theObjectTree.getParents(objectID).join(" --> "),
-            };
+            return [
+              {
+                insert: theObjectTree.getParents(objectID).join(" --> "),
+              },
+            ];
             break;
           case "html":
-            return {
+            return [{
               insert: theObjectTree
                 .getParents(objectID)
                 .map((x) => Util.escapeHTML(x))
                 .join(" &#10142; "),
               isCooked: true,
-            };
+            }];
             break;
           case "rtf":
-            return {
+            return [{
               insert: theObjectTree
                 .getParents(objectID)
                 .map((x) => Exporter.#escapeRTF(x))
                 .join(" \\u10142? "),
               isCooked: true,
-            };
+            }];
         }
       },
     },
     // creation time
     objCreatedPlaceholder: {
       function: (objectID) => {
-        return {
-          insert: theObjectTree
-            .getObject(objectID)
-            .created.toLocalString(
-              theSettings.effectiveSettings().dateTimeFormatLong,
-            ),
-        };
+        return [
+          {
+            insert: theObjectTree
+              .getObject(objectID)
+              .created.toLocalString(
+                theSettings.effectiveSettings().dateTimeFormatLong,
+              ),
+          },
+        ];
       },
     },
     // last changed time
     objChangedPlaceholder: {
       function: (objectID) => {
-        return {
-          insert: theObjectTree
-            .getObject(objectID)
-            .changed.toLocalString(
-              theSettings.effectiveSettings().dateTimeFormatLong,
-            ),
-        };
+        return [
+          {
+            insert: theObjectTree
+              .getObject(objectID)
+              .changed.toLocalString(
+                theSettings.effectiveSettings().dateTimeFormatLong,
+              ),
+          },
+        ];
       },
     },
     // object contents (as list)
     objContentBlockPlaceholder: {
       block: true,
       function: (objectID, exportType, objectContents) => {
-        return { insert: objectContents, isCooked: true, isBlock: true };
+        return objectContents;
       },
     },
     // objects contents (as table)
@@ -422,6 +448,7 @@ class Exporter {
         propertyNames,
         propertyTypes,
         propertyContents,
+        that
       ) => {
         switch (exportType) {
           case "txt":
@@ -433,45 +460,47 @@ class Exporter {
               _("Scheme_propertyContent"),
             ]);
             for (let i = 0; i < propertyNames.length; i++) {
-              if (propertyTypes[i].insert == "") {
-                data.push([propertyContents[i].insert, "", ""]);
+              if (propertyTypes[i][0].insert == "") {
+                data.push([Exporter.#deltaToText(propertyContents[i]), "", ""]);
                 sCells.push({ col: 0, row: i + 1, colSpan: 3 });
               } else {
                 data.push([
-                  propertyNames[i].insert,
-                  propertyTypes[i].insert,
-                  propertyContents[i].insert,
+                  propertyNames[i][0].insert,
+                  propertyTypes[i][0].insert,
+                  Exporter.#deltaToText(propertyContents[i]),
                 ]);
               }
             }
-            return {
-              insert: table(data, {
-                border: getBorderCharacters("norc"),
-                columns: [
-                  {
-                    width: 15,
-                    paddingLeft: 0,
-                    paddingRight: 2,
-                    wrapWord: true,
-                  },
-                  {
-                    width: 15,
-                    paddingLeft: 0,
-                    paddingRight: 2,
-                    wrapWord: true,
-                  },
-                  {
-                    width:
-                      theSettings.effectiveSettings().exportTableLineLength -
-                      (15 + 2 + 15 + 2),
-                    paddingLeft: 0,
-                    paddingRight: 0,
-                    wrapWord: true,
-                  },
-                ],
-                spanningCells: sCells,
-              }),
-            };
+            return [
+              {
+                insert: table(data, {
+                  border: getBorderCharacters("norc"),
+                  columns: [
+                    {
+                      width: 15,
+                      paddingLeft: 0,
+                      paddingRight: 2,
+                      wrapWord: true,
+                    },
+                    {
+                      width: 15,
+                      paddingLeft: 0,
+                      paddingRight: 2,
+                      wrapWord: true,
+                    },
+                    {
+                      width:
+                        theSettings.effectiveSettings().exportTableLineLength -
+                        (15 + 2 + 15 + 2),
+                      paddingLeft: 0,
+                      paddingRight: 0,
+                      wrapWord: true,
+                    },
+                  ],
+                  spanningCells: sCells,
+                }),
+              },
+            ];
           case "html":
             {
               let html = `<table style="width:100%"><thead><tr><th style="font-weight:bold; padding:0 10px 4px 0"><p>${_(
@@ -480,22 +509,22 @@ class Exporter {
                 "Scheme_propertyContent",
               )}</p></th></tr></thead><tbody>`;
               for (let i = 0; i < propertyNames.length; i++) {
-                if (propertyTypes[i].insert == "") {
-                  html += `<tr><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0" colspan=3><p>${Exporter.#escapeUncookedHTML(
+                if (propertyTypes[i][0].insert == "") {
+                  html += `<tr><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0" colspan=3><p>${Exporter.deltaToHTML(
                     propertyContents[i],
                   )}</p></td></tr>`;
                 } else {
-                  html += `<tr><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0"><p>${Exporter.#escapeUncookedHTML(
-                    propertyNames[i],
-                  )}</p></td><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0"><p>${Exporter.#escapeUncookedHTML(
-                    propertyTypes[i],
-                  )}</p></td><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0"><p>${Exporter.#escapeUncookedHTML(
+                  html += `<tr><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0"><p>${Util.escapeHTML(
+                    propertyNames[i][0].insert,
+                  )}</p></td><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0"><p>${Util.escapeHTML(
+                    propertyTypes[i][0].insert,
+                  )}</p></td><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0"><p>${Exporter.deltaToHTML(
                     propertyContents[i],
                   )}</p></td></tr>`;
                 }
               }
               html += "</table>";
-              return { insert: html, isCooked: true, isBlock: true };
+              return [{ insert: html, isCooked: true, isBlock: true }];
             }
             break;
           case "rtf":
@@ -513,25 +542,25 @@ class Exporter {
                 "Scheme_propertyContent",
               )}\\cell\\row\n`;
               for (let i = 0; i < propertyNames.length; i++) {
-                if (propertyTypes[i].insert == "") {
+                if (propertyTypes[i][0].insert == "") {
                   rtf += `${
                     Exporter.#rtfRow
-                  }\\clmgf${cell1Def}\\clmrg${cell2Def}\\clmrg${cell3Def}\\pard\\intbl ${Exporter.#escapeUncookedRTF(
+                  }\\clmgf${cell1Def}\\clmrg${cell2Def}\\clmrg${cell3Def}\\pard\\intbl ${that.#deltaToRTF(
                     propertyContents[i],
                   )}\\cell \\pard\\intbl \\cell \\pard\\intbl \\cell\\row\n`;
                 } else {
                   rtf += `${
                     Exporter.#rtfRow
-                  }${cell1Def}${cell2Def}${cell3Def}\\pard\\intbl ${Exporter.#escapeUncookedRTF(
+                  }${cell1Def}${cell2Def}${cell3Def}\\pard\\intbl ${Exporter.#escapeRTF(
                     propertyNames[i],
-                  )}\\cell \\pard\\intbl ${Exporter.#escapeUncookedRTF(
+                  )}\\cell \\pard\\intbl ${Exporter.#escapeRTF(
                     propertyTypes[i],
-                  )}\\cell \\pard\\intbl ${Exporter.#escapeUncookedRTF(
+                  )}\\cell \\pard\\intbl ${that.#deltaToRTF(
                     propertyContents[i],
                   )}\\cell\\row\n`;
                 }
               }
-              return { insert: rtf, isCooked: true, isBlock: true };
+              return [{ insert: rtf, isCooked: true, isBlock: true }];
             }
             break;
         }
@@ -552,7 +581,7 @@ class Exporter {
       ) => {
         switch (exportType) {
           case "txt":
-            return { insert: "" };
+            return [];
             break;
           case "html":
             {
@@ -589,7 +618,7 @@ class Exporter {
                   that.#colorTable.push(color);
                 }
               });
-              return {
+              return [{
                 insert:
                   `\\pard\\plain${Formats.formatToRTF(
                     theFormats.formats[UUID0],
@@ -611,7 +640,7 @@ class Exporter {
                   "}\\par\n",
                 isCooked: true,
                 isBlock: true,
-              };
+              }];
             }
             break;
         }
@@ -653,9 +682,11 @@ class Exporter {
                     });
                   }
                 });
-              return {
-                insert: text + "\n",
-              };
+              return [
+                {
+                  insert: text + "\n",
+                },
+              ];
             }
             break;
           case "html":
@@ -719,7 +750,7 @@ class Exporter {
                     });
                   }
                 });
-              return { insert: rtf, isCooked: true, isBlock: true };
+              return [{ insert: rtf, isCooked: true, isBlock: true }];
             }
             break;
         }
@@ -767,27 +798,29 @@ class Exporter {
                     });
                   }
                 });
-              return {
-                insert: table(data, {
-                  border: getBorderCharacters("norc"),
-                  columns: [
-                    {
-                      width: 15,
-                      paddingLeft: 0,
-                      paddingRight: 2,
-                      wrapWord: true,
-                    },
-                    {
-                      width:
-                        theSettings.effectiveSettings().exportTableLineLength -
-                        17,
-                      paddingLeft: 0,
-                      paddingRight: 0,
-                      wrapWord: true,
-                    },
-                  ],
-                }),
-              };
+              return [
+                {
+                  insert: table(data, {
+                    border: getBorderCharacters("norc"),
+                    columns: [
+                      {
+                        width: 15,
+                        paddingLeft: 0,
+                        paddingRight: 2,
+                        wrapWord: true,
+                      },
+                      {
+                        width:
+                          theSettings.effectiveSettings()
+                            .exportTableLineLength - 17,
+                        paddingLeft: 0,
+                        paddingRight: 0,
+                        wrapWord: true,
+                      },
+                    ],
+                  }),
+                },
+              ];
             }
             break;
           case "html":
@@ -872,7 +905,7 @@ class Exporter {
                   }
                 });
 
-              return { insert: rtf, isCooked: true, isBlock: true };
+              return [{ insert: rtf, isCooked: true, isBlock: true }];
             }
             break;
         }
@@ -888,17 +921,21 @@ class Exporter {
     // object name
     objTextNamePlaceholder: {
       function: (objectID) => {
-        return {
-          insert: theObjectTree.getObject(objectID).name,
-        };
+        return [
+          {
+            insert: theObjectTree.getObject(objectID).name,
+          },
+        ];
       },
     },
     // upper cased
     objTextNameUpperPlaceholder: {
       function: (objectID) => {
-        return {
-          insert: theObjectTree.getObject(objectID).name.toUpperCase(),
-        };
+        return [
+          {
+            insert: theObjectTree.getObject(objectID).name.toUpperCase(),
+          },
+        ];
       },
     },
     // path in object tree
@@ -909,20 +946,22 @@ class Exporter {
       function: (objectID, exportType) => {
         switch (exportType) {
           case "txt":
-            return {
-              insert: theObjectTree.getParents(objectID).join(" --> "),
-            };
+            return [
+              {
+                insert: theObjectTree.getParents(objectID).join(" --> "),
+              },
+            ];
             break;
           case "html":
           case "rtf":
           case "docx":
-            return {
+            return [{
               insert: theObjectTree
                 .getParents(objectID)
                 // .map((x) => Util.escapeHTML(x))
                 .join(" ➞ "), // .join(" &#10142; ")
               // isCooked: true,
-            };
+            }];
             break;
         }
       },
@@ -932,22 +971,24 @@ class Exporter {
       function: (objectID, exportType) => {
         switch (exportType) {
           case "txt":
-            return {
-              insert: theObjectTree
-                .getParents(objectID)
-                .join(" --> ")
-                .toUpperCase(),
-            };
+            return [
+              {
+                insert: theObjectTree
+                  .getParents(objectID)
+                  .join(" --> ")
+                  .toUpperCase(),
+              },
+            ];
             break;
           case "html":
           case "rtf":
           case "docx":
-            return {
+            return [{
               insert: theObjectTree
                 .getParents(objectID)
                 .join(" ➞ ")
                 .toUpperCase(),
-            };
+            }];
             break;
         }
       },
@@ -964,10 +1005,10 @@ class Exporter {
       function: (item) => {
         switch (item.type) {
           case "schemeTypes_header":
-            return { insert: "" };
+            return [];
             break;
           default:
-            return { insert: item.name };
+            return [{ insert: item.name }];
             break;
         }
       },
@@ -977,26 +1018,30 @@ class Exporter {
       function: (item) => {
         switch (item.type) {
           case "schemeTypes_header":
-            return { insert: "" };
+            return [];
             break;
           case "schemeTypes_select":
           case "schemeTypes_radio":
-            return {
-              insert: `${_(item.type)} (${_("Scheme_selectList", {
-                list: item.params[0].split("#").join(", "),
-              })})`,
-            };
+            return [
+              {
+                insert: `${_(item.type)} (${_("Scheme_selectList", {
+                  list: item.params[0].split("#").join(", "),
+                })})`,
+              },
+            ];
             break;
           case "schemeTypes_range":
-            return {
-              insert: `${_(item.type)} (${_("Scheme_rangeMinMax", {
-                min: item.params[0],
-                max: item.params[1],
-              })})`,
-            };
+            return [
+              {
+                insert: `${_(item.type)} (${_("Scheme_rangeMinMax", {
+                  min: item.params[0],
+                  max: item.params[1],
+                })})`,
+              },
+            ];
             break;
           default:
-            return { insert: _(item.type) };
+            return [{ insert: _(item.type) }];
             break;
         }
       },
@@ -1010,43 +1055,49 @@ class Exporter {
         if (item.type == "schemeTypes_header")
           switch (exportType) {
             case "txt":
-              return {
-                insert: item.name.toUpperCase().split("").join(" "),
-              };
+              return [
+                {
+                  insert: item.name.toUpperCase().split("").join(" "),
+                },
+              ];
             case "html":
-              return {
+              return [{
                 insert: `<span style="font-weight:bold; letter-spacing:1ex;">${Util.escapeHTML(
                   item.name,
                 )}</span>`,
                 isCooked: true,
-              };
+              }];
             case "rtf":
-              return {
+              return [{
                 insert: `{\\b1\\expnd${Math.round(
                   theFormats.formats[UUID0].formats_fontSize * 4,
                 )}\\expndtw${Math.round(
                   theFormats.formats[UUID0].formats_fontSize * 20,
                 )} ${Exporter.#escapeRTF(item.name)}}`,
                 isCooked: true,
-              };
+              }];
               break;
           }
-        if (content == null) return { insert: "---" };
+        if (content == null) return [{ insert: "---" }];
         else
           switch (item.type) {
             // object relation
             case "schemeTypes_relation":
             case "schemeTypes_irelation":
-              return {
-                insert: theObjectTree.getObject(content).name,
-              };
+              return [
+                {
+                  insert: theObjectTree.getObject(content).name,
+                },
+              ];
             // checkbox
             case "schemeTypes_checkbox":
-              return {
-                insert: content
-                  ? _("Scheme_checkTrue")
-                  : _("Scheme_checkFalse"),
-              };
+              return [
+                {
+                  insert: content
+                    ? _("Scheme_checkTrue")
+                    : _("Scheme_checkFalse"),
+                },
+              ];
               break;
             // everything text related
             case "schemeTypes_text":
@@ -1054,70 +1105,73 @@ class Exporter {
             case "schemeTypes_radio":
             case "schemeTypes_date":
             case "schemeTypes_dateRange":
-              return { insert: content };
+              return [{ insert: content }];
               break;
             // color
             case "schemeTypes_color":
               switch (exportType) {
                 case "txt":
                 case "rtf":
-                  return { insert: content };
+                  return [{ insert: content }];
                 case "html": {
                   let html = content;
                   for (let c = 255; c >= 0; c -= 55) {
                     let h = ("0" + c.toString(16)).slice(-2);
                     html += `<div style="display:inline-block; margin-right:25px; height:100px; width:100px; border:#${h}${h}${h} solid 25px; background-color:${content}"></div>`;
                   }
-                  return { insert: html, isCooked: true };
+                  return [{ insert: html, isCooked: true }];
                 }
               }
               break;
             // editor
             case "schemeTypes_editor":
-              switch (exportType) {
-                case "txt":
-                  return { insert: Exporter.#deltaToText(content.ops) };
-                case "html":
-                  return {
-                    insert: Exporter.deltaToHTML(
-                      content.ops,
-                      that.#usedFormats,
-                      that.#usedObjects,
-                    ),
-                    isCooked: true,
-                    isBlock: true,
-                  };
-                case "rtf":
-                  return {
-                    insert: that.#deltaToRTF(content.ops),
-                    isCooked: true,
-                    isBlock: true,
-                  };
-                  break;
-              }
+              return content.ops;
+              // switch (exportType) {
+              //   case "txt":
+              //     return { insert: Exporter.#deltaToText(content.ops) };
+              //   case "html":
+              //     return {
+              //       insert: Exporter.deltaToHTML(
+              //         content.ops,
+              //         that.#usedFormats,
+              //         that.#usedObjects,
+              //       ),
+              //       isCooked: true,
+              //       isBlock: true,
+              //     };
+              //   case "rtf":
+              //     return {
+              //       insert: that.#deltaToRTF(content.ops),
+              //       isCooked: true,
+              //       isBlock: true,
+              //     };
+              //     break;
+              // }
               break;
             // range / slider
             case "schemeTypes_range":
-              return { insert: `${content} ${item.params[3]}` };
+              return [{ insert: `${content} ${item.params[3]}` }];
               break;
             // map
             case "schemeTypes_map":
               switch (exportType) {
                 case "txt":
-                  return {
-                    insert: content.marker
-                      .map(
-                        (marker) =>
-                          `${marker.info ? marker.info : "---"}: ${_(
-                            "Scheme_locationLatLong",
-                            {
-                              lat: marker.latLng.lat.toFixed(6),
-                              lng: marker.latLng.lng.toFixed(6),
-                            },
-                          )}`,
-                      )
-                      .join("\n"),
-                  };
+                  return [
+                    {
+                      insert: content.marker
+                        .map(
+                          (marker) =>
+                            `${marker.info ? marker.info : "---"}: ${_(
+                              "Scheme_locationLatLong",
+                              {
+                                lat: marker.latLng.lat.toFixed(6),
+                                lng: marker.latLng.lng.toFixed(6),
+                              },
+                            )}`,
+                        )
+                        .join("\n"),
+                    },
+                  ];
                 case "html":
                   let html = "";
                   if (mapImages) {
@@ -1161,11 +1215,11 @@ class Exporter {
                   } else {
                     html = `<p>${_("Scheme_locationNoMarkers")}</p>`;
                   }
-                  return {
+                  return [{
                     insert: html,
                     isCooked: true,
                     isBlock: true,
-                  };
+                  }];
                 case "rtf":
                   {
                     let rtf = "";
@@ -1241,11 +1295,11 @@ class Exporter {
                     } else {
                       rtf = `\\pard\\plain ${_("Scheme_locationNoMarkers")}\\par`;
                     }
-                    return {
+                    return [{
                       insert: rtf,
                       isCooked: true,
                       isBlock: true,
-                    };
+                    }];
                     //TODO
                   }
                   break;
@@ -1253,21 +1307,23 @@ class Exporter {
               break;
             // file
             case "schemeTypes_file":
-              return {
-                insert: `${_("Scheme_fileName")}: ${
-                  content && content.filePath ? content.filePath : "---"
-                }, ${_("Scheme_fileSize")}: ${
-                  content && content.id && theFiles[content.id]
-                    ? Util.formatBytes(theFiles[content.id].size)
-                    : "---"
-                }, ${_("Scheme_fileTime")}: ${
-                  content && content.fileModtime
-                    ? new Timestamp(content.fileModtime).toLocalString(
-                        theSettings.effectiveSettings().dateTimeFormatLong,
-                      )
-                    : "---"
-                }`,
-              };
+              return [
+                {
+                  insert: `${_("Scheme_fileName")}: ${
+                    content && content.filePath ? content.filePath : "---"
+                  }, ${_("Scheme_fileSize")}: ${
+                    content && content.id && theFiles[content.id]
+                      ? Util.formatBytes(theFiles[content.id].size)
+                      : "---"
+                  }, ${_("Scheme_fileTime")}: ${
+                    content && content.fileModtime
+                      ? new Timestamp(content.fileModtime).toLocalString(
+                          theSettings.effectiveSettings().dateTimeFormatLong,
+                        )
+                      : "---"
+                  }`,
+                },
+              ];
               break;
           }
       },
@@ -1327,7 +1383,7 @@ class Exporter {
             "exportWindow_typeRTF",
             "exportWindow_typeDOCX",
           ],
-          default: "docx",
+          default: "rtf",
         },
         {
           name: "documentEditor",
@@ -2126,21 +2182,19 @@ class Exporter {
         case "txt":
           {
             // texts
-            let textsExport = "";
+            let textsExport = [];
             useTexts.forEach((textID) => {
-              let textContents = Exporter.#deltaToText(
-                Exporter.#textContentPlacegiver(
-                  profile.exportType,
-                  theTextTree.getText(textID).delta,
-                  useTextObjects,
-                  profile.objectStartEditor.ops,
-                  profile.objectEndEditor.ops,
-                ),
+              let textContents = Exporter.#textContentPlacegiver(
+                profile.exportType,
+                theTextTree.getText(textID).delta,
+                useTextObjects,
+                profile.objectStartEditor.ops,
+                profile.objectEndEditor.ops,
               );
               // each (non empty) text
-              if (textContents != "" || !profile.ignoreEmptyTexts) {
-                textsExport += Exporter.#deltaToText(
-                  Exporter.#textPlacegiver(
+              if (textContents.length || !profile.ignoreEmptyTexts) {
+                textsExport.push(
+                  ...Exporter.#textPlacegiver(
                     profile.exportType,
                     profile.textEditor.ops,
                     textID,
@@ -2151,53 +2205,51 @@ class Exporter {
             });
 
             // objects and their properties
-            let objectsExport = "";
+            let objectsExport = [];
             useObjects.forEach((objectID) => {
-              let objectContent = "";
+              let objectContent = [];
               let propertyNames = [];
               let propertyTypes = [];
               let propertyContents = [];
               // objects properties: iterate all properties (including those inherited by parent objects)
               theObjectTree.getParents(objectID, false).forEach((oID) => {
                 theObjectTree.getObject(oID).scheme.forEach((item) => {
-                  let content = null;
                   let props = theObjectTree.getObject(objectID).properties;
                   if (props && props[oID] && props[oID][item.id]) {
-                    content = props[oID][item.id];
+                    objectContent.push(
+                      ...this.#propertiesPlacegiver(
+                        profile.objectPropertiesEditor.ops,
+                        item,
+                        profile.exportType,
+                        props[oID][item.id],
+                      ),
+                    );
+                    // elements necessary for tabled export
+                    propertyNames.push(
+                      Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                        item,
+                      ),
+                    );
+                    propertyTypes.push(
+                      Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                        item,
+                      ),
+                    );
+                    propertyContents.push(
+                      Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                        item,
+                        this,
+                        profile.exportType,
+                        props[oID][item.id],
+                      ),
+                    );
                   }
-                  objectContent += Exporter.#deltaToText(
-                    this.#propertiesPlacegiver(
-                      profile.objectPropertiesEditor.ops,
-                      item,
-                      profile.exportType,
-                      content,
-                    ),
-                  );
-                  // elements necessary for tabled export
-                  propertyNames.push(
-                    Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                      item,
-                    ),
-                  );
-                  propertyTypes.push(
-                    Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                      item,
-                    ),
-                  );
-                  propertyContents.push(
-                    Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                      item,
-                      this,
-                      profile.exportType,
-                      content,
-                    ),
-                  );
                 });
               });
               // reverse object relations
               theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-                objectContent += Exporter.#deltaToText(
-                  this.#propertiesPlacegiver(
+                objectContent.push(
+                  ...this.#propertiesPlacegiver(
                     profile.objectPropertiesEditor.ops,
                     revRel,
                     profile.exportType,
@@ -2225,8 +2277,8 @@ class Exporter {
                 );
               });
 
-              objectsExport += Exporter.#deltaToText(
-                this.#objectPlacegiver(
+              objectsExport.push(
+                ...this.#objectPlacegiver(
                   profile.objectEditor.ops,
                   objectID,
                   profile.exportType,
@@ -2240,47 +2292,38 @@ class Exporter {
             });
 
             // document
-            resolve(
-              Exporter.#deltaToText(
-                Exporter.#documentPlacegiver(
-                  profile.documentEditor.ops,
-                  profile.exportType,
-                  documentStatistics,
-                  textsExport,
-                  objectsExport,
-                ),
-              ),
+            let documentExport = Exporter.#documentPlacegiver(
+              profile.documentEditor.ops,
+              profile.exportType,
+              documentStatistics,
+              textsExport,
+              objectsExport,
             );
+            resolve(Exporter.#deltaToText(documentExport));
           }
           break;
 
         case "html":
           {
             // texts
-            let textsExport = "";
+            let textsExport = [];
             useTexts.forEach((textID) => {
-              let textContents = Exporter.deltaToHTML(
-                Exporter.#textContentPlacegiver(
-                  profile.exportType,
-                  theTextTree.getText(textID).delta,
-                  useTextObjects,
-                  profile.objectStartEditor.ops,
-                  profile.objectEndEditor.ops,
-                ),
-                profile.textFormats ? this.#usedFormats : null,
-                profile.objectFormats ? this.#usedObjects : null,
+              let textContents = Exporter.#textContentPlacegiver(
+                profile.exportType,
+                theTextTree.getText(textID).delta,
+                useTextObjects,
+                profile.objectStartEditor.ops,
+                profile.objectEndEditor.ops,
               );
               // each (non empty) text
-              if (textContents != "" || !profile.ignoreEmptyTexts) {
-                textsExport += Exporter.deltaToHTML(
-                  Exporter.#textPlacegiver(
+              if (textContents.length || !profile.ignoreEmptyTexts) {
+                textsExport.push(
+                  ...Exporter.#textPlacegiver(
                     profile.exportType,
                     profile.textEditor.ops,
                     textID,
                     textContents,
                   ),
-                  profile.textFormats ? this.#usedFormats : null,
-                  profile.objectFormats ? this.#usedObjects : null,
                 );
               }
             });
@@ -2310,64 +2353,60 @@ class Exporter {
               });
             }
             Promise.allSettled(promises).then(() => {
-              let objectsExport = "";
+              let objectsExport = [];
               useObjects.forEach((objectID) => {
-                let objectContent = "";
+                let objectContent = [];
                 let propertyNames = [];
                 let propertyTypes = [];
                 let propertyContents = [];
                 // objects properties: iterate all properties (including those inherited by parent objects)
                 theObjectTree.getParents(objectID, false).forEach((oID) => {
                   theObjectTree.getObject(oID).scheme.forEach((item) => {
-                    let content = null;
                     let props = theObjectTree.getObject(objectID).properties;
                     if (props && props[oID] && props[oID][item.id]) {
-                      content = props[oID][item.id];
+                      let mapImages = null;
+                      if (
+                        rasteredMaps &&
+                        rasteredMaps[objectID] &&
+                        rasteredMaps[objectID][item.id]
+                      ) {
+                        mapImages = rasteredMaps[objectID][item.id];
+                      }
+                      objectContent.push(...
+                        this.#propertiesPlacegiver(
+                          profile.objectPropertiesEditor.ops,
+                          item,
+                          profile.exportType,
+                          props[oID][item.id],
+                          mapImages,
+                        ),
+                      );
+                      // elements necessary for tabled export
+                      propertyNames.push(
+                        Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                          item,
+                        ),
+                      );
+                      propertyTypes.push(
+                        Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                          item,
+                        ),
+                      );
+                      propertyContents.push(
+                        Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                          item,
+                          this,
+                          profile.exportType,
+                          props[oID][item.id],
+                          mapImages,
+                        ),
+                      );
                     }
-                    let mapImages = null;
-                    if (
-                      rasteredMaps &&
-                      rasteredMaps[objectID] &&
-                      rasteredMaps[objectID][item.id]
-                    ) {
-                      mapImages = rasteredMaps[objectID][item.id];
-                    }
-                    objectContent += Exporter.deltaToHTML(
-                      this.#propertiesPlacegiver(
-                        profile.objectPropertiesEditor.ops,
-                        item,
-                        profile.exportType,
-                        content,
-                        mapImages,
-                      ),
-                      profile.textFormats ? this.#usedFormats : null,
-                      profile.objectFormats ? this.#usedObjects : null,
-                    );
-                    // elements necessary for tabled export
-                    propertyNames.push(
-                      Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                        item,
-                      ),
-                    );
-                    propertyTypes.push(
-                      Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                        item,
-                      ),
-                    );
-                    propertyContents.push(
-                      Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                        item,
-                        this,
-                        profile.exportType,
-                        content,
-                        mapImages,
-                      ),
-                    );
                   });
                 });
                 // reverse object relations
                 theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-                  objectContent += Exporter.deltaToHTML(
+                  objectContent.push(...
                     this.#propertiesPlacegiver(
                       profile.objectPropertiesEditor.ops,
                       revRel,
@@ -2375,8 +2414,6 @@ class Exporter {
                       revRel.content,
                       null,
                     ),
-                    profile.textFormats ? this.#usedFormats : null,
-                    profile.objectFormats ? this.#usedObjects : null,
                   );
                   // for tabled export
                   propertyNames.push(
@@ -2400,8 +2437,8 @@ class Exporter {
                   );
                 });
 
-                objectsExport += Exporter.deltaToHTML(
-                  this.#objectPlacegiver(
+                objectsExport.push(
+                  ...this.#objectPlacegiver(
                     profile.objectEditor.ops,
                     objectID,
                     profile.exportType,
@@ -2411,8 +2448,6 @@ class Exporter {
                     propertyTypes,
                     propertyContents,
                   ),
-                  profile.textFormats ? this.#usedFormats : null,
-                  profile.objectFormats ? this.#usedObjects : null,
                 );
               });
 
@@ -2437,30 +2472,25 @@ class Exporter {
         case "rtf":
           {
             // texts
-            let textsExport = "";
+            let textsExport = [];
             useTexts.forEach((textID) => {
-              let textContents = this.#deltaToRTF(
+              let textContents = 
                 Exporter.#textContentPlacegiver(
                   profile.exportType,
                   theTextTree.getText(textID).delta,
                   useTextObjects,
                   profile.objectStartEditor.ops,
                   profile.objectEndEditor.ops,
-                ),
-                profile.textFormats,
-                profile.objectFormats,
               );
               // each (non empty) text
-              if (textContents != "" || !profile.ignoreEmptyTexts) {
-                textsExport += this.#deltaToRTF(
+              if (textContents.length || !profile.ignoreEmptyTexts) {
+                textsExport.push(...
                   Exporter.#textPlacegiver(
                     profile.exportType,
                     profile.textEditor.ops,
                     textID,
                     textContents,
                   ),
-                  profile.textFormats,
-                  profile.objectFormats,
                 );
               }
             });
@@ -2491,72 +2521,66 @@ class Exporter {
               });
             }
             Promise.allSettled(promises).then(() => {
-              let objectsExport = "";
+              let objectsExport = [];
               useObjects.forEach((objectID) => {
-                let objectContent = "";
+                let objectContent = [];
                 let propertyNames = [];
                 let propertyTypes = [];
                 let propertyContents = [];
                 // objects properties: iterate all properties (including those inherited by parent objects)
                 theObjectTree.getParents(objectID, false).forEach((oID) => {
                   theObjectTree.getObject(oID).scheme.forEach((item) => {
-                    let content = null;
                     let props = theObjectTree.getObject(objectID).properties;
                     if (props && props[oID] && props[oID][item.id]) {
-                      content = props[oID][item.id];
+                      let mapImages = null;
+                      if (
+                        rasteredMaps &&
+                        rasteredMaps[objectID] &&
+                        rasteredMaps[objectID][item.id]
+                      ) {
+                        mapImages = rasteredMaps[objectID][item.id];
+                      }
+                      objectContent.push(...
+                        this.#propertiesPlacegiver(
+                          profile.objectPropertiesEditor.ops,
+                          item,
+                          profile.exportType,
+                          props[oID][item.id],
+                          mapImages,
+                        ),
+                      );
+                      // elements necessary for tabled export
+                      propertyNames.push(
+                        Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                          item,
+                        ),
+                      );
+                      propertyTypes.push(
+                        Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                          item,
+                        ),
+                      );
+                      propertyContents.push(
+                        Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                          item,
+                          this,
+                          profile.exportType,
+                          props[oID][item.id],
+                          mapImages,
+                        ),
+                      );
                     }
-                    let mapImages = null;
-                    if (
-                      rasteredMaps &&
-                      rasteredMaps[objectID] &&
-                      rasteredMaps[objectID][item.id]
-                    ) {
-                      mapImages = rasteredMaps[objectID][item.id];
-                    }
-                    objectContent += this.#deltaToRTF(
-                      this.#propertiesPlacegiver(
-                        profile.objectPropertiesEditor.ops,
-                        item,
-                        profile.exportType,
-                        content,
-                        mapImages,
-                      ),
-                      profile.textFormats,
-                      profile.objectFormats,
-                    );
-                    // elements necessary for tabled export
-                    propertyNames.push(
-                      Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                        item,
-                      ),
-                    );
-                    propertyTypes.push(
-                      Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                        item,
-                      ),
-                    );
-                    propertyContents.push(
-                      Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                        item,
-                        this,
-                        profile.exportType,
-                        content,
-                        mapImages,
-                      ),
-                    );
                   });
                 });
                 // reverse object relations
                 theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-                  objectContent += this.#deltaToRTF(
+                  objectContent.push(...
                     this.#propertiesPlacegiver(
                       profile.objectPropertiesEditor.ops,
                       revRel,
                       profile.exportType,
                       revRel.content,
                     ),
-                    profile.textFormats,
-                    profile.objectFormats,
                   );
                   // for tabled export
                   propertyNames.push(
@@ -2579,7 +2603,7 @@ class Exporter {
                   );
                 });
 
-                objectsExport += this.#deltaToRTF(
+                objectsExport.push(...
                   this.#objectPlacegiver(
                     profile.objectEditor.ops,
                     objectID,
@@ -2590,8 +2614,6 @@ class Exporter {
                     propertyTypes,
                     propertyContents,
                   ),
-                  profile.textFormats,
-                  profile.objectFormats,
                 );
               });
 
@@ -2697,111 +2719,73 @@ class Exporter {
    * substitute document placeholders with actual values
    * @static
    *
-   * @param {Object[]} deltaOps
+   * @param {Object[]} documentPlaceholderOps
    * @param {String} exportType
    * @param {Object} statistics
-   * @param {String} textsExport
-   * @param {String} objectsExport
-   * @returns {Object[]}
+   * @param {Object[]} textsExport dimOps of all exported texts
+   * @param {Object[]} objectsExport dimOps of all exported objects
+   * @returns {Object[]} dimOps
    */
   static #documentPlacegiver(
-    deltaOps,
+    documentPlaceholderOps,
     exportType,
     statistics,
     textsExport,
     objectsExport,
   ) {
-    console.log("docPG",deltaOps,textsExport)
-    let newOps = [];
-    deltaOps.forEach((op) => {
-      let newOp = JSON.parse(JSON.stringify(op));
-      if (op.insert && op.insert.placeholder) {
-        if (
-          Object.keys(Exporter.#documentPlaceholders).includes(
-            op.insert.placeholder,
-          )
-        ) {
-          if (Array.isArray(textsExport)) {
-            let d = Exporter.#documentPlaceholders[
-              op.insert.placeholder
-            ].function(exportType, statistics, textsExport, objectsExport);
-            if (Array.isArray(d))
-              d.forEach((dd) => newOps.push(dd)); else newOps.push(d);
-            // for (let i = 0; i < textsExport.length; i++) {
-              // newOps.push(
-              //   ...Exporter.#documentPlaceholders[op.insert.placeholder].function(
-              //     exportType,
-              //     statistics,
-              //     textsExport,
-              //     objectsExport,
-              //   ),
-              // );
-            // }
-          } else {
-            Object.assign(
-              newOp,
-              Exporter.#documentPlaceholders[op.insert.placeholder].function(
-                exportType,
-                statistics,
-                textsExport,
-                objectsExport,
-              ),
-            );
-            newOps.push(newOp);
-          }
-        }
+    let dimOps = [];
+    documentPlaceholderOps.forEach((op) => {
+      if (
+        op.insert &&
+        op.insert.placeholder &&
+        Object.keys(Exporter.#documentPlaceholders).includes(
+          op.insert.placeholder,
+        )
+      ) {
+        dimOps.push(
+          ...Exporter.#documentPlaceholders[op.insert.placeholder].function(
+            exportType,
+            statistics,
+            textsExport,
+            objectsExport,
+          ),
+        );
+      } else {
+        dimOps.push(JSON.parse(JSON.stringify(op)));
       }
     });
-    return newOps;
+    return dimOps;
   }
 
   /**
    * substitute text placeholders with actual values
    *
    * @param {String} exportType
-   * @param {Object[]} deltaOps
+   * @param {Object[]} textPlaceholderOps
    * @param {String} textID
-   * @param {String} textContents
-   * @returns {Object[]}
+   * @param {Object[]} textContents substituted text contents in dimOps
+   * @returns {Object[]} dimOps
    */
-  static #textPlacegiver(exportType, deltaOps, textID, textContents) {
-    console.log("dOps", deltaOps);
-    console.log("tC", textContents);
-    let newOps = [];
-    deltaOps.forEach((op) => {
-      let newOp = JSON.parse(JSON.stringify(op));
-      if (op.insert && op.insert.placeholder) {
-        if (
-          Object.keys(Exporter.#textPlaceholders).includes(
-            op.insert.placeholder,
-          )
-        ) {
-          if (Array.isArray(textContents)) {
-            for (let i = 0; i < textContents.length; i++) {
-              newOps.push(
-                Exporter.#textPlaceholders[op.insert.placeholder].function(
-                  textID,
-                  textContents[i],
-                  exportType,
-                ),
-              );
-            }
-          } else {
-            Object.assign(
-              newOp,
-              Exporter.#textPlaceholders[op.insert.placeholder].function(
-                textID,
-                textContents,
-                exportType,
-              ),
-            );
-            newOps.push(newOp);
-          }
-        }
+  static #textPlacegiver(exportType, textPlaceholderOps, textID, textContents) {
+    let dimOps = [];
+    textPlaceholderOps.forEach((op) => {
+      if (
+        op.insert &&
+        op.insert.placeholder &&
+        Object.keys(Exporter.#textPlaceholders).includes(op.insert.placeholder)
+      ) {
+        dimOps.push(
+          ...Exporter.#textPlaceholders[op.insert.placeholder].function(
+            textID,
+            textContents,
+            exportType,
+          ),
+        );
+      } else {
+        dimOps.push(JSON.parse(JSON.stringify(op)));
       }
     });
-    console.log("nO", newOps);
-    return newOps;
+    return dimOps;
   }
 
   /**
@@ -2809,36 +2793,36 @@ class Exporter {
    * @static
    *
    * @param {String} exportType
-   * @param {Object[]} deltaOps
-   * @param {String[]} useObjects ids of obejcts to use for textObject placeholders
-   * @param {Object[]} startOps
-   * @param {Object[]} endOps
-   * @returns {Object[]}
+   * @param {Object[]} textDelta text contents
+   * @param {String[]} useObjects ids of objects to use for textObject placeholders
+   * @param {Object[]} beforeObjectDelta
+   * @param {Object[]} afterObjectDelta
+   * @returns {Object[]} substituted contents in dimOps
    */
   static #textContentPlacegiver(
     exportType,
-    deltaOps,
+    textDelta,
     useObjects,
-    startOps,
-    endOps,
+    beforeObjectDelta,
+    afterObjectDelta,
   ) {
-    let newOps = [];
-    deltaOps.forEach((op) => {
+    let dimOps = [];
+    textDelta.forEach((op) => {
       let newOp = JSON.parse(JSON.stringify(op));
-      let before = "";
-      let after = "";
+      let beforeOps = [];
+      let afterOps = [];
       if (op.attributes) {
         Object.keys(op.attributes).forEach((attr) => {
           if (attr.startsWith("object")) {
             let objectID = attr.slice(6);
             if (useObjects.includes(objectID)) {
-              before += Exporter.#objectTextPlacegiver(
-                startOps,
+              beforeOps = Exporter.#objectTextPlacegiver(
+                beforeObjectDelta,
                 objectID,
                 exportType,
               );
-              after += Exporter.#objectTextPlacegiver(
-                endOps,
+              afterOps = Exporter.#objectTextPlacegiver(
+                afterObjectDelta,
                 objectID,
                 exportType,
               );
@@ -2849,59 +2833,60 @@ class Exporter {
           }
         });
       }
-      if (typeof op.insert != "object") {
-        newOp.insert = before + op.insert + after;
-        newOps.push(newOp);
-      } else {
-        if (before) {
-          newOps.push({ insert: before });
-        }
-        newOps.push(newOp);
-        if (after) {
-          newOps.push({ insert: after });
-        }
-      }
+      dimOps.push(...beforeOps, newOp, ...afterOps);
     });
-    return newOps;
+    return dimOps;
   }
 
   /**
    * substitute text objects placeholders
    * @static
    *
-   * @param {Object[]} deltaOps
+   * @param {Object[]} objectTextPlaceholderDelta
    * @param {String} objectID
    * @param {String} exportType
    * @returns {Object[]}
    */
-  static #objectTextPlacegiver(deltaOps, objectID, exportType) {
-    let text = "";
-    deltaOps.forEach((op) => {
-      let insert = op.insert;
-      if (op.insert && op.insert.placeholder) {
-        if (
-          Object.keys(Exporter.#objectTextPlaceholders).includes(
-            op.insert.placeholder,
-          )
-        ) {
-          insert = Exporter.#objectTextPlaceholders[
-            op.insert.placeholder
-          ].function(objectID, exportType).insert;
-        }
+  static #objectTextPlacegiver(
+    objectTextPlaceholderDelta,
+    objectID,
+    exportType,
+  ) {
+    let dimOps = [];
+    objectTextPlaceholderDelta.forEach((op) => {
+      if (
+        op.insert &&
+        op.insert.placeholder &&
+        Object.keys(Exporter.#objectTextPlaceholders).includes(
+          op.insert.placeholder,
+        )
+      ) {
+        dimOps.push(
+          ...Exporter.#objectTextPlaceholders[op.insert.placeholder].function(
+            objectID,
+            exportType,
+          ),
+        );
+      } else {
+        dimOps.push(JSON.parse(JSON.stringify(op)));
       }
-      text += insert;
     });
-    // remove all "\n"
-    return text.replace(/\n/g, "");
+    // remove trailing "\n"
+    if (dimOps.length && dimOps[dimOps.length - 1].insert.endsWith("\n")) {
+      dimOps[dimOps.length - 1].insert = dimOps[
+        dimOps.length - 1
+      ].insert.substring(0, dimOps[dimOps.length - 1].insert.length - 1);
+    }
+    return dimOps;
   }
 
   /**
    * substitute object placeholders with actual values (not static!)
    *
-   * @param {Object[]} deltaOps
+   * @param {Object[]} objectPlaceholderDelta
    * @param {String} objectID
    * @param {String} exportType
-   * @param {String} objectContents
+   * @param {Object[]} objectContents
    * @param {String[]} useCitationTexts
    * @param {Object[]} propertyNames
    * @param {Object[]} propertyTypes
@@ -2909,7 +2894,7 @@ class Exporter {
    * @returns {Object[]}
    */
   #objectPlacegiver(
-    deltaOps,
+    objectPlaceholderDelta,
     objectID,
     exportType,
     objectContents,
@@ -2918,70 +2903,74 @@ class Exporter {
     propertyTypes,
     propertyContents,
   ) {
-    let newOps = [];
-    deltaOps.forEach((op) => {
-      let newOp = JSON.parse(JSON.stringify(op));
-      if (op.insert && op.insert.placeholder) {
-        if (
-          Object.keys(Exporter.#objectPlaceholders).includes(
-            op.insert.placeholder,
-          )
-        ) {
-          Object.assign(
-            newOp,
-            Exporter.#objectPlaceholders[op.insert.placeholder].function(
-              objectID,
-              exportType,
-              objectContents,
-              useCitationTexts,
-              propertyNames,
-              propertyTypes,
-              propertyContents,
-              this,
-            ),
-          );
-        }
+    let dimOps = [];
+    objectPlaceholderDelta.forEach((op) => {
+      if (
+        op.insert &&
+        op.insert.placeholder &&
+        Object.keys(Exporter.#objectPlaceholders).includes(
+          op.insert.placeholder,
+        )
+      ) {
+        dimOps.push(
+          ...Exporter.#objectPlaceholders[op.insert.placeholder].function(
+            objectID,
+            exportType,
+            objectContents,
+            useCitationTexts,
+            propertyNames,
+            propertyTypes,
+            propertyContents,
+            this,
+          ),
+        );
+      } else {
+        dimOps.push(JSON.parse(JSON.stringify(op)));
       }
-      newOps.push(newOp);
     });
-    return newOps;
+    return dimOps;
   }
 
   /**
    * substitute object property placeholders with actual values (not static!)
    *
-   * @param {Object[]} deltaOps
+   * @param {Object[]} objectPropertiesPlaceholderDelta
    * @param {*} item
    * @param {String} exportType
    * @param {*} content
    * @param {*} mapImages
    * @returns {Object[]}
    */
-  #propertiesPlacegiver(deltaOps, item, exportType, content, mapImages) {
-    let newOps = [];
-    deltaOps.forEach((op) => {
-      let newOp = JSON.parse(JSON.stringify(op));
-      if (op.insert && op.insert.placeholder) {
-        if (
-          Object.keys(Exporter.#propertyPlaceholders).includes(
-            op.insert.placeholder,
-          )
-        ) {
-          Object.assign(
-            newOp,
-            Exporter.#propertyPlaceholders[op.insert.placeholder].function(
-              item,
-              this,
-              exportType,
-              content,
-              mapImages,
-            ),
-          );
-        }
+  #propertiesPlacegiver(
+    objectPropertiesPlaceholderDelta,
+    item,
+    exportType,
+    content,
+    mapImages,
+  ) {
+    let dimOps = [];
+    objectPropertiesPlaceholderDelta.forEach((op) => {
+      if (
+        op.insert &&
+        op.insert.placeholder &&
+        Object.keys(Exporter.#propertyPlaceholders).includes(
+          op.insert.placeholder,
+        )
+      ) {
+        dimOps.push(
+          ...Exporter.#propertyPlaceholders[op.insert.placeholder].function(
+            item,
+            this,
+            exportType,
+            content,
+            mapImages,
+          ),
+        );
+      } else {
+        dimOps.push(JSON.parse(JSON.stringify(op)));
       }
-      newOps.push(newOp);
     });
-    return newOps;
+    return dimOps;
   }
 
   /**
@@ -3006,6 +2995,9 @@ class Exporter {
         });
       }
     });
+    if (text.endsWith("\n")) {
+      text = text.substring(0, text.length - 1);
+    }
     return text;
   }
 
@@ -3190,6 +3182,7 @@ class Exporter {
 
   /**
    * convert delta to html
+   * this is also needed outside of Exporter, thus not private
    *
    * @param {Object[]} deltaOps
    * @param {} usedFormats
@@ -3197,6 +3190,7 @@ class Exporter {
    * @returns {String} html result
    */
   static deltaToHTML(deltaOps, usedFormats = null, usedObjects = null) {
+    console.log("deltaToHTML",deltaOps)
     let blocks = [];
     let text = "";
     let formatClass = "";
