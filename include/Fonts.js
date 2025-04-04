@@ -72,6 +72,18 @@ class Fonts {
     fantasy: "fdecor",
   };
 
+  /**
+   * generic families as known in DOCX
+   * @static
+   */
+  static docxFamilies = {
+    sansSerif: "Sans-serif",
+    serif: "Serif",
+    monospace: "Monospace",
+    cursive: "Cursive",
+    fantasy: "Fantasy",
+  };
+
   #availableFamilies; // all font families found on system
 
   /**
@@ -91,7 +103,7 @@ class Fonts {
 
   /**
    * load all fonts provided in fonts dir
-   * 
+   *
    * @param {String} baseDir necessary
    * @param {Boolean} uiOnly
    * @returns {Promise} resolves when all fonts are loaded
@@ -133,7 +145,7 @@ class Fonts {
 
   /**
    * retreive locally available fonts
-   * 
+   *
    * @returns {Promise} resolves to a list of available fonts on the system
    */
   getAvailableFamilies() {

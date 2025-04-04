@@ -78,115 +78,127 @@ class Exporter {
     // document title
     projectTitlePlaceholder: {
       function: () => {
-        return { type: "text", content: theProperties.title };
+        return [{ insert: theProperties.title }];
       },
     },
     // document subtitle
     projectSubtitlePlaceholder: {
       function: () => {
-        return { type: "text", content: theProperties.subtitle };
+        return [{ insert: theProperties.subtitle }];
       },
     },
     // document author
     projectAuthorPlaceholder: {
       function: () => {
-        return { type: "text", content: theProperties.author };
+        return [{ insert: theProperties.author }];
       },
     },
-    // document infos (possibly multiple paragraphs)
+    // document infos (multiple paragraphs)
     projectInfoPlaceholder: {
-      function: () => {
-        let result = []
-        let infoParagraphs = theProperties.info.split("\n");
-        let lastPara = infoParagraphs.pop()
-        infoParagraphs.forEach((p) =>
-          result.push({
-            type: "paragraph",
-            content: [{ type: "text", content: p }],
-          }),
-        );
-        result.push({ type: "text", content: lastPara });
-        return result;
+      function: (exportType) => {
+        switch (exportType) {
+          case "txt":
+            return [{ insert: theProperties.info }];
+            break;
+          case "html":
+            return [
+              {
+                insert: Util.escapeHTML(theProperties.info)
+                  .split("\n")
+                  .join("<br>"),
+                isCooked: true,
+              },
+            ];
+            break;
+          case "rtf":
+            return [
+              {
+                insert: Exporter.#escapeRTF(theProperties.info)
+                  .split("\n")
+                  .join("\\line "),
+                isCooked: true,
+              },
+            ];
+            break;
+        }
       },
     },
     // creation time
     projectCreatedPlaceholder: {
       function: () => {
-        return {
-          type: "text",
-          content: theProject.created
-            ? theProject.created.toLocalString(
-                theSettings.effectiveSettings().dateTimeFormatLong,
-              )
-            : "---",
-        };
+        return [
+          {
+            insert: theProject.created
+              ? theProject.created.toLocalString(
+                  theSettings.effectiveSettings().dateTimeFormatLong,
+                )
+              : "---",
+          },
+        ];
       },
     },
     // last changed time
     projectChangedPlaceholder: {
       function: () => {
-        return {
-          type: "text",
-          content: theProject.changed
-            ? theProject.changed.toLocalString(
-                theSettings.effectiveSettings().dateTimeFormatLong,
-              )
-            : "---",
-        };
+        return [
+          {
+            insert: theProject.changed
+              ? theProject.changed.toLocalString(
+                  theSettings.effectiveSettings().dateTimeFormatLong,
+                )
+              : "---",
+          },
+        ];
       },
     },
     // current time
     projectNowPlaceholder: {
       function: () => {
-        return {
-          type: "text",
-          content: new Timestamp().toLocalString(
-            theSettings.effectiveSettings().dateTimeFormatLong,
-          ),
-        };
+        return [
+          {
+            insert: new Timestamp().toLocalString(
+              theSettings.effectiveSettings().dateTimeFormatLong,
+            ),
+          },
+        ];
       },
     },
     // storage version
     projectVersionPlaceholder: {
       function: () => {
-        return {
-          type: "text",
-          content: theProject.version ? theProject.version : "---",
-        };
+        return [{ insert: theProject.version ? theProject.version : "---" }];
       },
     },
     // storage path
     projectPathPlaceholder: {
-      function: () => {
-        return {
-          type: "text",
-          content: theProject.path ? theProject.path : "---",
-        };
+      function: (exportType) => {
+        return [{ insert: theProject.path ? theProject.path : "---" }];
       },
     },
     // character count
     projectCharactersPlaceholder: {
-      function: (statistics) => {
-        return { type: "text", content: statistics.characters };
+      function: (exportType, statistics) => {
+        return [{ insert: statistics.characters }];
       },
     },
     // word count
     projectWordsPlaceholder: {
-      function: (statistics) => {
-        return { type: "text", content: statistics.words };
+      function: (exportType, statistics) => {
+        return [{ insert: statistics.words }];
       },
     },
     // exported texts (see textPlaceholders)
     textsBlockPlaceholder: {
       block: true,
-      function: (statistics, textsExport) => {
+      function: (exportType, statistics, textsExport) => {
         return textsExport;
       },
     },
     // exported objects (see objectPlaceholders)
     objsBlockPlaceholder: {
       block: true,
-      function: (statistics, textsExport, objectsExport) => {
+      html: true,
+      function: (exportType, statistics, textsExport, objectsExport) => {
         return objectsExport;
       },
     },
@@ -200,22 +212,47 @@ class Exporter {
     // text name
     textNamePlaceholder: {
       function: (textID) => {
-        return {
-          type: "text",
-          content: theTextTree.getText(textID).name,
-        };
+        return [
+          {
+            insert: theTextTree.getText(textID).name,
+          },
+        ];
       },
     },
     // text path in tree
     textPathPlaceholder: {
-      function: (textID) => {
-        return {
-          type: "text",
-          content: theTextTree
-            .getParents(textID)
-            .map((x) => Util.escapeHTML(x))
-            .join(" &#10142; "),
-        };
+      function: (textID, textContents, exportType) => {
+        switch (exportType) {
+          case "txt":
+            return [{ insert: theTextTree.getParents(textID).join(" --> ") }];
+            break;
+          case "html":
+            return [
+              {
+                insert: theTextTree
+                  .getParents(textID)
+                  .map((x) => Util.escapeHTML(x))
+                  .join(" &#10142; "),
+                isCooked: true,
+              },
+            ];
+            break;
+          case "rtf":
+            return [
+              {
+                insert: theTextTree
+                  .getParents(textID)
+                  .map((x) => Exporter.#escapeRTF(x))
+                  .join(" \\u10142? "),
+                isCooked: true,
+              },
+            ];
+            break;
+          case "docx":
+            return {
+              insert: theTextTree.getParents(textID).join(" ➞"),
+            };
+        }
       },
     },
     // text status
@@ -230,12 +267,13 @@ class Exporter {
             theProperties.categories.categories_status[i].id ==
             theTextTree.getText(textID).status
           ) {
-            return {
-              type: "text",
-              content:
-                theProperties.categories.categories_status[i]
-                  .categories_statusName,
-            };
+            return [
+              {
+                insert:
+                  theProperties.categories.categories_status[i]
+                    .categories_statusName,
+              },
+            ];
           }
         }
       },
@@ -252,11 +290,13 @@ class Exporter {
             theProperties.categories.categories_type[i].id ==
             theTextTree.getText(textID).type
           ) {
-            return {
-              type: "text",
-              content:
-                theProperties.categories.categories_type[i].categories_typeName,
-            };
+            return [
+              {
+                insert:
+                  theProperties.categories.categories_type[i]
+                    .categories_typeName,
+              },
+            ];
           }
         }
       },
@@ -273,11 +313,13 @@ class Exporter {
             theProperties.categories.categories_user[i].id ==
             theTextTree.getText(textID).userValue
           ) {
-            return {
-              type: "text",
-              content:
-                theProperties.categories.categories_user[i].categories_userName,
-            };
+            return [
+              {
+                insert:
+                  theProperties.categories.categories_user[i]
+                    .categories_userName,
+              },
+            ];
           }
         }
       },
@@ -285,48 +327,47 @@ class Exporter {
     // creation time
     textCreatedPlaceholder: {
       function: (textID) => {
-        return {
-          type: "text",
-          content: theTextTree
-            .getText(textID)
-            .created.toLocalString(
-              theSettings.effectiveSettings().dateTimeFormatLong,
-            ),
-        };
+        return [
+          {
+            insert: theTextTree
+              .getText(textID)
+              .created.toLocalString(
+                theSettings.effectiveSettings().dateTimeFormatLong,
+              ),
+          },
+        ];
       },
     },
     // last changed time
     textChangedPlaceholder: {
       function: (textID) => {
-        return {
-          type: "text",
-          content: theTextTree
-            .getText(textID)
-            .changed.toLocalString(
-              theSettings.effectiveSettings().dateTimeFormatLong,
-            ),
-        };
+        return [
+          {
+            insert: theTextTree
+              .getText(textID)
+              .changed.toLocalString(
+                theSettings.effectiveSettings().dateTimeFormatLong,
+              ),
+          },
+        ];
       },
     },
     // character count
     textCharactersPlaceholder: {
       function: (textID) => {
-        return {
-          type: "text",
-          content: theTextTree.getText(textID).characters,
-        };
+        return [{ insert: theTextTree.getText(textID).characters }];
       },
     },
     // word count
     textWordsPlaceholder: {
       function: (textID) => {
-        return { type: "text", content: theTextTree.getText(textID).words };
+        return [{ insert: theTextTree.getText(textID).words }];
       },
     },
     // text contents
     textContentBlockPlaceholder: {
       block: true,
-      function: (textID, textContents) => {
+      function: (textID, textContents, exportType) => {
         return textContents;
       },
     },
@@ -903,40 +944,80 @@ class Exporter {
     // object name
     objTextNamePlaceholder: {
       function: (objectID) => {
-        return {
-          type: "text",
-          content: theObjectTree.getObject(objectID).name,
-        };
+        return [
+          {
+            insert: theObjectTree.getObject(objectID).name,
+          },
+        ];
       },
     },
     // upper cased
     objTextNameUpperPlaceholder: {
       function: (objectID) => {
-        return {
-          type: "text",
-          content: theObjectTree.getObject(objectID).name.toUpperCase(),
-        };
+        return [
+          {
+            insert: theObjectTree.getObject(objectID).name.toUpperCase(),
+          },
+        ];
       },
     },
     // path in object tree
     objTextPathPlaceholder: {
-      function: (objectID) => {
-        return {
-          type: "text",
-          content: theObjectTree.getParents(objectID).join(" &#10142; "),
-        };
+      /**
+       * @todo implement way to insert cooked ops into text content, so they won't be escaped (again) and change arrow symbol to respective html / rtf code
+       */
+      function: (objectID, exportType) => {
+        switch (exportType) {
+          case "txt":
+            return [
+              {
+                insert: theObjectTree.getParents(objectID).join(" --> "),
+              },
+            ];
+            break;
+          case "html":
+          case "rtf":
+          case "docx":
+            return [
+              {
+                insert: theObjectTree
+                  .getParents(objectID)
+                  // .map((x) => Util.escapeHTML(x))
+                  .join(" ➞ "), // .join(" &#10142; ")
+                // isCooked: true,
+              },
+            ];
+            break;
+        }
       },
     },
     // upper cased
     objTextPathUpperPlaceholder: {
-      function: (objectID) => {
-        return {
-          type: "text",
-          content: theObjectTree
-            .getParents(objectID)
-            .join(" &#10142; ")
-            .toUpperCase(),
-        };
+      function: (objectID, exportType) => {
+        switch (exportType) {
+          case "txt":
+            return [
+              {
+                insert: theObjectTree
+                  .getParents(objectID)
+                  .join(" --> ")
+                  .toUpperCase(),
+              },
+            ];
+            break;
+          case "html":
+          case "rtf":
+          case "docx":
+            return [
+              {
+                insert: theObjectTree
+                  .getParents(objectID)
+                  .join(" ➞ ")
+                  .toUpperCase(),
+              },
+            ];
+            break;
+        }
       },
     },
   };
@@ -1338,7 +1419,7 @@ class Exporter {
             "exportWindow_typeDOCX",
             "json",
           ],
-          default: "txt",
+          default: "json",
         },
         {
           name: "documentEditor",
@@ -2120,345 +2201,343 @@ class Exporter {
 
       let documentStatistics = theProject.statistics(useTexts);
 
-      // texts
-      let textsExport = [];
-      useTexts.forEach((textID) => {
-        let textContents = Exporter.#textContentPlacegiver1(
-          theTextTree.getText(textID).delta,
-          useTextObjects,
-          profile.objectStartEditor.ops,
-          profile.objectEndEditor.ops,
-        );
-        console.log({ textContents });
-        if (textContents.length || !profile.ignoreEmptyTexts) {
-          // each (non empty) text
-          textsExport.push(
-            Exporter.#textPlacegiver1(
-              profile.textEditor.ops,
-              textID,
-              textContents,
-            ),
-          );
-        }
-      });
-
-      // document
-      let documentExport = Exporter.#documentPlacegiver1(
-        profile.documentEditor.ops,
-        documentStatistics,
-        textsExport,
-        [], //objectsExport,
-      );
-      let jsonExport = Exporter.#deltaToJSON(documentExport);
-
       switch (profile.exportType) {
         case "json":
-          resolve(JSON.stringify(jsonExport, null, "  "));
+          {
+            let document = [];
+            // texts
+            let textsExport = [];
+            useTexts.forEach((textID) => {
+              let [textContents, trailingNewLine] =
+                Exporter.#textContentPlacegiver1(
+                  theTextTree.getText(textID).delta,
+                  useTextObjects,
+                  profile.objectStartEditor.ops,
+                  profile.objectEndEditor.ops,
+                );
+              if (textContents.length || !profile.ignoreEmptyTexts) {
+                // each (non empty) text
+                textsExport.push(...textContents);
+                // textsExport.push(
+                //   ...Exporter.#textPlacegiver(
+                //     profile.exportType,
+                //     trailingNewLine
+                //       ? profile.textEditor.ops.slice(
+                //           0,
+                //           profile.textEditor.ops.length - 1,
+                //         )
+                //       : profile.textEditor.ops,
+                //     textID,
+                //     textContents,
+                //   ),
+                // );
+              }
+            });
+
+            resolve(JSON.stringify(textsExport, null, "  "));
+          }
           break;
         case "txt":
-          resolve(Exporter.#jsonToText(jsonExport));
+          {
+            // texts
+            let textsExport = [];
+            useTexts.forEach((textID) => {
+              let [textContents, trailingNewLine] =
+                Exporter.#textContentPlacegiver(
+                  profile.exportType,
+                  theTextTree.getText(textID).delta,
+                  useTextObjects,
+                  profile.objectStartEditor.ops,
+                  profile.objectEndEditor.ops,
+                );
+              // each (non empty) text
+              if (textContents.length || !profile.ignoreEmptyTexts) {
+                textsExport.push(
+                  ...Exporter.#textPlacegiver(
+                    profile.exportType,
+                    trailingNewLine
+                      ? profile.textEditor.ops.slice(
+                          0,
+                          profile.textEditor.ops.length - 1,
+                        )
+                      : profile.textEditor.ops,
+                    textID,
+                    textContents,
+                  ),
+                );
+              }
+            });
+
+            // objects and their properties
+            let objectsExport = [];
+            useObjects.forEach((objectID) => {
+              let objectContent = [];
+              let propertyNames = [];
+              let propertyTypes = [];
+              let propertyContents = [];
+              // objects properties: iterate all properties (including those inherited by parent objects)
+              theObjectTree.getParents(objectID, false).forEach((oID) => {
+                theObjectTree.getObject(oID).scheme.forEach((item) => {
+                  let props = theObjectTree.getObject(objectID).properties;
+                  if (props && props[oID] && props[oID][item.id]) {
+                    objectContent.push(
+                      ...this.#propertiesPlacegiver(
+                        profile.objectPropertiesEditor.ops,
+                        item,
+                        profile.exportType,
+                        props[oID][item.id],
+                      ),
+                    );
+                    // elements necessary for tabled export
+                    propertyNames.push(
+                      Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                        item,
+                      ),
+                    );
+                    propertyTypes.push(
+                      Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                        item,
+                      ),
+                    );
+                    propertyContents.push(
+                      Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                        item,
+                        this,
+                        profile.exportType,
+                        props[oID][item.id],
+                      ),
+                    );
+                  }
+                });
+              });
+              // reverse object relations
+              theObjectTree.reverseRelations(objectID).forEach((revRel) => {
+                objectContent.push(
+                  ...this.#propertiesPlacegiver(
+                    profile.objectPropertiesEditor.ops,
+                    revRel,
+                    profile.exportType,
+                    revRel.content,
+                  ),
+                );
+                // for tabled export
+                propertyNames.push(
+                  Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                    revRel,
+                  ),
+                );
+                propertyTypes.push(
+                  Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                    revRel,
+                  ),
+                );
+                propertyContents.push(
+                  Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                    revRel,
+                    this,
+                    profile.exportType,
+                    revRel.content,
+                  ),
+                );
+              });
+
+              objectsExport.push(
+                ...this.#objectPlacegiver(
+                  profile.objectEditor.ops,
+                  objectID,
+                  profile.exportType,
+                  objectContent,
+                  useCitationTexts,
+                  propertyNames,
+                  propertyTypes,
+                  propertyContents,
+                ),
+              );
+            });
+
+            // document
+            let documentExport = Exporter.#documentPlacegiver(
+              profile.documentEditor.ops,
+              profile.exportType,
+              documentStatistics,
+              textsExport,
+              objectsExport,
+            );
+            resolve(Exporter.#deltaToText(documentExport));
+          }
           break;
+
         case "html":
-          resolve(Exporter.#jsonToHTML(jsonExport));
+          {
+            // texts
+            let textsExport = [];
+            useTexts.forEach((textID) => {
+              let [textContents, trailingNewLine] =
+                Exporter.#textContentPlacegiver(
+                  profile.exportType,
+                  theTextTree.getText(textID).delta,
+                  useTextObjects,
+                  profile.objectStartEditor.ops,
+                  profile.objectEndEditor.ops,
+                );
+              // each (non empty) text
+              if (textContents.length || !profile.ignoreEmptyTexts) {
+                textsExport.push(
+                  ...Exporter.#textPlacegiver(
+                    profile.exportType,
+                    trailingNewLine
+                      ? profile.textEditor.ops.slice(
+                          0,
+                          profile.textEditor.ops.length - 1,
+                        )
+                      : profile.textEditor.ops,
+                    textID,
+                    textContents,
+                  ),
+                );
+              }
+            });
+
+            // raster the maps
+            let rasteredMaps = {};
+            let promises = [];
+            if (Exporter.#doExportProperties(profile)) {
+              useObjects.forEach((objectID) => {
+                theObjectTree.getParents(objectID, false).forEach((oID) => {
+                  theObjectTree.getObject(oID).scheme.forEach((item) => {
+                    if (item.type == "schemeTypes_map") {
+                      let props = theObjectTree.getObject(objectID).properties;
+                      if (props && props[oID] && props[oID][item.id]) {
+                        promises.push(
+                          Exporter.#rasterize(
+                            rasteredMaps,
+                            objectID,
+                            item.id,
+                            props[oID][item.id],
+                          ),
+                        );
+                      }
+                    }
+                  });
+                });
+              });
+            }
+            Promise.allSettled(promises).then(() => {
+              let objectsExport = [];
+              useObjects.forEach((objectID) => {
+                let objectContent = [];
+                let propertyNames = [];
+                let propertyTypes = [];
+                let propertyContents = [];
+                // objects properties: iterate all properties (including those inherited by parent objects)
+                theObjectTree.getParents(objectID, false).forEach((oID) => {
+                  theObjectTree.getObject(oID).scheme.forEach((item) => {
+                    let props = theObjectTree.getObject(objectID).properties;
+                    if (props && props[oID] && props[oID][item.id]) {
+                      let mapImages = null;
+                      if (
+                        rasteredMaps &&
+                        rasteredMaps[objectID] &&
+                        rasteredMaps[objectID][item.id]
+                      ) {
+                        mapImages = rasteredMaps[objectID][item.id];
+                      }
+                      objectContent.push(
+                        ...this.#propertiesPlacegiver(
+                          profile.objectPropertiesEditor.ops,
+                          item,
+                          profile.exportType,
+                          props[oID][item.id],
+                          mapImages,
+                        ),
+                      );
+                      // elements necessary for tabled export
+                      propertyNames.push(
+                        Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                          item,
+                        ),
+                      );
+                      propertyTypes.push(
+                        Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                          item,
+                        ),
+                      );
+                      propertyContents.push(
+                        Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                          item,
+                          this,
+                          profile.exportType,
+                          props[oID][item.id],
+                          mapImages,
+                        ),
+                      );
+                    }
+                  });
+                });
+                // reverse object relations
+                theObjectTree.reverseRelations(objectID).forEach((revRel) => {
+                  objectContent.push(
+                    ...this.#propertiesPlacegiver(
+                      profile.objectPropertiesEditor.ops,
+                      revRel,
+                      profile.exportType,
+                      revRel.content,
+                      null,
+                    ),
+                  );
+                  // for tabled export
+                  propertyNames.push(
+                    Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                      revRel,
+                    ),
+                  );
+                  propertyTypes.push(
+                    Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                      revRel,
+                    ),
+                  );
+                  propertyContents.push(
+                    Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                      revRel,
+                      this,
+                      profile.exportType,
+                      revRel.content,
+                      null,
+                    ),
+                  );
+                });
+
+                objectsExport.push(
+                  ...this.#objectPlacegiver(
+                    profile.objectEditor.ops,
+                    objectID,
+                    profile.exportType,
+                    objectContent,
+                    useCitationTexts,
+                    propertyNames,
+                    propertyTypes,
+                    propertyContents,
+                  ),
+                );
+              });
+
+              // document
+              resolve(
+                Exporter.deltaToHTML(
+                  Exporter.#documentPlacegiver(
+                    profile.documentEditor.ops,
+                    profile.exportType,
+                    documentStatistics,
+                    textsExport,
+                    objectsExport,
+                  ),
+                  profile.textFormats ? this.#usedFormats : null,
+                  profile.objectFormats ? this.#usedObjects : null,
+                ),
+              );
+            });
+          }
           break;
-          //   // texts
-          //   let textsExport = [];
-          //   useTexts.forEach((textID) => {
-          //     let [textContents, trailingNewLine] =
-          //       Exporter.#textContentPlacegiver(
-          //         profile.exportType,
-          //         theTextTree.getText(textID).delta,
-          //         useTextObjects,
-          //         profile.objectStartEditor.ops,
-          //         profile.objectEndEditor.ops,
-          //       );
-          //     // each (non empty) text
-          //     if (textContents.length || !profile.ignoreEmptyTexts) {
-          //       textsExport.push(
-          //         ...Exporter.#textPlacegiver(
-          //           profile.exportType,
-          //           trailingNewLine
-          //             ? profile.textEditor.ops.slice(
-          //                 0,
-          //                 profile.textEditor.ops.length - 1,
-          //               )
-          //             : profile.textEditor.ops,
-          //           textID,
-          //           textContents,
-          //         ),
-          //       );
-          //     }
-          //   });
-
-          //   // objects and their properties
-          //   let objectsExport = [];
-          //   useObjects.forEach((objectID) => {
-          //     let objectContent = [];
-          //     let propertyNames = [];
-          //     let propertyTypes = [];
-          //     let propertyContents = [];
-          //     // objects properties: iterate all properties (including those inherited by parent objects)
-          //     theObjectTree.getParents(objectID, false).forEach((oID) => {
-          //       theObjectTree.getObject(oID).scheme.forEach((item) => {
-          //         let props = theObjectTree.getObject(objectID).properties;
-          //         if (props && props[oID] && props[oID][item.id]) {
-          //           objectContent.push(
-          //             ...this.#propertiesPlacegiver(
-          //               profile.objectPropertiesEditor.ops,
-          //               item,
-          //               profile.exportType,
-          //               props[oID][item.id],
-          //             ),
-          //           );
-          //           // elements necessary for tabled export
-          //           propertyNames.push(
-          //             Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-          //               item,
-          //             ),
-          //           );
-          //           propertyTypes.push(
-          //             Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-          //               item,
-          //             ),
-          //           );
-          //           propertyContents.push(
-          //             Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-          //               item,
-          //               this,
-          //               profile.exportType,
-          //               props[oID][item.id],
-          //             ),
-          //           );
-          //         }
-          //       });
-          //     });
-          //     // reverse object relations
-          //     theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-          //       objectContent.push(
-          //         ...this.#propertiesPlacegiver(
-          //           profile.objectPropertiesEditor.ops,
-          //           revRel,
-          //           profile.exportType,
-          //           revRel.content,
-          //         ),
-          //       );
-          //       // for tabled export
-          //       propertyNames.push(
-          //         Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-          //           revRel,
-          //         ),
-          //       );
-          //       propertyTypes.push(
-          //         Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-          //           revRel,
-          //         ),
-          //       );
-          //       propertyContents.push(
-          //         Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-          //           revRel,
-          //           this,
-          //           profile.exportType,
-          //           revRel.content,
-          //         ),
-          //       );
-          //     });
-
-          //     objectsExport.push(
-          //       ...this.#objectPlacegiver(
-          //         profile.objectEditor.ops,
-          //         objectID,
-          //         profile.exportType,
-          //         objectContent,
-          //         useCitationTexts,
-          //         propertyNames,
-          //         propertyTypes,
-          //         propertyContents,
-          //       ),
-          //     );
-          //   });
-
-          //   // document
-          //   let documentExport = Exporter.#documentPlacegiver(
-          //     profile.documentEditor.ops,
-          //     profile.exportType,
-          //     documentStatistics,
-          //     textsExport,
-          //     objectsExport,
-          //   );
-          //   resolve(Exporter.#deltaToText(documentExport));
-          // }
-
-        // case "html":
-        //   {
-        //     // texts
-        //     let textsExport = [];
-        //     useTexts.forEach((textID) => {
-        //       let [textContents, trailingNewLine] =
-        //         Exporter.#textContentPlacegiver(
-        //           profile.exportType,
-        //           theTextTree.getText(textID).delta,
-        //           useTextObjects,
-        //           profile.objectStartEditor.ops,
-        //           profile.objectEndEditor.ops,
-        //         );
-        //       // each (non empty) text
-        //       if (textContents.length || !profile.ignoreEmptyTexts) {
-        //         textsExport.push(
-        //           ...Exporter.#textPlacegiver(
-        //             profile.exportType,
-        //             trailingNewLine
-        //               ? profile.textEditor.ops.slice(
-        //                   0,
-        //                   profile.textEditor.ops.length - 1,
-        //                 )
-        //               : profile.textEditor.ops,
-        //             textID,
-        //             textContents,
-        //           ),
-        //         );
-        //       }
-        //     });
-
-        //     // raster the maps
-        //     let rasteredMaps = {};
-        //     let promises = [];
-        //     if (Exporter.#doExportProperties(profile)) {
-        //       useObjects.forEach((objectID) => {
-        //         theObjectTree.getParents(objectID, false).forEach((oID) => {
-        //           theObjectTree.getObject(oID).scheme.forEach((item) => {
-        //             if (item.type == "schemeTypes_map") {
-        //               let props = theObjectTree.getObject(objectID).properties;
-        //               if (props && props[oID] && props[oID][item.id]) {
-        //                 promises.push(
-        //                   Exporter.#rasterize(
-        //                     rasteredMaps,
-        //                     objectID,
-        //                     item.id,
-        //                     props[oID][item.id],
-        //                   ),
-        //                 );
-        //               }
-        //             }
-        //           });
-        //         });
-        //       });
-        //     }
-        //     Promise.allSettled(promises).then(() => {
-        //       let objectsExport = [];
-        //       useObjects.forEach((objectID) => {
-        //         let objectContent = [];
-        //         let propertyNames = [];
-        //         let propertyTypes = [];
-        //         let propertyContents = [];
-        //         // objects properties: iterate all properties (including those inherited by parent objects)
-        //         theObjectTree.getParents(objectID, false).forEach((oID) => {
-        //           theObjectTree.getObject(oID).scheme.forEach((item) => {
-        //             let props = theObjectTree.getObject(objectID).properties;
-        //             if (props && props[oID] && props[oID][item.id]) {
-        //               let mapImages = null;
-        //               if (
-        //                 rasteredMaps &&
-        //                 rasteredMaps[objectID] &&
-        //                 rasteredMaps[objectID][item.id]
-        //               ) {
-        //                 mapImages = rasteredMaps[objectID][item.id];
-        //               }
-        //               objectContent.push(
-        //                 ...this.#propertiesPlacegiver(
-        //                   profile.objectPropertiesEditor.ops,
-        //                   item,
-        //                   profile.exportType,
-        //                   props[oID][item.id],
-        //                   mapImages,
-        //                 ),
-        //               );
-        //               // elements necessary for tabled export
-        //               propertyNames.push(
-        //                 Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-        //                   item,
-        //                 ),
-        //               );
-        //               propertyTypes.push(
-        //                 Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-        //                   item,
-        //                 ),
-        //               );
-        //               propertyContents.push(
-        //                 Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-        //                   item,
-        //                   this,
-        //                   profile.exportType,
-        //                   props[oID][item.id],
-        //                   mapImages,
-        //                 ),
-        //               );
-        //             }
-        //           });
-        //         });
-        //         // reverse object relations
-        //         theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-        //           objectContent.push(
-        //             ...this.#propertiesPlacegiver(
-        //               profile.objectPropertiesEditor.ops,
-        //               revRel,
-        //               profile.exportType,
-        //               revRel.content,
-        //               null,
-        //             ),
-        //           );
-        //           // for tabled export
-        //           propertyNames.push(
-        //             Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-        //               revRel,
-        //             ),
-        //           );
-        //           propertyTypes.push(
-        //             Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-        //               revRel,
-        //             ),
-        //           );
-        //           propertyContents.push(
-        //             Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-        //               revRel,
-        //               this,
-        //               profile.exportType,
-        //               revRel.content,
-        //               null,
-        //             ),
-        //           );
-        //         });
-
-        //         objectsExport.push(
-        //           ...this.#objectPlacegiver(
-        //             profile.objectEditor.ops,
-        //             objectID,
-        //             profile.exportType,
-        //             objectContent,
-        //             useCitationTexts,
-        //             propertyNames,
-        //             propertyTypes,
-        //             propertyContents,
-        //           ),
-        //         );
-        //       });
-
-        //       // document
-        //       resolve(
-        //         Exporter.deltaToHTML(
-        //           Exporter.#documentPlacegiver(
-        //             profile.documentEditor.ops,
-        //             profile.exportType,
-        //             documentStatistics,
-        //             textsExport,
-        //             objectsExport,
-        //           ),
-        //           profile.textFormats ? this.#usedFormats : null,
-        //           profile.objectFormats ? this.#usedObjects : null,
-        //         ),
-        //       );
-        //     });
-        //   }
-        //   break;
 
         case "rtf":
           {
@@ -2854,46 +2933,6 @@ class Exporter {
    * @param {Object[]} objectsExport dimOps of all exported objects
    * @returns {Object[]} dimOps
    */
-  static #documentPlacegiver1(
-    documentPlaceholderOps,
-    statistics,
-    textsExport,
-    objectsExport,
-  ) {
-    let ops = [];
-    let blockBefore = false;
-    documentPlaceholderOps.forEach((op) => {
-            let newOp = JSON.parse(JSON.stringify(op));
-      // after a block (textContent) insert, remove next "\n" to avoid an extra empty paragraph
-      if (
-        blockBefore &&
-        typeof newOp.insert == "string" &&
-        newOp.insert.startsWith("\n")
-      )
-        newOp.insert = newOp.insert.substring(1);
-      if (
-        newOp.insert &&
-        newOp.insert.placeholder &&
-        Object.keys(Exporter.#documentPlaceholders).includes(
-          newOp.insert.placeholder,
-        )
-      ) {
-        ops.push(
-          Exporter.#documentPlaceholders[newOp.insert.placeholder].function(
-            statistics,
-            textsExport,
-            objectsExport,
-          ),
-        );
-        blockBefore =
-          Exporter.#documentPlaceholders[newOp.insert.placeholder].block;
-      } else {
-        ops.push(newOp);
-      }
-    });
-    return ops;
-  }
-
   static #documentPlacegiver(
     documentPlaceholderOps,
     exportType,
@@ -2934,42 +2973,6 @@ class Exporter {
    * @param {Object[]} textContents substituted text contents in dimOps
    * @returns {Object[]} dimOps
    */
-  static #textPlacegiver1(textPlaceholderOps, textID, textContents) {
-    console.log("textPlacegiver1", { textPlaceholderOps }, { textContents });
-    let ops = [];
-    let blockBefore = false;
-    textPlaceholderOps.forEach((op) => {
-      let newOp = JSON.parse(JSON.stringify(op));
-      // after a block (textContent) insert, remove next "\n" to avoid an extra empty paragraph
-      if (
-        blockBefore &&
-        typeof newOp.insert == "string" &&
-        newOp.insert.startsWith("\n")
-      )
-        newOp.insert = newOp.insert.substring(1);
-      if (
-        newOp.insert &&
-        newOp.insert.placeholder &&
-        Object.keys(Exporter.#textPlaceholders).includes(
-          newOp.insert.placeholder,
-        )
-      ) {
-        ops.push(
-          Exporter.#textPlaceholders[newOp.insert.placeholder].function(
-            textID,
-            textContents,
-          ),
-        );
-        blockBefore =
-          Exporter.#textPlaceholders[newOp.insert.placeholder].block;
-      } else {
-        ops.push(newOp);
-      }
-    });
-    console.log({ ops });
-    return ops;
-  }
-
   static #textPlacegiver(exportType, textPlaceholderOps, textID, textContents) {
     let dimOps = [];
     textPlaceholderOps.forEach((op) => {
@@ -3037,9 +3040,12 @@ class Exporter {
       ops.push(...beforeOps, newOp, ...afterOps);
     });
 
-    let json = Exporter.#deltaToJSON(ops);
-    console.log("#textContentPlacegiver1", { ops }, { json });
-    return json;
+    return [
+      Exporter.#deltaToJSON(ops),
+      ops.length &&
+        typeof ops[ops.length - 1].insert != "object" &&
+        ops[ops.length - 1].insert.endsWith("\n"),
+    ];
   }
 
   static #textContentPlacegiver(
@@ -3096,32 +3102,11 @@ class Exporter {
    * @param {String} exportType
    * @returns {Object[]}
    */
-  static #objectTextPlacegiver1(objectTextPlaceholderDelta, objectID) {
-    let dimOps = [];
-    objectTextPlaceholderDelta.forEach((op) => {
-      if (
-        op.insert &&
-        op.insert.placeholder &&
-        Object.keys(Exporter.#objectTextPlaceholders).includes(
-          op.insert.placeholder,
-        )
-      ) {
-        dimOps.push(
-          Exporter.#objectTextPlaceholders[op.insert.placeholder].function(
-            objectID,
-          ),
-        );
-      } else {
-        dimOps.push(JSON.parse(JSON.stringify(op)));
-      }
-    });
-
-    let json = Exporter.#deltaToJSON(dimOps);
-    // remove trailing "\n" -- if only "\n" remove whole op
-    if (json.length == 1 && !json[0].content.length) return [];
-    if (json.length == 1) return json[0].content;
-
-    return json;
+  static #objectTextPlacegiver1(
+    objectTextPlaceholderDelta,
+    objectID,
+  ) {
+    
   }
 
   static #objectTextPlacegiver(
@@ -3595,206 +3580,95 @@ class Exporter {
   }
 
   /**
-   * convert JSON to text
-   */
-
-  static #jsonToText(json) {
-    let text = "";
-    json.forEach((p) => {
-      if (p.type == "paragraph") {
-        p.content.forEach((c) => {
-          switch (c.type) {
-            case "text":
-              text += c.content;
-              break;
-            case "image":
-              if (theSettings.effectiveSettings().exportTextImage)
-                text += _("image_reference", {
-                  title: c.title ? ` "${c.title}"` : "",
-                  width: c.width,
-                  height: c.height,
-                });
-              break;
-          }
-        });
-        text += "\n";
-      }
-    });
-
-    return text;
-  }
-
-    /**
-   * convert JSON to HTML
-   */
-  static #jsonToHTML(json) {
-    let html = "";
-    json.forEach((p) => {
-      if (p.type == "paragraph") {
-        let para = "";
-        p.content.forEach((c) => {
-          switch (c.type) {
-            case "text":
-              let element = c.content;
-              if (c.bold)
-                element = `<strong>${element}</strong>`;
-              if (c.italic)
-                element = `<em>${element}</em>`;
-              if (c.underline)
-                element = `<u>${element}</u>`;
-              if (c.strike)
-                element = `<s>${element}</s>`;
-              para += element;
-              break;
-            case "image":
-              let style = "";
-              Object.keys(c).forEach((att) => {
-                if (att in DIMImage.styles) {
-                  for (let [k, v] of Object.entries(
-                    DIMImage.styles[att][c[att]],
-                  )) {
-                    style += `${k}:${v};`;
-                  }
-                }
-              });
-              para += `<img src="${c.content}" width="${c.width}px" height="${c.height}px" style="${style}" ${c.title ? `title="${c.title}"` : ""}>`;
-              break;
-          }
-        });
-        html += `<p>${para}</p>`;
-      }
-    });
-
-    return html;
-  }
-
-  /**
-   * convert delta/JSON mix to JSON
+   * convert delta to JSON
    */
   static #deltaToJSON(deltaOps) {
-    console.log({ deltaOps }, deltaOps.flat(Infinity));
     let paragraphs = [];
     let content = [];
     let formatID = UUID0;
-    deltaOps.flat(Infinity).forEach((op) => {
-      // already in JSON format
-      if ("type" in op) {
-        if (op.type == "paragraph") {
-          if (content.length)
-            paragraphs.push({
-              type: "paragraph",
-              content: content,
-              format: formatID,
-            });
-          content = [];
-          formatID = UUID0;
-          paragraphs.push(op);
-        } else {
-          content.push(op);
-        }
-      }
-      // delta format
-      else {
-        let textContent = {
-          type: "text",
-          content: "",
-          objects: [],
-          style: {},
-        };
-        if (typeof op.insert != "object") {
-          if ("attributes" in op) {
-            Object.keys(op.attributes).forEach((attr) => {
-              switch (attr) {
-                case "bold":
-                  textContent.bold = true;
-                  break;
-                case "italic":
-                  textContent.italic = true;
-                  break;
-                case "underline":
-                  textContent.underline = true;
-                  break;
-                case "strike":
-                  textContent.strike = true;
-                  break;
-                default:
-                  if (attr.startsWith("format")) {
-                    formatID = attr.substring("format".length);
-                    // this.#usedFormats[formatID] = theFormats.formats[formatID];
-                  } else if (attr.startsWith("object")) {
-                    let objectID = attr.substring("object".length);
-                    textContent.objects.push(objectID);
-                    // Object.assign(
-                    //   textContent,
-                    //   StylingControls.controls2DOCX(
-                    //     theObjectTree.objectStyle(objectID).styleProperties.text,
-                    //   ),
-                    // );
-                  }
-                  break;
-              }
-            });
-          }
-          let chunks = op.insert.split(/(\n)/).filter((x) => x);
-          for (let i = 0; i < chunks.length; i++) {
-            if (chunks[i] == "\n") {
-              content.push(textContent);
-              let paragraph = { type: "paragraph", content: content };
-              paragraph.format = formatID;
-              paragraphs.push(paragraph);
-              content = [];
-              textContent = {
-                type: "text",
-                content: "",
-                objects: [],
-                style: {},
-              };
-            } else {
-              textContent.content = chunks[i];
-              content.push(textContent);
-              textContent = {
-                type: "text",
-                content: "",
-                objects: [],
-                style: {},
-              };
+    deltaOps.forEach((op) => {
+      let textContent = {
+        type: "text",
+        content: "",
+        bold: false,
+        italics: false,
+        underline: false,
+        strike: false,
+        objects: [],
+        style: {},
+      };
+      if (typeof op.insert != "object") {
+        if ("attributes" in op) {
+          Object.keys(op.attributes).forEach((attr) => {
+            switch (attr) {
+              case "bold":
+                textContent.bold = true;
+                break;
+              case "italic":
+                textContent.italics = true;
+                break;
+              case "underline":
+                textContent.underline = true;
+                break;
+              case "strike":
+                textContent.strike = true;
+                break;
+              default:
+                if (attr.startsWith("format")) {
+                  formatID = attr.substring("format".length);
+                  // this.#usedFormats[formatID] = theFormats.formats[formatID];
+                } else if (attr.startsWith("object")) {
+                  let objectID = attr.substring("object".length);
+                  textContent.objects.push(objectID);
+                  // Object.assign(
+                  //   textContent,
+                  //   StylingControls.controls2DOCX(
+                  //     theObjectTree.objectStyle(objectID).styleProperties.text,
+                  //   ),
+                  // );
+                }
+                break;
             }
-          }
-          formatID = UUID0;
-        } else {
-          let alignment;
-          switch (op.attributes.alignment) {
-            case "image_alignmentLeft":
-              alignment = "left";
-              break;
-            case "image_alignmentCenter":
-              alignment = "center";
-              break;
-            case "image_alignmentRight":
-              alignment = "right";
-              break;
-          }
-          content.push({
-            type: "image",
-            alignment: alignment,
-            content: op.insert.image,
-            width: parseInt(op.attributes.width),
-            height: parseInt(op.attributes.height),
-            origWidth: parseInt(op.attributes.origWidth),
-            origHeight: parseInt(op.attributes.origHeight),
-            title: op.attributes.title,
-            shadow: op.attributes.shadow,
           });
         }
+        let chunks = op.insert.split(/(\n)/).filter((x) => x);
+        for (let i = 0; i < chunks.length; i++) {
+          if (chunks[i] == "\n") {
+            let paragraph = { content: content };
+            paragraph.format = formatID;
+            paragraphs.push(paragraph);
+            content = [];
+          } else {
+            textContent.content = chunks[i];
+            content.push(textContent);
+          }
+        }
+        formatID = UUID0;
+      } else {
+        let alignment;
+        switch (op.attributes.alignment) {
+          case "image_alignmentLeft":
+            alignment = "left";
+            break;
+          case "image_alignmentCenter":
+            alignment = "center";
+            break;
+          case "image_alignmentRight":
+            alignment = "right";
+            break;
+        }
+        content.push({
+          type: "image",
+          alignment: alignment,
+          content: op.insert.image,
+          width: parseInt(op.attributes.width),
+          height: parseInt(op.attributes.height),
+          title: op.attributes.title,
+        });
       }
     });
-    if (content.length)
-      paragraphs.push({
-        type: "paragraph",
-        content: content,
-        format: formatID,
-      });
-    console.log({ paragraphs });
+    paragraphs.push({ content: content, format: formatID });
+    console.log({ deltaOps }, { paragraphs });
     return paragraphs;
   }
 
