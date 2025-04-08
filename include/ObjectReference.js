@@ -15,7 +15,7 @@ class ObjectReference {
    * @param {Object[{id:String,delta:[]}]} texts list of texts and their content
    * @param {String[]} objects list ob objectIDs
    * @param {String} handleImages how to handle (substitute) images
-   * @returns {Object[]} [{object:id, references:[{text:id, citations:[{pos:pos,len:len,parts:[text:string,html:boolean]},...]}, ...]}, ...]
+   * @returns {Object[]} [{object:id, references:[{text:id, citations:[{pos:pos,len:len,parts:[content:string,html:boolean]},...]}, ...]}, ...]
    */
   static citations(texts, objects, handleImages) {
     let objectReferences = {};
@@ -36,7 +36,7 @@ class ObjectReference {
                 objectReferences[objectID][text.id].push({
                   pos: pos,
                   len: deltaOP.insert.length,
-                  text: deltaOP.insert,
+                  content: deltaOP.insert,
                   html: false,
                 });
               } else {
@@ -76,7 +76,7 @@ class ObjectReference {
                     // nothing
                     case "imageReferenceEmpty":
                       break;
-                    // export as text description
+                    // as text description
                     case "imageReferenceExportText":
                       content = _("image_reference", {
                         title: deltaOP.attributes.title
@@ -86,11 +86,15 @@ class ObjectReference {
                         height: deltaOP.attributes.height,
                       });
                       break;
+                    // raw image data
+                    default:
+                      content = deltaOP;
+                      break;
                   }
                   objectReferences[objectID][text.id].push({
                     pos: pos,
                     len: 1, // images are always one char long
-                    text: content,
+                    content: content,
                     html: true,
                   });
                 }
@@ -144,9 +148,9 @@ class ObjectReference {
               if (startPos == -1) {
                 startPos = ref.pos;
               }
-              citation.push({ text: ref.text, html: ref.html });
+              citation.push({ content: ref.content, html: ref.html });
               pos = ref.pos + ref.len + 1;
-              len += ref.len + (ref.text.endsWith("\n") ? 1 : 0);
+              len += ref.len + (typeof ref.content=="string" && ref.content.endsWith("\n") ? 1 : 0);
             });
             citations.push({
               pos: startPos,
@@ -298,7 +302,7 @@ class ObjectReference {
             textName,
             c.parts
               .map((part) =>
-                part.html ? part.text : Util.escapeHTML(part.text),
+                part.html ? part.content : Util.escapeHTML(part.content),
               )
               .join(""),
             r.object,

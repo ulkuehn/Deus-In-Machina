@@ -231,6 +231,10 @@ class Formats {
     return this.#formats[UUID0];
   }
 
+  getFormat(id) {
+    return this.#formats[id]
+  }
+
   isDirty() {
     return this.#dirty;
   }

@@ -271,7 +271,7 @@ class StyledObject {
   /**
    * verbatim references for all texts this object is connected with
    *
-   * @returns {Object[]} [{object:id, references:[{text:id, citations:[{pos:pos,len:len,parts:[text:string,html:boolean]},...]}, ...]}, ...]
+   * @returns {Object[]} [{object:id, references:[{text:id, citations:[{pos:pos,len:len,parts:[content:string,html:boolean]},...]}, ...]}, ...]
    */
   textReferences(
     handleImages = theSettings.effectiveSettings().imageReference,
@@ -734,7 +734,7 @@ class StyledObject {
             for (let part of citation.parts) {
               if (!part.html) {
                 rex.lastIndex = -1;
-                if ((r = rex.exec(part.text))) break;
+                if ((r = rex.exec(part.content))) break;
               }
               index++;
             }
@@ -747,25 +747,25 @@ class StyledObject {
                   citation.parts
                     .slice(0, index)
                     .map((part) =>
-                      part.html ? part.text : Util.escapeHTML(part.text),
+                      part.html ? part.content : Util.escapeHTML(part.content),
                     )
                     .join("") +
                     Util.escapeHTML(
-                      citation.parts[index].text.substring(0, r.indices[0][0]),
+                      citation.parts[index].content.substring(0, r.indices[0][0]),
                     ),
                   Util.escapeHTML(
-                    citation.parts[index].text.substring(
+                    citation.parts[index].content.substring(
                       r.indices[0][0],
                       r.indices[0][1],
                     ),
                   ),
                   Util.escapeHTML(
-                    citation.parts[index].text.substring(r.indices[0][1]),
+                    citation.parts[index].content.substring(r.indices[0][1]),
                   ) +
                     citation.parts
                       .slice(index + 1)
                       .map((part) =>
-                        part.html ? part.text : Util.escapeHTML(part.text),
+                        part.html ? part.content : Util.escapeHTML(part.content),
                       )
                       .join(""),
                 ],

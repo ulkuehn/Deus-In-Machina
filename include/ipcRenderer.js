@@ -1420,9 +1420,9 @@ ipcRenderer.on("rendererProcess_printEditor", (event, toPDF) => {
     { toPDF },
   ]);
   ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
-  theExporter.exportForPrint().then((efp) => {
+  theExporter.exportForPrint().then(([head, body]) => {
     ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
-    ipcRenderer.invoke("mainWindow_printEditor", [toPDF, ...efp]);
+    ipcRenderer.invoke("mainWindow_printEditor", [toPDF, head, body]);
   });
 });
 
@@ -1704,7 +1704,7 @@ ipcRenderer.on(
       { searchRegex },
       { filters },
     ]);
-    
+
     theTextCollectionTree.newSearchCollection({
       text: searchText,
       case: searchCase,

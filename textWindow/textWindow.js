@@ -187,7 +187,7 @@ ipcRenderer.on(
             pre +
               c.parts
                 .map((part) =>
-                  part.html ? part.text : Util.escapeHTML(part.text),
+                  part.html ? part.content : Util.escapeHTML(part.content),
                 )
                 .join("") +
               post,

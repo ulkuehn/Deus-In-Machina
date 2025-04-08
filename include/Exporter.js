@@ -6,18 +6,30 @@
  */
 
 /*
-JSON intermediate format: deltaOps -> JSON -> text | html | rtf | docx | ...
+@TODO rowspan in text citation table bei gleichen Texten
+@TODO rtf
+@TODO docx
+@TODO odf
+@TODO markdown
+*/
+
+/*
+structure of exporter JSON intermediate format
+this JSON format ist derived from deltaOps and inserted by ...placegiver functions
+the eventual export format (text | html | rtf | docx | ...) is built from this JSON format
 
 document = [ paragraph* ]
 paragraph = { content: [ element* ], format: String }
 element = text | image | table
-text = { type: "text", content: String, bold: Boolean, ..., format: String, style: styleObject }
-image = { type: "image", content: String, alignment: String, title: String, description: String }
-table = { type: "table", row: Int, cols: Int, header: Boolean, content: [ [ String* ] * ]}
+text = { type: "text", content: String, bold: Boolean, ..., objects: [ String* ] }
+image = { type: "image", content: String, alignment: String, title: String, width: Int, height: Int }
+table = { type: "table", rows: Int, cols: Int, header: Boolean, width: [ Int* ], content: [ row* ]}
+row = [ cell* ]
+cell = { content: type | image | Object[], rowSpan: Int, colSpan: Int }
 */
 
 /**
- * @classdesc Exporter combines all functionality to export a project's information to common formats like RTF
+ * @classdesc Exporter combines all functionality to export a project's information to common formats like HTML or RTF
  */
 
 class Exporter {
@@ -72,6 +84,12 @@ class Exporter {
   static #rtfRow = `\\trowd\\trpaddb50\\trpaddt50\\trpaddl50\\trpaddr50`;
 
   /**
+   * string for path building (text and object paths)
+   * @static
+   */
+  static #pathSeparator = " &#10142; ";
+
+  /**
    * document level placeholders
    */
   static #documentPlaceholders = {
@@ -96,9 +114,9 @@ class Exporter {
     // document infos (possibly multiple paragraphs)
     projectInfoPlaceholder: {
       function: () => {
-        let result = []
+        let result = [];
         let infoParagraphs = theProperties.info.split("\n");
-        let lastPara = infoParagraphs.pop()
+        let lastPara = infoParagraphs.pop();
         infoParagraphs.forEach((p) =>
           result.push({
             type: "paragraph",
@@ -211,10 +229,7 @@ class Exporter {
       function: (textID) => {
         return {
           type: "text",
-          content: theTextTree
-            .getParents(textID)
-            .map((x) => Util.escapeHTML(x))
-            .join(" &#10142; "),
+          content: theTextTree.getParents(textID).join(Exporter.#pathSeparator),
         };
       },
     },
@@ -340,80 +355,53 @@ class Exporter {
     // object name
     objNamePlaceholder: {
       function: (objectID) => {
-        return [
-          {
-            insert: theObjectTree.getObject(objectID).name,
-          },
-        ];
+        return {
+          type: "text",
+          content: theObjectTree.getObject(objectID).name,
+        };
       },
     },
     // object path in tree
     objPathPlaceholder: {
-      function: (objectID, exportType) => {
-        switch (exportType) {
-          case "txt":
-            return [
-              {
-                insert: theObjectTree.getParents(objectID).join(" --> "),
-              },
-            ];
-            break;
-          case "html":
-            return [
-              {
-                insert: theObjectTree
-                  .getParents(objectID)
-                  .map((x) => Util.escapeHTML(x))
-                  .join(" &#10142; "),
-                isCooked: true,
-              },
-            ];
-            break;
-          case "rtf":
-            return [
-              {
-                insert: theObjectTree
-                  .getParents(objectID)
-                  .map((x) => Exporter.#escapeRTF(x))
-                  .join(" \\u10142? "),
-                isCooked: true,
-              },
-            ];
-        }
+      function: (objectID) => {
+        return {
+          type: "text",
+          content: theObjectTree
+            .getParents(objectID)
+            .join(Exporter.#pathSeparator),
+        };
       },
     },
     // creation time
     objCreatedPlaceholder: {
       function: (objectID) => {
-        return [
-          {
-            insert: theObjectTree
-              .getObject(objectID)
-              .created.toLocalString(
-                theSettings.effectiveSettings().dateTimeFormatLong,
-              ),
-          },
-        ];
+        return {
+          type: "text",
+          content: theObjectTree
+            .getObject(objectID)
+            .created.toLocalString(
+              theSettings.effectiveSettings().dateTimeFormatLong,
+            ),
+        };
       },
     },
     // last changed time
     objChangedPlaceholder: {
       function: (objectID) => {
-        return [
-          {
-            insert: theObjectTree
-              .getObject(objectID)
-              .changed.toLocalString(
-                theSettings.effectiveSettings().dateTimeFormatLong,
-              ),
-          },
-        ];
+        return {
+          type: "text",
+          content: theObjectTree
+            .getObject(objectID)
+            .changed.toLocalString(
+              theSettings.effectiveSettings().dateTimeFormatLong,
+            ),
+        };
       },
     },
     // object contents (as list)
     objContentBlockPlaceholder: {
       block: true,
-      function: (objectID, exportType, objectContents) => {
+      function: (objectID, objectContents) => {
         return objectContents;
       },
     },
@@ -422,475 +410,213 @@ class Exporter {
       block: true,
       function: (
         objectID,
-        exportType,
         objectContents,
         useCitationTexts,
         propertyNames,
         propertyTypes,
         propertyContents,
-        that,
       ) => {
-        switch (exportType) {
-          case "txt":
-            let data = [];
-            let sCells = [];
-            data.push([
-              _("Scheme_propertyName"),
-              _("Scheme_propertyType"),
-              _("Scheme_propertyContent"),
-            ]);
-            for (let i = 0; i < propertyNames.length; i++) {
-              if (propertyTypes[i][0].insert == "") {
-                data.push([Exporter.#deltaToText(propertyContents[i]), "", ""]);
-                sCells.push({ col: 0, row: i + 1, colSpan: 3 });
-              } else {
-                data.push([
-                  propertyNames[i][0].insert,
-                  propertyTypes[i][0].insert,
-                  Exporter.#deltaToText(propertyContents[i]),
-                ]);
-              }
-            }
-            return [
-              {
-                insert: table(data, {
-                  border: getBorderCharacters("norc"),
-                  columns: [
-                    {
-                      width: 15,
-                      paddingLeft: 0,
-                      paddingRight: 2,
-                      wrapWord: true,
-                    },
-                    {
-                      width: 15,
-                      paddingLeft: 0,
-                      paddingRight: 2,
-                      wrapWord: true,
-                    },
-                    {
-                      width:
-                        theSettings.effectiveSettings().exportTableLineLength -
-                        (15 + 2 + 15 + 2),
-                      paddingLeft: 0,
-                      paddingRight: 0,
-                      wrapWord: true,
-                    },
-                  ],
-                  spanningCells: sCells,
-                }),
+        let tableContent = [
+          [
+            {
+              content: {
+                type: "text",
+                content: _("Scheme_propertyName"),
+                bold: true,
               },
-            ];
-          case "html":
+            },
             {
-              let html = `<table style="width:100%"><thead><tr><th style="font-weight:bold; padding:0 10px 4px 0"><p>${_(
-                "Scheme_propertyName",
-              )}</p></th><th style="font-weight:bold; padding:0 10px 4px 0"><p>${_("Scheme_propertyType")}</p></th><th style="font-weight:bold; padding:0 10px 4px 0"><p>${_(
-                "Scheme_propertyContent",
-              )}</p></th></tr></thead><tbody>`;
-              for (let i = 0; i < propertyNames.length; i++) {
-                if (propertyTypes[i][0].insert == "") {
-                  html += `<tr><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0" colspan=3><p>${Exporter.deltaToHTML(
-                    propertyContents[i],
-                  )}</p></td></tr>`;
-                } else {
-                  html += `<tr><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0"><p>${Util.escapeHTML(
-                    propertyNames[i][0].insert,
-                  )}</p></td><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0"><p>${Util.escapeHTML(
-                    propertyTypes[i][0].insert,
-                  )}</p></td><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0"><p>${Exporter.deltaToHTML(
-                    propertyContents[i],
-                  )}</p></td></tr>`;
-                }
-              }
-              html += "</table>";
-              return [{ insert: html, isCooked: true, isBlock: true }];
-            }
-            break;
-          case "rtf":
+              content: {
+                type: "text",
+                content: _("Scheme_propertyType"),
+                bold: true,
+              },
+            },
             {
-              let cell1Def = `${Exporter.#rtfBorder}\\cellx2000`;
-              let cell2Def = `${Exporter.#rtfBorder}\\cellx4000`;
-              let cell3Def = `${Exporter.#rtfBorder}\\cellx9000`;
-              let rtf = `${
-                Exporter.#rtfRow
-              }${cell1Def}${cell2Def}${cell3Def}\\pard\\intbl ${_(
-                "Scheme_propertyName",
-              )}\\cell \\pard\\intbl ${_(
-                "Scheme_propertyType",
-              )}\\cell \\pard\\intbl ${_(
-                "Scheme_propertyContent",
-              )}\\cell\\row\n`;
-              for (let i = 0; i < propertyNames.length; i++) {
-                if (propertyTypes[i][0].insert == "") {
-                  rtf += `${
-                    Exporter.#rtfRow
-                  }\\clmgf${cell1Def}\\clmrg${cell2Def}\\clmrg${cell3Def}\\pard\\intbl ${that.#deltaToRTF(
-                    propertyContents[i],
-                  )}\\cell \\pard\\intbl \\cell \\pard\\intbl \\cell\\row\n`;
-                } else {
-                  rtf += `${
-                    Exporter.#rtfRow
-                  }${cell1Def}${cell2Def}${cell3Def}\\pard\\intbl ${Exporter.#escapeRTF(
-                    propertyNames[i],
-                  )}\\cell \\pard\\intbl ${Exporter.#escapeRTF(
-                    propertyTypes[i],
-                  )}\\cell \\pard\\intbl ${that.#deltaToRTF(
-                    propertyContents[i],
-                  )}\\cell\\row\n`;
-                }
-              }
-              return [{ insert: rtf, isCooked: true, isBlock: true }];
-            }
-            break;
+              content: {
+                type: "text",
+                content: _("Scheme_propertyContent"),
+                bold: true,
+              },
+            },
+          ],
+        ];
+        for (let i = 0; i < propertyNames.length; i++) {
+          if ("content" in propertyNames[i]) {
+            tableContent.push([
+              {
+                content: propertyNames[i],
+              },
+              { content: propertyTypes[i] },
+              { content: propertyContents[i] },
+            ]);
+          }
+          // scheme headers - they span the whole row
+          else {
+            tableContent.push([
+              {
+                content: Object.assign({ italic: true }, propertyContents[i]),
+                rowSpan: 3,
+              },
+              { content: { type: "text", content: "" } },
+              { content: { type: "text", content: "" } },
+            ]);
+          }
         }
+        console.log({ tableContent });
+        return {
+          type: "table",
+          rows: propertyNames.length,
+          cols: 3,
+          width: [20, 20, 60],
+          header: true,
+          content: tableContent,
+        };
       },
     },
-    // sample text styled with object style
+    // sample text styled with object style (useless for txt exports)
     objStyleSamplePlaceholder: {
       block: true,
-      function: (
-        objectID,
-        exportType,
-        objectContents,
-        useCitationTexts,
-        propertyNames,
-        propertyTypes,
-        propertyContents,
-        that,
-      ) => {
-        switch (exportType) {
-          case "txt":
-            return [];
-            break;
-          case "html":
-            {
-              // set object style (in case it is not already set)
-              let so = new StyledObject();
-              so.styleProperties =
-                theObjectTree.objectStyle(objectID).styleProperties;
-              that.useObjectStyle(objectID, so);
-              return {
-                insert:
-                  `<p><span class="object${objectID}-true">` +
-                  (
-                    theSettings.effectiveSettings().exportTextSample ||
-                    _("sampleTexts_medium")
-                  )
-                    .split("\n")
-                    .join("<br>") +
-                  "</span></p>",
-                isCooked: true,
-                isBlock: true,
-              };
-            }
-            break;
-          case "rtf":
-            {
-              let fac = theObjectTree.objectStyle(objectID).fontsAndColors();
-              fac.fonts.forEach((font) => {
-                if (!that.#fontTable.includes(font)) {
-                  that.#fontTable.push(font);
-                }
-              });
-              fac.colors.forEach((color) => {
-                if (!that.#colorTable.includes(color)) {
-                  that.#colorTable.push(color);
-                }
-              });
-              return [
-                {
-                  insert:
-                    `\\pard\\plain${Formats.formatToRTF(
-                      theFormats.formats[UUID0],
-                      that.#fontTable,
-                      that.#colorTable,
-                      that.#styleTable.indexOf(UUID0),
-                    )}{${StylingControls.controls2RTF(
-                      theObjectTree.objectStyle(objectID).styleProperties.text,
-                      theFormats.formats[UUID0].formats_fontSize,
-                      that.#fontTable,
-                      that.#colorTable,
-                    )} ` +
-                    Exporter.#escapeRTF(
-                      theSettings.effectiveSettings().exportTextSample ||
-                        _("sampleTexts_medium"),
-                    )
-                      .split("\n")
-                      .join("\\line ") +
-                    "}\\par\n",
-                  isCooked: true,
-                  isBlock: true,
-                },
-              ];
-            }
-            break;
-        }
+      function: (objectID) => {
+        let paras = [];
+        (
+          theSettings.effectiveSettings().exportTextSample ||
+          _("sampleTexts_medium")
+        )
+          .split("\n")
+          .forEach((p) => {
+            paras.push({
+              type: "paragraph",
+              content: [{ type: "text", content: p, objects: [objectID] }],
+            });
+          });
+        return paras;
       },
     },
     // object references (text passages linked with the object)
     objTextReferencesPlaceholder: {
       block: true,
-      function: (
-        objectID,
-        exportType,
-        objectContents,
-        useCitationTexts,
-        propertyNames,
-        propertyTypes,
-        propertyContents,
-        that,
-      ) => {
-        switch (exportType) {
-          case "txt":
-            {
-              let text = "";
-              theObjectTree
-                .getObject(objectID)
-                .textReferences(
-                  theSettings.effectiveSettings().exportTextImage
-                    ? "imageReferenceExportText"
-                    : "imageReferenceEmpty",
-                )
-                .forEach((objRef) => {
-                  if (objRef.object == objectID) {
-                    objRef.references.forEach((textRef) => {
-                      if (useCitationTexts.includes(textRef.text)) {
-                        let name = theTextTree.getText(textRef.text).name;
-                        textRef.citations.forEach((citation) => {
-                          text += `${name}:\n${citation.parts.map((c) => c.text).join("")}\n`;
+      function: (objectID, objectContents, useCitationTexts) => {
+        let paras = [];
+        theObjectTree
+          .getObject(objectID)
+          .textReferences("") // return as raw
+          .forEach((objRef) => {
+            if (objRef.object == objectID) {
+              objRef.references.forEach((textRef) => {
+                if (useCitationTexts.includes(textRef.text)) {
+                  paras.push({
+                    type: "paragraph",
+                    content: [
+                      {
+                        type: "text",
+                        content: theTextTree.getText(textRef.text).name,
+                        bold: true,
+                      },
+                    ],
+                  });
+                  textRef.citations.forEach((citation) => {
+                    let c = [];
+                    citation.parts.forEach((part) => {
+                      if (typeof part.content == "object")
+                        c.push({
+                          type: "image",
+                          content: part.content.insert.image,
+                          width: part.content.attributes.width,
+                          height: part.content.attributes.height,
+                          title: part.content.attributes.title,
                         });
-                      }
-                    });
-                  }
-                });
-              return [
-                {
-                  insert: text + "\n",
-                },
-              ];
-            }
-            break;
-          case "html":
-            {
-              let html = "";
-              theObjectTree
-                .getObject(objectID)
-                .textReferences()
-                .forEach((objRef) => {
-                  if (objRef.object == objectID) {
-                    objRef.references.forEach((textRef) => {
-                      if (useCitationTexts.includes(textRef.text)) {
-                        let name = theTextTree.getText(textRef.text).name;
-                        textRef.citations.forEach((citation) => {
-                          html += `<p><b>${Util.escapeHTML(
-                            name,
-                          )}:</b></p><p>${citation.parts
-                            .map((part) =>
-                              part.html
-                                ? part.text
-                                : Util.escapeHTML(part.text),
-                            )
-                            .join("")}</p>`;
+                      else
+                        c.push({
+                          type: "text",
+                          content: part.content,
                         });
-                      }
                     });
-                  }
-                });
-              return { insert: html, isCooked: true, isBlock: true };
-            }
-            break;
-          case "rtf":
-            {
-              let rtf = "";
-              theObjectTree
-                .getObject(objectID)
-                .textReferences(
-                  theSettings.effectiveSettings().exportTextImage
-                    ? "imageReferenceExportText"
-                    : "imageReferenceEmpty",
-                )
-                .forEach((objRef) => {
-                  if (objRef.object == objectID) {
-                    objRef.references.forEach((textRef) => {
-                      if (useCitationTexts.includes(textRef.text)) {
-                        let name = theTextTree.getText(textRef.text).name;
-                        let format = Formats.formatToRTF(
-                          theFormats.formats[UUID0],
-                          that.#fontTable,
-                          that.#colorTable,
-                          that.#styleTable.indexOf(UUID0),
-                        );
-                        textRef.citations.forEach((citation) => {
-                          rtf += `\\pard\\plain${format}{\\b1 ${Exporter.#escapeRTF(
-                            name,
-                          )}:}\\par\n\\pard\\plain${format} ${Exporter.#escapeRTF(
-                            citation.parts.map((c) => c.text).join(""),
-                          )}\\par\n`;
-                        });
-                      }
+                    paras.push({
+                      type: "paragraph",
+                      content: c,
                     });
-                  }
-                });
-              return [{ insert: rtf, isCooked: true, isBlock: true }];
+                  });
+                }
+              });
             }
-            break;
-        }
+          });
+        return paras;
       },
     },
     // object references as table
     objTextReferencesTablePlaceholder: {
       block: true,
-      function: (
-        objectID,
-        exportType,
-        objectContents,
-        useCitationTexts,
-        propertyNames,
-        propertyTypes,
-        propertyContents,
-        that,
-      ) => {
-        switch (exportType) {
-          case "txt":
+      function: (objectID, objectContents, useCitationTexts) => {
+        let tableContent = [
+          [
             {
-              let data = [];
-              data.push([_("mainWindow_textName"), _("mainWindow_citation")]);
-              let prevName = "";
-              theObjectTree
-                .getObject(objectID)
-                .textReferences(
-                  theSettings.effectiveSettings().exportTextImage
-                    ? "imageReferenceExportText"
-                    : "imageReferenceEmpty",
-                )
-                .forEach((objRef) => {
-                  if (objRef.object == objectID) {
-                    objRef.references.forEach((textRef) => {
-                      if (useCitationTexts.includes(textRef.text)) {
-                        let name = theTextTree.getText(textRef.text).name;
-                        textRef.citations.forEach((citation) => {
-                          data.push([
-                            name == prevName ? "" : name,
-                            citation.parts.map((c) => c.text).join(""),
-                          ]);
-                          prevName = name;
-                        });
-                      }
-                    });
-                  }
-                });
-              return [
-                {
-                  insert: table(data, {
-                    border: getBorderCharacters("norc"),
-                    columns: [
+              content: {
+                type: "text",
+                content: _("mainWindow_textName"),
+                bold: true,
+              },
+            },
+            {
+              content: {
+                type: "text",
+                content: _("mainWindow_citation"),
+                bold: true,
+              },
+            },
+          ],
+        ];
+        let rows = 1;
+        theObjectTree
+          .getObject(objectID)
+          .textReferences("") // return as raw
+          .forEach((objRef) => {
+            if (objRef.object == objectID) {
+              objRef.references.forEach((textRef) => {
+                if (useCitationTexts.includes(textRef.text)) {
+                  textRef.citations.forEach((citation) => {
+                    rows++;
+                    let tableRow = [
                       {
-                        width: 15,
-                        paddingLeft: 0,
-                        paddingRight: 2,
-                        wrapWord: true,
+                        content: {
+                          type: "text",
+                          content: theTextTree.getText(textRef.text).name,
+                        },
                       },
-                      {
-                        width:
-                          theSettings.effectiveSettings()
-                            .exportTableLineLength - 17,
-                        paddingLeft: 0,
-                        paddingRight: 0,
-                        wrapWord: true,
-                      },
-                    ],
-                  }),
-                },
-              ];
-            }
-            break;
-          case "html":
-            {
-              let html = `<table style="width:100%"><thead><tr><th style="font-weight:bold; padding:0 10px 4px 0"><p>${_(
-                "mainWindow_textName",
-              )}</p></th><th style="font-weight:bold; padding:0 10px 4px 0"><p>${_(
-                "mainWindow_citation",
-              )}</p></th></tr></thead><tbody>`;
-
-              theObjectTree
-                .getObject(objectID)
-                .textReferences()
-                .forEach((objRef) => {
-                  if (objRef.object == objectID) {
-                    objRef.references.forEach((textRef) => {
-                      if (useCitationTexts.includes(textRef.text)) {
-                        let row = `<td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0" rowspan=${textRef.citations.length}>${Util.escapeHTML(
-                          theTextTree.getText(textRef.text).name,
-                        )}</td>`;
-
-                        textRef.citations.forEach((citation) => {
-                          row += `<td style="white-space:pre-wrap; vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0">${citation.parts
-                            .map((part) =>
-                              part.html
-                                ? part.text
-                                : Util.escapeHTML(part.text),
-                            )
-                            .join("")}</td>`;
-                          html += `<tr>${row}</tr>`;
-                          row = "";
+                    ];
+                    let c = [];
+                    citation.parts.forEach((part) => {
+                      if (typeof part.content == "object")
+                        c.push({
+                          type: "image",
+                          content: part.content.insert.image,
+                          width: part.content.attributes.width,
+                          height: part.content.attributes.height,
+                          title: part.content.attributes.title,
                         });
-                      }
-                    });
-                  }
-                });
-              html += "</tbody></table>";
-              return { insert: html, isCooked: true, isBlock: true };
-            }
-            break;
-          case "rtf":
-            {
-              let cell1Def = `${Exporter.#rtfBorder}\\cellx3000`;
-              let cell2Def = `${Exporter.#rtfBorder}\\cellx9000`;
-              let rtf = `${
-                Exporter.#rtfRow
-              }${cell1Def}${cell2Def}\\pard\\intbl ${_(
-                "mainWindow_textName",
-              )}\\cell \\pard\\intbl ${_("mainWindow_citation")}\\cell\\row\n`;
-              let prevName = null;
-
-              theObjectTree
-                .getObject(objectID)
-                .textReferences(
-                  theSettings.effectiveSettings().exportTextImage
-                    ? "imageReferenceExportText"
-                    : "imageReferenceEmpty",
-                )
-                .forEach((objRef) => {
-                  if (objRef.object == objectID) {
-                    objRef.references.forEach((textRef) => {
-                      if (useCitationTexts.includes(textRef.text)) {
-                        let name = theTextTree.getText(textRef.text).name;
-                        let format = Formats.formatToRTF(
-                          theFormats.formats[UUID0],
-                          that.#fontTable,
-                          that.#colorTable,
-                          that.#styleTable.indexOf(UUID0),
-                        );
-                        textRef.citations.forEach((citation) => {
-                          rtf += `${
-                            Exporter.#rtfRow
-                          }${cell1Def}${cell2Def}\\pard\\intbl${format} ${
-                            prevName == name ? "" : Exporter.#escapeRTF(name)
-                          }\\cell \\pard\\intbl${format} ${Exporter.#escapeRTF(
-                            citation.parts.map((c) => c.text).join(""),
-                          )}\\cell\\row\n`;
-                          prevName = name;
+                      else
+                        c.push({
+                          type: "text",
+                          content: part.content,
                         });
-                      }
                     });
-                  }
-                });
-
-              return [{ insert: rtf, isCooked: true, isBlock: true }];
+                    tableRow.push({
+                      content: c,
+                    });
+                    tableContent.push(tableRow);
+                  });
+                }
+              });
             }
-            break;
-        }
+          });
+        return {
+          type: "table",
+          rows: rows,
+          cols: 2,
+          width: [30, 70],
+          header: true,
+          content: tableContent,
+        };
       },
     },
   };
@@ -923,7 +649,9 @@ class Exporter {
       function: (objectID) => {
         return {
           type: "text",
-          content: theObjectTree.getParents(objectID).join(" &#10142; "),
+          content: theObjectTree
+            .getParents(objectID)
+            .join(Exporter.#pathSeparator),
         };
       },
     },
@@ -934,7 +662,7 @@ class Exporter {
           type: "text",
           content: theObjectTree
             .getParents(objectID)
-            .join(" &#10142; ")
+            .join(Exporter.#pathSeparator)
             .toUpperCase(),
         };
       },
@@ -954,7 +682,7 @@ class Exporter {
             return [];
             break;
           default:
-            return [{ insert: item.name }];
+            return { type: "text", content: item.name };
             break;
         }
       },
@@ -968,26 +696,24 @@ class Exporter {
             break;
           case "schemeTypes_select":
           case "schemeTypes_radio":
-            return [
-              {
-                insert: `${_(item.type)} (${_("Scheme_selectList", {
-                  list: item.params[0].split("#").join(", "),
-                })})`,
-              },
-            ];
+            return {
+              type: "text",
+              content: `${_(item.type)} (${_("Scheme_selectList", {
+                list: item.params[0].split("#").join(", "),
+              })})`,
+            };
             break;
           case "schemeTypes_range":
-            return [
-              {
-                insert: `${_(item.type)} (${_("Scheme_rangeMinMax", {
-                  min: item.params[0],
-                  max: item.params[1],
-                })})`,
-              },
-            ];
+            return {
+              type: "text",
+              content: `${_(item.type)} (${_("Scheme_rangeMinMax", {
+                min: item.params[0],
+                max: item.params[1],
+              })})`,
+            };
             break;
           default:
-            return [{ insert: _(item.type) }];
+            return { type: "text", content: _(item.type) };
             break;
         }
       },
@@ -995,59 +721,29 @@ class Exporter {
     // property content
     propertyContentPlaceholder: {
       block: true,
-      html: true,
-      function: (item, that, exportType, content, mapImages) => {
-        // header
+      function: (item, content, mapImages) => {
+        // for headers we put their name as content, while name and type fields are empty
         if (item.type == "schemeTypes_header")
-          switch (exportType) {
-            case "txt":
-              return [
-                {
-                  insert: item.name.toUpperCase().split("").join(" "),
-                },
-              ];
-            case "html":
-              return [
-                {
-                  insert: `<span style="font-weight:bold; letter-spacing:1ex;">${Util.escapeHTML(
-                    item.name,
-                  )}</span>`,
-                  isCooked: true,
-                },
-              ];
-            case "rtf":
-              return [
-                {
-                  insert: `{\\b1\\expnd${Math.round(
-                    theFormats.formats[UUID0].formats_fontSize * 4,
-                  )}\\expndtw${Math.round(
-                    theFormats.formats[UUID0].formats_fontSize * 20,
-                  )} ${Exporter.#escapeRTF(item.name)}}`,
-                  isCooked: true,
-                },
-              ];
-              break;
-          }
-        if (content == null) return [{ insert: "---" }];
+          return { type: "text", content: item.name };
+        if (content == null) return { type: "text", content: "---" };
         else
           switch (item.type) {
             // object relation
             case "schemeTypes_relation":
             case "schemeTypes_irelation":
-              return [
-                {
-                  insert: theObjectTree.getObject(content).name,
-                },
-              ];
+              return {
+                type: "text",
+                content: theObjectTree.getObject(content).name,
+              };
+              break;
             // checkbox
             case "schemeTypes_checkbox":
-              return [
-                {
-                  insert: content
-                    ? _("Scheme_checkTrue")
-                    : _("Scheme_checkFalse"),
-                },
-              ];
+              return {
+                type: "text",
+                content: content
+                  ? _("Scheme_checkTrue")
+                  : _("Scheme_checkFalse"),
+              };
               break;
             // everything text related
             case "schemeTypes_text":
@@ -1055,229 +751,75 @@ class Exporter {
             case "schemeTypes_radio":
             case "schemeTypes_date":
             case "schemeTypes_dateRange":
-              return [{ insert: content }];
-              break;
-            // color
             case "schemeTypes_color":
-              switch (exportType) {
-                case "txt":
-                case "rtf":
-                  return [{ insert: content }];
-                case "html": {
-                  let html = content;
-                  for (let c = 255; c >= 0; c -= 55) {
-                    let h = ("0" + c.toString(16)).slice(-2);
-                    html += `<div style="display:inline-block; margin-right:25px; height:100px; width:100px; border:#${h}${h}${h} solid 25px; background-color:${content}"></div>`;
-                  }
-                  return [{ insert: html, isCooked: true }];
-                }
-              }
+              return { type: "text", content: content };
               break;
             // editor
             case "schemeTypes_editor":
               return content.ops;
-              // switch (exportType) {
-              //   case "txt":
-              //     return { insert: Exporter.#deltaToText(content.ops) };
-              //   case "html":
-              //     return {
-              //       insert: Exporter.deltaToHTML(
-              //         content.ops,
-              //         that.#usedFormats,
-              //         that.#usedObjects,
-              //       ),
-              //       isCooked: true,
-              //       isBlock: true,
-              //     };
-              //   case "rtf":
-              //     return {
-              //       insert: that.#deltaToRTF(content.ops),
-              //       isCooked: true,
-              //       isBlock: true,
-              //     };
-              //     break;
-              // }
               break;
             // range / slider
             case "schemeTypes_range":
-              return [{ insert: `${content} ${item.params[3]}` }];
+              return { type: "text", content: `${content} ${item.params[3]}` };
               break;
             // map
             case "schemeTypes_map":
-              switch (exportType) {
-                case "txt":
-                  return [
+              let r = [];
+              if (mapImages && mapImages[0]) {
+                r.push({
+                  type: "paragraph",
+                  content: [{ type: "text", content: _("Scheme_overviewMap") }],
+                });
+                r.push({
+                  type: "paragraph",
+                  content: [
                     {
-                      insert: content.marker
-                        .map(
-                          (marker) =>
-                            `${marker.info ? marker.info : "---"}: ${_(
-                              "Scheme_locationLatLong",
-                              {
-                                lat: marker.latLng.lat.toFixed(6),
-                                lng: marker.latLng.lng.toFixed(6),
-                              },
-                            )}`,
-                        )
-                        .join("\n"),
+                      type: "image",
+                      content: mapImages[0],
                     },
-                  ];
-                case "html":
-                  let html = "";
-                  if (mapImages) {
-                    if (mapImages[0]) {
-                      html += `<p>${_("Scheme_overviewMap")}<br><img src="${
-                        mapImages[0]
-                      }"/></p>`;
-                    }
-                    for (let i = 0; i < content.marker.length; i++) {
-                      html += `<p style="margin-top:10px">${
-                        content.marker[i].info
-                          ? `${Util.escapeHTML(content.marker[i].info)}: `
-                          : ""
-                      }${_("Scheme_locationLatLong", {
+                  ],
+                });
+              }
+              for (let i = 0; i < content.marker.length; i++) {
+                r.push({
+                  type: "paragraph",
+                  content: [
+                    { type: "text", content: content.marker[i].info + ": " },
+                    {
+                      type: "text",
+                      content: _("Scheme_locationLatLong", {
                         lat: content.marker[i].latLng.lat.toFixed(6),
                         lng: content.marker[i].latLng.lng.toFixed(6),
-                      })}${
-                        mapImages[i + 1]
-                          ? `<br><img src="${mapImages[i + 1]}"/>`
-                          : ""
-                      }</p>`;
-                    }
-                  } else if (content.marker.length) {
-                    html += `<table><thead><tr><th style="padding:0 10px 4px 0">${_(
-                      "Scheme_locationName",
-                    )}</th><th style="padding:0 10px 4px 0">${_(
-                      "Scheme_locationLat",
-                    )}</th><th style="padding:0 10px 4px 0">${_(
-                      "Scheme_locationLon",
-                    )}</th></tr><tbody>`;
-                    content.marker.map((marker) => {
-                      html += `<tr><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0">${Util.escapeHTML(
-                        marker.info,
-                      )}</td><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0">${marker.latLng.lat.toFixed(
-                        6,
-                      )}</td><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0">${marker.latLng.lng.toFixed(
-                        6,
-                      )}</td></tr>`;
-                    });
-                    html += "</table>";
-                  } else {
-                    html = `<p>${_("Scheme_locationNoMarkers")}</p>`;
-                  }
-                  return [
-                    {
-                      insert: html,
-                      isCooked: true,
-                      isBlock: true,
+                      }),
                     },
-                  ];
-                case "rtf":
-                  {
-                    let rtf = "";
-                    if (mapImages) {
-                      if (mapImages[0]) {
-                        rtf += `\\pard\\plain\\sl1 ${Exporter.#escapeRTF(
-                          _("Scheme_overviewMap"),
-                        )}\\line{\\pict\\pngblip\\picwgoal${Math.floor(
-                          (theSettings.effectiveSettings()
-                            .exportOverwiewmapWidth /
-                            180) *
-                            1440,
-                        )}\\pichgoal${Math.floor(
-                          (theSettings.effectiveSettings()
-                            .exportOverwiewmapHeight /
-                            180) *
-                            1440,
-                        )}\n`;
-                        let bytes = Buffer.from(
-                          mapImages[0].split(",")[1],
-                          "base64",
-                        ).toString("hex");
-                        while (bytes.length) {
-                          rtf += `${bytes.substring(0, 128)}\n`;
-                          bytes = bytes.substring(128);
-                        }
-                        rtf += `}\\par\n`;
-                      }
-                      for (let i = 0; i < content.marker.length; i++) {
-                        rtf += `\\pard\\plain\\sl1 ${
-                          content.marker[i].info
-                            ? `${Exporter.#escapeRTF(content.marker[i].info)}: `
-                            : ""
-                        }${Exporter.#escapeRTF(
-                          _("Scheme_locationLatLong", {
-                            lat: content.marker[i].latLng.lat.toFixed(6),
-                            lng: content.marker[i].latLng.lng.toFixed(6),
-                          }),
-                        )}\\line{\\pict\\pngblip\\picwgoal${Math.floor(
-                          (theSettings.effectiveSettings()
-                            .exportDetailmapWidth /
-                            180) *
-                            1440,
-                        )}\\pichgoal${Math.floor(
-                          (theSettings.effectiveSettings()
-                            .exportDetailmapHeight /
-                            180) *
-                            1440,
-                        )}\n`;
-                        let bytes = Buffer.from(
-                          mapImages[i + 1].split(",")[1],
-                          "base64",
-                        ).toString("hex");
-                        while (bytes.length) {
-                          rtf += `${bytes.substring(0, 128)}\n`;
-                          bytes = bytes.substring(128);
-                        }
-                        rtf += `}\\par\n`;
-                      }
-                    } else if (content.marker.length) {
-                      content.marker.map((marker) => {
-                        rtf += `\\pard\\plain ${
-                          marker.info
-                            ? `${Exporter.#escapeRTF(marker.info)}: `
-                            : ""
-                        }${Exporter.#escapeRTF(
-                          _("Scheme_locationLatLong", {
-                            lat: marker.latLng.lat.toFixed(6),
-                            lng: marker.latLng.lng.toFixed(6),
-                          }),
-                        )}\\par\n`;
-                      });
-                    } else {
-                      rtf = `\\pard\\plain ${_("Scheme_locationNoMarkers")}\\par`;
-                    }
-                    return [
-                      {
-                        insert: rtf,
-                        isCooked: true,
-                        isBlock: true,
-                      },
-                    ];
-                    //TODO
-                  }
-                  break;
+                  ],
+                });
+                if (mapImages && mapImages[i + 1])
+                  r.push({
+                    type: "paragraph",
+                    content: [{ type: "image", content: mapImages[i + 1] }],
+                  });
               }
+              return r;
               break;
             // file
             case "schemeTypes_file":
-              return [
-                {
-                  insert: `${_("Scheme_fileName")}: ${
-                    content && content.filePath ? content.filePath : "---"
-                  }, ${_("Scheme_fileSize")}: ${
-                    content && content.id && theFiles[content.id]
-                      ? Util.formatBytes(theFiles[content.id].size)
-                      : "---"
-                  }, ${_("Scheme_fileTime")}: ${
-                    content && content.fileModtime
-                      ? new Timestamp(content.fileModtime).toLocalString(
-                          theSettings.effectiveSettings().dateTimeFormatLong,
-                        )
-                      : "---"
-                  }`,
-                },
-              ];
+              return {
+                type: "text",
+                content: `${_("Scheme_fileName")}: ${
+                  content && content.filePath ? content.filePath : "---"
+                }, ${_("Scheme_fileSize")}: ${
+                  content && content.id && theFiles[content.id]
+                    ? Util.formatBytes(theFiles[content.id].size)
+                    : "---"
+                }, ${_("Scheme_fileTime")}: ${
+                  content && content.fileModtime
+                    ? new Timestamp(content.fileModtime).toLocalString(
+                        theSettings.effectiveSettings().dateTimeFormatLong,
+                      )
+                    : "---"
+                }`,
+              };
               break;
           }
       },
@@ -1338,7 +880,7 @@ class Exporter {
             "exportWindow_typeDOCX",
             "json",
           ],
-          default: "txt",
+          default: "html",
         },
         {
           name: "documentEditor",
@@ -1597,38 +1139,39 @@ class Exporter {
   /**
    * build css style for given formats
    *
-   * @param {String} id
+   * @param {String} domID id of stylesheet
    * @param {Object} formats
    * @returns {String}
    */
-  static formats2CSS(id, formats) {
-    let formatCSS = `<style id="${id}">\n`;
-    for (let [id, format] of Object.entries(formats)) {
-      formatCSS += Formats.toCSS(
-        id,
-        format,
-        undefined,
-        undefined,
-        undefined,
-        true,
-      );
-    }
+  static formats2CSS(domID, formats) {
+    let formatCSS = `<style id="${domID}">\n`;
+    Object.keys(formats).forEach(
+      (id) =>
+        (formatCSS += Formats.toCSS(
+          id,
+          theFormats.getFormat(id),
+          undefined,
+          undefined,
+          undefined,
+          true,
+        )),
+    );
     return formatCSS + "</style>\n";
   }
 
   /**
    * build css style for given objects
    *
-   * @param {String} id
+   * @param {String} domID
    * @param {Object} objects
    * @returns {String}
    */
-  static objects2CSS(id, objects) {
-    let objectCSS = `<style id="${id}">\n`;
-    for (let [id, object] of Object.entries(objects)) {
-      objectCSS += `.object${id}-true { ${object.toCSS("text")} }\n`;
-      objectCSS += `.object${id}-true img { ${object.toCSS("image")} }\n`;
-    }
+  static objects2CSS(domID, objects) {
+    let objectCSS = `<style id="${domID}">\n`;
+    Object.keys(objects).forEach((id) => {
+      objectCSS += `.object${id}-true { ${theObjectTree.getObject(id).toCSS("text")} }\n`;
+      objectCSS += `.object${id}-true img { ${theObjectTree.getObject(id).toCSS("image")} }\n`;
+    });
     return objectCSS + "</style>\n";
   }
 
@@ -1640,7 +1183,7 @@ class Exporter {
   }
 
   /**
-   * remove quill format attributes with given ids from all editors in all profiles
+   * remove quill format attributes with given ids from all editors in all profiles (called when a format is deleted)
    *
    * @param {String[]} ids
    */
@@ -1725,12 +1268,17 @@ class Exporter {
                         theSettings.effectiveSettings().dateTimeFormatShort,
                       ),
                     ]);
-                    ipcRenderer.invoke("mainProcess_infoMessage", [
-                      _("mainWindow_exportComplete"),
-                      _("mainWindow_exportSuccess", {
-                        file: file,
-                      }),
-                    ]);
+                    ipcRenderer
+                      .invoke("mainProcess_yesNoDialog", [
+                        _("mainWindow_exportComplete"),
+                        _("mainWindow_exportSuccess", {
+                          file: file,
+                        }),
+                      ])
+                      .then((result) => {
+                        !result &&
+                          ipcRenderer.invoke("mainProcess_openPath", file);
+                      });
                   }
                 });
               }
@@ -1742,8 +1290,7 @@ class Exporter {
 
   exportForPrint() {
     this.#usedFonts = {};
-    this.#usedFormats = {};
-    this.#usedFormats[UUID0] = theFormats.formats[UUID0];
+    this.#usedFormats = { [UUID0]: true };
     this.#usedObjects = {};
 
     return new Promise((resolve) => {
@@ -1758,22 +1305,13 @@ class Exporter {
           },
         ],
       };
-      profile.objectEditor = { ops: [] };
-      profile.objectEndEditor = { ops: [] };
-      profile.objectStartEditor = { ops: [] };
-      profile.objectPropertiesEditor = { ops: [] };
+      profile.objectEditor = { ops: [{insert:"\n"}] };
+      profile.objectEndEditor = { ops: [{ insert: "\n" }] };
+      profile.objectStartEditor = { ops: [{ insert: "\n" }] };
+      profile.objectPropertiesEditor = { ops: [{ insert: "\n" }] };
 
       this.#export(profile).then((result) => {
-        Object.values(this.#usedFormats).forEach((format) => {
-          if (format.formats_fontFamily) {
-            this.#usedFonts[format.formats_fontFamily] = true;
-          }
-        });
-        Object.values(this.#usedObjects).forEach((object) => {
-          if (object.styleProperties.formats_fontFamily) {
-            this.#usedFonts[object.styleProperties.formats_fontFamily] = true;
-          }
-        });
+        // resolve as html head, html body
         resolve([
           `${Exporter.formats2CSS(
             "formatSheet",
@@ -1796,14 +1334,7 @@ class Exporter {
    */
   export(profile, preview) {
     this.#usedFonts = {};
-    this.#usedFormats = {};
-    this.#usedFormats[UUID0] =
-      profile.exportType == "txt"
-        ? {
-            formats_fontFamily: "'monospace'",
-            formats_fontSize: 12,
-          }
-        : theFormats.formats[UUID0];
+    this.#usedFormats = { [UUID0]: true };
     this.#usedObjects = {};
     // rtf related tables
     this.#colorTable = ["#000000"];
@@ -1814,14 +1345,16 @@ class Exporter {
       ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
       this.#export(profile).then((result) => {
         ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
-        Object.values(this.#usedFormats).forEach((format) => {
-          if (format.formats_fontFamily) {
-            this.#usedFonts[format.formats_fontFamily] = true;
+        Object.keys(this.#usedFormats).forEach((id) => {
+          if (theFormats.getFormat(id).formats_fontFamily) {
+            this.#usedFonts[theFormats.getFormat(id).formats_fontFamily] = true;
           }
         });
-        Object.values(this.#usedObjects).forEach((object) => {
-          if (object.styleProperties.formats_fontFamily) {
-            this.#usedFonts[object.styleProperties.formats_fontFamily] = true;
+        Object.keys(this.#usedObjects).forEach((id) => {
+          if (theObjectTree.getObject(id).styleProperties.formats_fontFamily) {
+            this.#usedFonts[
+              theObjectTree.getObject(id).styleProperties.formats_fontFamily
+            ] = true;
           }
         });
         ipcRenderer.invoke("mainProcess_openWindow", [
@@ -1847,18 +1380,30 @@ class Exporter {
             result,
             profile,
             Object.keys(this.#usedFonts),
-            this.#usedFormats,
+            Object.fromEntries(
+              Object.keys(this.#usedFormats).map((id) => [
+                id,
+                profile.exportType == "txt" && id == UUID0
+                  ? {
+                      formats_fontFamily: "'monospace'",
+                      formats_fontSize: 12,
+                    }
+                  : theFormats.getFormat(id),
+              ]),
+            ),
             // transport only styleProps, as complex objs cannot be handed over (or only as JSON)
             Object.fromEntries(
-              Object.entries(this.#usedObjects).map(([k, v]) => [
-                k,
-                v.styleProperties,
+              Object.keys(this.#usedObjects).map((id) => [
+                id,
+                theObjectTree.getObject(id).styleProperties,
               ]),
             ),
           ],
         ]);
       });
-    } else {
+    }
+    // real export, no preview
+    else {
       ipcRenderer
         .invoke("mainProcess_fileSaveDialog", [
           {
@@ -1891,6 +1436,49 @@ class Exporter {
                         Exporter.#exportFileFinal(fd, file, profile);
                       });
                       break;
+
+                    case "html":
+                      ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
+                      this.#export(profile).then((result) => {
+                        ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
+                        fs.writeSync(
+                          fd,
+                          `<html><meta charset="utf-8"><meta name="author" content="${Util.escapeHTML(
+                            theProperties.author,
+                          )}"><meta name="description" content="${Util.escapeHTML(
+                            theProperties.info,
+                          )}"><meta name="generator" content="${theProgramLongName} (${theProgramID})"><head><title>${Util.escapeHTML(
+                            _("mainWindow_exportTitle", {
+                              title:
+                                theProperties.fulltitle || theProgramLongName,
+                              time: new Timestamp().toLocalString(
+                                theSettings.effectiveSettings()
+                                  .dateTimeFormatShort,
+                              ),
+                            }),
+                          )}</title>`,
+                        );
+                        fs.writeSync(
+                          fd,
+                          Exporter.formats2CSS(
+                            "formatSheet",
+                            this.#usedFormats,
+                          ),
+                        );
+                        fs.writeSync(
+                          fd,
+                          Exporter.objects2CSS(
+                            "objectSheet",
+                            this.#usedObjects,
+                          ),
+                        );
+                        fs.writeSync(fd, `</head>\n<body>\n`);
+                        fs.writeSync(fd, result);
+                        fs.writeSync(fd, "</body></html>");
+                        Exporter.#exportFileFinal(fd, file, profile);
+                      });
+                      break;
+
                     case "rtf":
                       fs.writeSync(fd, `{\\rtf1\\ansi\n`);
                       ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
@@ -1911,58 +1499,6 @@ class Exporter {
                         );
                         fs.writeSync(fd, result);
                         fs.writeSync(fd, "}");
-                        Exporter.#exportFileFinal(fd, file, profile);
-                      });
-                      break;
-                    case "html":
-                      fs.writeSync(
-                        fd,
-                        `<html><meta charset="utf-8"><meta name="author" content="${Util.escapeHTML(
-                          theProperties.author,
-                        )}"><meta name="description" content="${Util.escapeHTML(
-                          theProperties.info,
-                        )}"><meta name="generator" content="${theProgramLongName} (${theProgramID})"><head><title>${Util.escapeHTML(
-                          _("mainWindow_exportTitle", {
-                            title:
-                              theProperties.fulltitle || theProgramLongName,
-                            time: new Timestamp().toLocalString(
-                              theSettings.effectiveSettings()
-                                .dateTimeFormatShort,
-                            ),
-                          }),
-                        )}</title></head>\n<body>\n`,
-                      );
-                      ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
-                      this.#export(profile).then((result) => {
-                        ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
-                        fs.writeSync(fd, result);
-                        Object.values(this.#usedFormats).forEach((format) => {
-                          if (format.formats_fontFamily) {
-                            this.#usedFonts[format.formats_fontFamily] = true;
-                          }
-                        });
-                        Object.values(this.#usedObjects).forEach((object) => {
-                          if (object.styleProperties.formats_fontFamily) {
-                            this.#usedFonts[
-                              object.styleProperties.formats_fontFamily
-                            ] = true;
-                          }
-                        });
-                        fs.writeSync(
-                          fd,
-                          Exporter.formats2CSS(
-                            "formatSheet",
-                            this.#usedFormats,
-                          ),
-                        );
-                        fs.writeSync(
-                          fd,
-                          Exporter.objects2CSS(
-                            "objectSheet",
-                            this.#usedObjects,
-                          ),
-                        );
-                        fs.writeSync(fd, "</body></html>");
                         Exporter.#exportFileFinal(fd, file, profile);
                       });
                       break;
@@ -2123,12 +1659,14 @@ class Exporter {
       // texts
       let textsExport = [];
       useTexts.forEach((textID) => {
-        let textContents = Exporter.#textContentPlacegiver1(
+        let [textContents, formats, objects] = Exporter.#textContentPlacegiver(
           theTextTree.getText(textID).delta,
           useTextObjects,
           profile.objectStartEditor.ops,
           profile.objectEndEditor.ops,
         );
+        Object.assign(this.#usedFormats, formats);
+        Object.assign(this.#usedObjects, objects);
         console.log({ textContents });
         if (textContents.length || !profile.ignoreEmptyTexts) {
           // each (non empty) text
@@ -2142,666 +1680,496 @@ class Exporter {
         }
       });
 
-      // document
-      let documentExport = Exporter.#documentPlacegiver1(
-        profile.documentEditor.ops,
-        documentStatistics,
-        textsExport,
-        [], //objectsExport,
-      );
-      let jsonExport = Exporter.#deltaToJSON(documentExport);
-
-      switch (profile.exportType) {
-        case "json":
-          resolve(JSON.stringify(jsonExport, null, "  "));
-          break;
-        case "txt":
-          resolve(Exporter.#jsonToText(jsonExport));
-          break;
-        case "html":
-          resolve(Exporter.#jsonToHTML(jsonExport));
-          break;
-          //   // texts
-          //   let textsExport = [];
-          //   useTexts.forEach((textID) => {
-          //     let [textContents, trailingNewLine] =
-          //       Exporter.#textContentPlacegiver(
-          //         profile.exportType,
-          //         theTextTree.getText(textID).delta,
-          //         useTextObjects,
-          //         profile.objectStartEditor.ops,
-          //         profile.objectEndEditor.ops,
-          //       );
-          //     // each (non empty) text
-          //     if (textContents.length || !profile.ignoreEmptyTexts) {
-          //       textsExport.push(
-          //         ...Exporter.#textPlacegiver(
-          //           profile.exportType,
-          //           trailingNewLine
-          //             ? profile.textEditor.ops.slice(
-          //                 0,
-          //                 profile.textEditor.ops.length - 1,
-          //               )
-          //             : profile.textEditor.ops,
-          //           textID,
-          //           textContents,
-          //         ),
-          //       );
-          //     }
-          //   });
-
-          //   // objects and their properties
-          //   let objectsExport = [];
-          //   useObjects.forEach((objectID) => {
-          //     let objectContent = [];
-          //     let propertyNames = [];
-          //     let propertyTypes = [];
-          //     let propertyContents = [];
-          //     // objects properties: iterate all properties (including those inherited by parent objects)
-          //     theObjectTree.getParents(objectID, false).forEach((oID) => {
-          //       theObjectTree.getObject(oID).scheme.forEach((item) => {
-          //         let props = theObjectTree.getObject(objectID).properties;
-          //         if (props && props[oID] && props[oID][item.id]) {
-          //           objectContent.push(
-          //             ...this.#propertiesPlacegiver(
-          //               profile.objectPropertiesEditor.ops,
-          //               item,
-          //               profile.exportType,
-          //               props[oID][item.id],
-          //             ),
-          //           );
-          //           // elements necessary for tabled export
-          //           propertyNames.push(
-          //             Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-          //               item,
-          //             ),
-          //           );
-          //           propertyTypes.push(
-          //             Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-          //               item,
-          //             ),
-          //           );
-          //           propertyContents.push(
-          //             Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-          //               item,
-          //               this,
-          //               profile.exportType,
-          //               props[oID][item.id],
-          //             ),
-          //           );
-          //         }
-          //       });
-          //     });
-          //     // reverse object relations
-          //     theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-          //       objectContent.push(
-          //         ...this.#propertiesPlacegiver(
-          //           profile.objectPropertiesEditor.ops,
-          //           revRel,
-          //           profile.exportType,
-          //           revRel.content,
-          //         ),
-          //       );
-          //       // for tabled export
-          //       propertyNames.push(
-          //         Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-          //           revRel,
-          //         ),
-          //       );
-          //       propertyTypes.push(
-          //         Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-          //           revRel,
-          //         ),
-          //       );
-          //       propertyContents.push(
-          //         Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-          //           revRel,
-          //           this,
-          //           profile.exportType,
-          //           revRel.content,
-          //         ),
-          //       );
-          //     });
-
-          //     objectsExport.push(
-          //       ...this.#objectPlacegiver(
-          //         profile.objectEditor.ops,
-          //         objectID,
-          //         profile.exportType,
-          //         objectContent,
-          //         useCitationTexts,
-          //         propertyNames,
-          //         propertyTypes,
-          //         propertyContents,
-          //       ),
-          //     );
-          //   });
-
-          //   // document
-          //   let documentExport = Exporter.#documentPlacegiver(
-          //     profile.documentEditor.ops,
-          //     profile.exportType,
-          //     documentStatistics,
-          //     textsExport,
-          //     objectsExport,
-          //   );
-          //   resolve(Exporter.#deltaToText(documentExport));
-          // }
-
-        // case "html":
-        //   {
-        //     // texts
-        //     let textsExport = [];
-        //     useTexts.forEach((textID) => {
-        //       let [textContents, trailingNewLine] =
-        //         Exporter.#textContentPlacegiver(
-        //           profile.exportType,
-        //           theTextTree.getText(textID).delta,
-        //           useTextObjects,
-        //           profile.objectStartEditor.ops,
-        //           profile.objectEndEditor.ops,
-        //         );
-        //       // each (non empty) text
-        //       if (textContents.length || !profile.ignoreEmptyTexts) {
-        //         textsExport.push(
-        //           ...Exporter.#textPlacegiver(
-        //             profile.exportType,
-        //             trailingNewLine
-        //               ? profile.textEditor.ops.slice(
-        //                   0,
-        //                   profile.textEditor.ops.length - 1,
-        //                 )
-        //               : profile.textEditor.ops,
-        //             textID,
-        //             textContents,
-        //           ),
-        //         );
-        //       }
-        //     });
-
-        //     // raster the maps
-        //     let rasteredMaps = {};
-        //     let promises = [];
-        //     if (Exporter.#doExportProperties(profile)) {
-        //       useObjects.forEach((objectID) => {
-        //         theObjectTree.getParents(objectID, false).forEach((oID) => {
-        //           theObjectTree.getObject(oID).scheme.forEach((item) => {
-        //             if (item.type == "schemeTypes_map") {
-        //               let props = theObjectTree.getObject(objectID).properties;
-        //               if (props && props[oID] && props[oID][item.id]) {
-        //                 promises.push(
-        //                   Exporter.#rasterize(
-        //                     rasteredMaps,
-        //                     objectID,
-        //                     item.id,
-        //                     props[oID][item.id],
-        //                   ),
-        //                 );
-        //               }
-        //             }
-        //           });
-        //         });
-        //       });
-        //     }
-        //     Promise.allSettled(promises).then(() => {
-        //       let objectsExport = [];
-        //       useObjects.forEach((objectID) => {
-        //         let objectContent = [];
-        //         let propertyNames = [];
-        //         let propertyTypes = [];
-        //         let propertyContents = [];
-        //         // objects properties: iterate all properties (including those inherited by parent objects)
-        //         theObjectTree.getParents(objectID, false).forEach((oID) => {
-        //           theObjectTree.getObject(oID).scheme.forEach((item) => {
-        //             let props = theObjectTree.getObject(objectID).properties;
-        //             if (props && props[oID] && props[oID][item.id]) {
-        //               let mapImages = null;
-        //               if (
-        //                 rasteredMaps &&
-        //                 rasteredMaps[objectID] &&
-        //                 rasteredMaps[objectID][item.id]
-        //               ) {
-        //                 mapImages = rasteredMaps[objectID][item.id];
-        //               }
-        //               objectContent.push(
-        //                 ...this.#propertiesPlacegiver(
-        //                   profile.objectPropertiesEditor.ops,
-        //                   item,
-        //                   profile.exportType,
-        //                   props[oID][item.id],
-        //                   mapImages,
-        //                 ),
-        //               );
-        //               // elements necessary for tabled export
-        //               propertyNames.push(
-        //                 Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-        //                   item,
-        //                 ),
-        //               );
-        //               propertyTypes.push(
-        //                 Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-        //                   item,
-        //                 ),
-        //               );
-        //               propertyContents.push(
-        //                 Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-        //                   item,
-        //                   this,
-        //                   profile.exportType,
-        //                   props[oID][item.id],
-        //                   mapImages,
-        //                 ),
-        //               );
-        //             }
-        //           });
-        //         });
-        //         // reverse object relations
-        //         theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-        //           objectContent.push(
-        //             ...this.#propertiesPlacegiver(
-        //               profile.objectPropertiesEditor.ops,
-        //               revRel,
-        //               profile.exportType,
-        //               revRel.content,
-        //               null,
-        //             ),
-        //           );
-        //           // for tabled export
-        //           propertyNames.push(
-        //             Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-        //               revRel,
-        //             ),
-        //           );
-        //           propertyTypes.push(
-        //             Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-        //               revRel,
-        //             ),
-        //           );
-        //           propertyContents.push(
-        //             Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-        //               revRel,
-        //               this,
-        //               profile.exportType,
-        //               revRel.content,
-        //               null,
-        //             ),
-        //           );
-        //         });
-
-        //         objectsExport.push(
-        //           ...this.#objectPlacegiver(
-        //             profile.objectEditor.ops,
-        //             objectID,
-        //             profile.exportType,
-        //             objectContent,
-        //             useCitationTexts,
-        //             propertyNames,
-        //             propertyTypes,
-        //             propertyContents,
-        //           ),
-        //         );
-        //       });
-
-        //       // document
-        //       resolve(
-        //         Exporter.deltaToHTML(
-        //           Exporter.#documentPlacegiver(
-        //             profile.documentEditor.ops,
-        //             profile.exportType,
-        //             documentStatistics,
-        //             textsExport,
-        //             objectsExport,
-        //           ),
-        //           profile.textFormats ? this.#usedFormats : null,
-        //           profile.objectFormats ? this.#usedObjects : null,
-        //         ),
-        //       );
-        //     });
-        //   }
-        //   break;
-
-        case "rtf":
-          {
-            // texts
-            let textsExport = [];
-            useTexts.forEach((textID) => {
-              let [textContents, trailingNewLine] =
-                Exporter.#textContentPlacegiver(
-                  profile.exportType,
-                  theTextTree.getText(textID).delta,
-                  useTextObjects,
-                  profile.objectStartEditor.ops,
-                  profile.objectEndEditor.ops,
-                );
-              // each (non empty) text
-              if (textContents.length || !profile.ignoreEmptyTexts) {
-                textsExport.push(
-                  ...Exporter.#textPlacegiver(
-                    profile.exportType,
-                    trailingNewLine
-                      ? profile.textEditor.ops.slice(
-                          0,
-                          profile.textEditor.ops.length - 1,
-                        )
-                      : profile.textEditor.ops,
-                    textID,
-                    textContents,
-                  ),
-                );
+      // objects and their properties
+      let rasteredMaps = {};
+      let promises = [];
+      // raster the maps (if they are exported)
+      if (Exporter.#doExportProperties(profile)) {
+        useObjects.forEach((objectID) => {
+          theObjectTree.getParents(objectID, false).forEach((oID) => {
+            theObjectTree.getObject(oID).scheme.forEach((item) => {
+              if (item.type == "schemeTypes_map") {
+                let props = theObjectTree.getObject(objectID).properties;
+                if (props && props[oID] && props[oID][item.id]) {
+                  promises.push(
+                    Exporter.#rasterize(
+                      rasteredMaps,
+                      objectID,
+                      item.id,
+                      props[oID][item.id],
+                    ),
+                  );
+                }
               }
             });
-
-            // objects and their properties -- first determine if object properties will be exported as some preliminary steps (such as rasterizing maps) would then be necessary
-            // raster the maps
-            let rasteredMaps = {};
-            let promises = [];
-            if (Exporter.#doExportProperties(profile)) {
-              useObjects.forEach((objectID) => {
-                theObjectTree.getParents(objectID, false).forEach((oID) => {
-                  theObjectTree.getObject(oID).scheme.forEach((item) => {
-                    if (item.type == "schemeTypes_map") {
-                      let props = theObjectTree.getObject(objectID).properties;
-                      if (props && props[oID] && props[oID][item.id]) {
-                        promises.push(
-                          Exporter.#rasterize(
-                            rasteredMaps,
-                            objectID,
-                            item.id,
-                            props[oID][item.id],
-                          ),
-                        );
-                      }
-                    }
-                  });
-                });
-              });
-            }
-            Promise.allSettled(promises).then(() => {
-              let objectsExport = [];
-              useObjects.forEach((objectID) => {
-                let objectContent = [];
-                let propertyNames = [];
-                let propertyTypes = [];
-                let propertyContents = [];
-                // objects properties: iterate all properties (including those inherited by parent objects)
-                theObjectTree.getParents(objectID, false).forEach((oID) => {
-                  theObjectTree.getObject(oID).scheme.forEach((item) => {
-                    let props = theObjectTree.getObject(objectID).properties;
-                    if (props && props[oID] && props[oID][item.id]) {
-                      let mapImages = null;
-                      if (
-                        rasteredMaps &&
-                        rasteredMaps[objectID] &&
-                        rasteredMaps[objectID][item.id]
-                      ) {
-                        mapImages = rasteredMaps[objectID][item.id];
-                      }
-                      objectContent.push(
-                        ...this.#propertiesPlacegiver(
-                          profile.objectPropertiesEditor.ops,
-                          item,
-                          profile.exportType,
-                          props[oID][item.id],
-                          mapImages,
-                        ),
-                      );
-                      // elements necessary for tabled export
-                      propertyNames.push(
-                        Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                          item,
-                        ),
-                      );
-                      propertyTypes.push(
-                        Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                          item,
-                        ),
-                      );
-                      propertyContents.push(
-                        Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                          item,
-                          this,
-                          profile.exportType,
-                          props[oID][item.id],
-                          mapImages,
-                        ),
-                      );
-                    }
-                  });
-                });
-                // reverse object relations
-                theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-                  objectContent.push(
-                    ...this.#propertiesPlacegiver(
-                      profile.objectPropertiesEditor.ops,
-                      revRel,
-                      profile.exportType,
-                      revRel.content,
-                    ),
-                  );
-                  // for tabled export
-                  propertyNames.push(
-                    Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                      revRel,
-                    ),
-                  );
-                  propertyTypes.push(
-                    Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                      revRel,
-                    ),
-                  );
-                  propertyContents.push(
-                    Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                      revRel,
-                      this,
-                      profile.exportType,
-                      revRel.content,
-                    ),
-                  );
-                });
-
-                objectsExport.push(
-                  ...this.#objectPlacegiver(
-                    profile.objectEditor.ops,
-                    objectID,
-                    profile.exportType,
-                    objectContent,
-                    useCitationTexts,
-                    propertyNames,
-                    propertyTypes,
-                    propertyContents,
-                  ),
-                );
-              });
-
-              // document
-              resolve(
-                this.#deltaToRTF(
-                  Exporter.#documentPlacegiver(
-                    profile.documentEditor.ops,
-                    profile.exportType,
-                    documentStatistics,
-                    textsExport,
-                    objectsExport,
-                  ),
-                  profile.textFormats,
-                  profile.objectFormats,
-                ),
-              );
-            });
-          }
-          break;
-
-        case "docx":
-          {
-            // texts
-            let textsExport = [];
-            useTexts.forEach((textID) => {
-              let [textContents, trailingNewLine] =
-                Exporter.#textContentPlacegiver(
-                  profile.exportType,
-                  theTextTree.getText(textID).delta,
-                  useTextObjects,
-                  profile.objectStartEditor.ops,
-                  profile.objectEndEditor.ops,
-                );
-              if (textContents.length || !profile.ignoreEmptyTexts) {
-                // each (non empty) text
-                textsExport.push(
-                  ...Exporter.#textPlacegiver(
-                    profile.exportType,
-                    trailingNewLine
-                      ? profile.textEditor.ops.slice(
-                          0,
-                          profile.textEditor.ops.length - 1,
-                        )
-                      : profile.textEditor.ops,
-                    textID,
-                    textContents,
-                  ),
-                );
-              }
-            });
-
-            // objects and their properties -- first determine if object properties will be exported as some preliminary steps (such as rasterizing maps) would then be necessary
-            // raster the maps
-            let rasteredMaps = {};
-            let promises = [];
-            if (Exporter.#doExportProperties(profile)) {
-              useObjects.forEach((objectID) => {
-                theObjectTree.getParents(objectID, false).forEach((oID) => {
-                  theObjectTree.getObject(oID).scheme.forEach((item) => {
-                    if (item.type == "schemeTypes_map") {
-                      let props = theObjectTree.getObject(objectID).properties;
-                      if (props && props[oID] && props[oID][item.id]) {
-                        promises.push(
-                          Exporter.#rasterize(
-                            rasteredMaps,
-                            objectID,
-                            item.id,
-                            props[oID][item.id],
-                          ),
-                        );
-                      }
-                    }
-                  });
-                });
-              });
-            }
-            Promise.allSettled(promises).then(() => {
-              let objectsExport = [];
-              useObjects.forEach((objectID) => {
-                let objectContent = [];
-                let propertyNames = [];
-                let propertyTypes = [];
-                let propertyContents = [];
-                // objects properties: iterate all properties (including those inherited by parent objects)
-                theObjectTree.getParents(objectID, false).forEach((oID) => {
-                  theObjectTree.getObject(oID).scheme.forEach((item) => {
-                    let props = theObjectTree.getObject(objectID).properties;
-                    if (props && props[oID] && props[oID][item.id]) {
-                      let mapImages = null;
-                      if (
-                        rasteredMaps &&
-                        rasteredMaps[objectID] &&
-                        rasteredMaps[objectID][item.id]
-                      ) {
-                        mapImages = rasteredMaps[objectID][item.id];
-                      }
-                      objectContent.push(
-                        ...this.#propertiesPlacegiver(
-                          profile.objectPropertiesEditor.ops,
-                          item,
-                          profile.exportType,
-                          props[oID][item.id],
-                          mapImages,
-                        ),
-                      );
-                      // elements necessary for tabled export
-                      propertyNames.push(
-                        Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                          item,
-                        ),
-                      );
-                      propertyTypes.push(
-                        Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                          item,
-                        ),
-                      );
-                      propertyContents.push(
-                        Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                          item,
-                          this,
-                          profile.exportType,
-                          props[oID][item.id],
-                          mapImages,
-                        ),
-                      );
-                    }
-                  });
-                });
-                // reverse object relations
-                theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-                  objectContent.push(
-                    ...this.#propertiesPlacegiver(
-                      profile.objectPropertiesEditor.ops,
-                      revRel,
-                      profile.exportType,
-                      revRel.content,
-                    ),
-                  );
-                  // for tabled export
-                  propertyNames.push(
-                    Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                      revRel,
-                    ),
-                  );
-                  propertyTypes.push(
-                    Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                      revRel,
-                    ),
-                  );
-                  propertyContents.push(
-                    Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                      revRel,
-                      this,
-                      profile.exportType,
-                      revRel.content,
-                    ),
-                  );
-                });
-
-                objectsExport.push(
-                  ...this.#objectPlacegiver(
-                    profile.objectEditor.ops,
-                    objectID,
-                    profile.exportType,
-                    objectContent,
-                    useCitationTexts,
-                    propertyNames,
-                    propertyTypes,
-                    propertyContents,
-                  ),
-                );
-              });
-
-              // document
-              resolve(
-                this.#deltaToDocx(
-                  Exporter.#documentPlacegiver(
-                    profile.documentEditor.ops,
-                    profile.exportType,
-                    documentStatistics,
-                    textsExport,
-                    objectsExport,
-                  ),
-                  profile.textFormats,
-                  profile.objectFormats,
-                ),
-              );
-            });
-          }
-          break;
+          });
+        });
       }
+      Promise.allSettled(promises).then(() => {
+        let objectsExport = [];
+        useObjects.forEach((objectID) => {
+          let objectContent = [];
+          let propertyNames = [];
+          let propertyTypes = [];
+          let propertyContents = [];
+          // objects properties: iterate all properties (including those inherited by parent objects)
+          theObjectTree.getParents(objectID, false).forEach((oID) => {
+            theObjectTree.getObject(oID).scheme.forEach((item) => {
+              let mapImages = null;
+              if (
+                rasteredMaps &&
+                rasteredMaps[objectID] &&
+                rasteredMaps[objectID][item.id]
+              )
+                mapImages = rasteredMaps[objectID][item.id];
+              let props = theObjectTree.getObject(objectID).properties;
+              if (props && props[oID] && props[oID][item.id])
+                objectContent.push(
+                  Exporter.#propertiesPlacegiver(
+                    profile.objectPropertiesEditor.ops,
+                    item,
+                    props[oID][item.id],
+                    mapImages,
+                  ),
+                );
+              // elements necessary for tabled export
+              if (
+                (props && props[oID] && props[oID][item.id]) ||
+                item.type == "schemeTypes_header"
+              )
+                propertyNames.push(
+                  Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                    item,
+                  ),
+                );
+              propertyTypes.push(
+                Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                  item,
+                ),
+              );
+              propertyContents.push(
+                Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                  item,
+                  props[oID][item.id],
+                  mapImages,
+                ),
+              );
+            });
+          });
+          // reverse object relations
+          theObjectTree.reverseRelations(objectID).forEach((revRel) => {
+            objectContent.push(
+              Exporter.#propertiesPlacegiver(
+                profile.objectPropertiesEditor.ops,
+                revRel,
+                revRel.content,
+              ),
+            );
+            // for tabled export
+            propertyNames.push(
+              Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                revRel,
+              ),
+            );
+            propertyTypes.push(
+              Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                revRel,
+              ),
+            );
+            propertyContents.push(
+              Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                revRel,
+                revRel.content,
+              ),
+            );
+          });
+
+          objectsExport.push(
+            Exporter.#objectPlacegiver(
+              profile.objectEditor.ops,
+              objectID,
+              objectContent,
+              useCitationTexts,
+              propertyNames,
+              propertyTypes,
+              propertyContents,
+            ),
+          );
+        });
+
+        // document
+        let documentExport = Exporter.#documentPlacegiver1(
+          profile.documentEditor.ops,
+          documentStatistics,
+          textsExport,
+          objectsExport,
+        );
+
+        // JSON
+        let [jsonExport, formats, objects] =
+          Exporter.#deltaToJSON(documentExport);
+        Object.assign(this.#usedFormats, formats);
+        Object.assign(this.#usedObjects, objects);
+        console.log("usedFormats", this.#usedFormats);
+        console.log("usedObjects", this.#usedObjects);
+
+        switch (profile.exportType) {
+          case "json":
+            resolve(JSON.stringify(jsonExport, null, "  "));
+            break;
+          case "txt":
+            resolve(Exporter.#JSON2Text(jsonExport));
+            break;
+          case "html":
+            resolve(Exporter.#JSON2HTML(jsonExport));
+            break;
+          /*
+          case "rtf":
+            {
+              // texts
+              let textsExport = [];
+              useTexts.forEach((textID) => {
+                let [textContents, trailingNewLine] =
+                  Exporter.#textContentPlacegiver(
+                    profile.exportType,
+                    theTextTree.getText(textID).delta,
+                    useTextObjects,
+                    profile.objectStartEditor.ops,
+                    profile.objectEndEditor.ops,
+                  );
+                // each (non empty) text
+                if (textContents.length || !profile.ignoreEmptyTexts) {
+                  textsExport.push(
+                    ...Exporter.#textPlacegiver(
+                      profile.exportType,
+                      trailingNewLine
+                        ? profile.textEditor.ops.slice(
+                            0,
+                            profile.textEditor.ops.length - 1,
+                          )
+                        : profile.textEditor.ops,
+                      textID,
+                      textContents,
+                    ),
+                  );
+                }
+              });
+
+              // objects and their properties -- first determine if object properties will be exported as some preliminary steps (such as rasterizing maps) would then be necessary
+              // raster the maps
+              let rasteredMaps = {};
+              let promises = [];
+              if (Exporter.#doExportProperties(profile)) {
+                useObjects.forEach((objectID) => {
+                  theObjectTree.getParents(objectID, false).forEach((oID) => {
+                    theObjectTree.getObject(oID).scheme.forEach((item) => {
+                      if (item.type == "schemeTypes_map") {
+                        let props =
+                          theObjectTree.getObject(objectID).properties;
+                        if (props && props[oID] && props[oID][item.id]) {
+                          promises.push(
+                            Exporter.#rasterize(
+                              rasteredMaps,
+                              objectID,
+                              item.id,
+                              props[oID][item.id],
+                            ),
+                          );
+                        }
+                      }
+                    });
+                  });
+                });
+              }
+              Promise.allSettled(promises).then(() => {
+                let objectsExport = [];
+                useObjects.forEach((objectID) => {
+                  let objectContent = [];
+                  let propertyNames = [];
+                  let propertyTypes = [];
+                  let propertyContents = [];
+                  // objects properties: iterate all properties (including those inherited by parent objects)
+                  theObjectTree.getParents(objectID, false).forEach((oID) => {
+                    theObjectTree.getObject(oID).scheme.forEach((item) => {
+                      let props = theObjectTree.getObject(objectID).properties;
+                      if (props && props[oID] && props[oID][item.id]) {
+                        let mapImages = null;
+                        if (
+                          rasteredMaps &&
+                          rasteredMaps[objectID] &&
+                          rasteredMaps[objectID][item.id]
+                        ) {
+                          mapImages = rasteredMaps[objectID][item.id];
+                        }
+                        objectContent.push(
+                          ...this.#propertiesPlacegiver(
+                            profile.objectPropertiesEditor.ops,
+                            item,
+                            profile.exportType,
+                            props[oID][item.id],
+                            mapImages,
+                          ),
+                        );
+                        // elements necessary for tabled export
+                        propertyNames.push(
+                          Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                            item,
+                          ),
+                        );
+                        propertyTypes.push(
+                          Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                            item,
+                          ),
+                        );
+                        propertyContents.push(
+                          Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                            item,
+                            this,
+                            profile.exportType,
+                            props[oID][item.id],
+                            mapImages,
+                          ),
+                        );
+                      }
+                    });
+                  });
+                  // reverse object relations
+                  theObjectTree.reverseRelations(objectID).forEach((revRel) => {
+                    objectContent.push(
+                      ...this.#propertiesPlacegiver(
+                        profile.objectPropertiesEditor.ops,
+                        revRel,
+                        profile.exportType,
+                        revRel.content,
+                      ),
+                    );
+                    // for tabled export
+                    propertyNames.push(
+                      Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                        revRel,
+                      ),
+                    );
+                    propertyTypes.push(
+                      Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                        revRel,
+                      ),
+                    );
+                    propertyContents.push(
+                      Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                        revRel,
+                        this,
+                        profile.exportType,
+                        revRel.content,
+                      ),
+                    );
+                  });
+
+                  objectsExport.push(
+                    ...this.#objectPlacegiver(
+                      profile.objectEditor.ops,
+                      objectID,
+                      profile.exportType,
+                      objectContent,
+                      useCitationTexts,
+                      propertyNames,
+                      propertyTypes,
+                      propertyContents,
+                    ),
+                  );
+                });
+
+                // document
+                resolve(
+                  this.#deltaToRTF(
+                    Exporter.#documentPlacegiver(
+                      profile.documentEditor.ops,
+                      profile.exportType,
+                      documentStatistics,
+                      textsExport,
+                      objectsExport,
+                    ),
+                    profile.textFormats,
+                    profile.objectFormats,
+                  ),
+                );
+              });
+            }
+            break;
+
+          case "docx":
+            {
+              // texts
+              let textsExport = [];
+              useTexts.forEach((textID) => {
+                let [textContents, trailingNewLine] =
+                  Exporter.#textContentPlacegiver(
+                    profile.exportType,
+                    theTextTree.getText(textID).delta,
+                    useTextObjects,
+                    profile.objectStartEditor.ops,
+                    profile.objectEndEditor.ops,
+                  );
+                if (textContents.length || !profile.ignoreEmptyTexts) {
+                  // each (non empty) text
+                  textsExport.push(
+                    ...Exporter.#textPlacegiver(
+                      profile.exportType,
+                      trailingNewLine
+                        ? profile.textEditor.ops.slice(
+                            0,
+                            profile.textEditor.ops.length - 1,
+                          )
+                        : profile.textEditor.ops,
+                      textID,
+                      textContents,
+                    ),
+                  );
+                }
+              });
+
+              // objects and their properties -- first determine if object properties will be exported as some preliminary steps (such as rasterizing maps) would then be necessary
+              // raster the maps
+              let rasteredMaps = {};
+              let promises = [];
+              if (Exporter.#doExportProperties(profile)) {
+                useObjects.forEach((objectID) => {
+                  theObjectTree.getParents(objectID, false).forEach((oID) => {
+                    theObjectTree.getObject(oID).scheme.forEach((item) => {
+                      if (item.type == "schemeTypes_map") {
+                        let props =
+                          theObjectTree.getObject(objectID).properties;
+                        if (props && props[oID] && props[oID][item.id]) {
+                          promises.push(
+                            Exporter.#rasterize(
+                              rasteredMaps,
+                              objectID,
+                              item.id,
+                              props[oID][item.id],
+                            ),
+                          );
+                        }
+                      }
+                    });
+                  });
+                });
+              }
+              Promise.allSettled(promises).then(() => {
+                let objectsExport = [];
+                useObjects.forEach((objectID) => {
+                  let objectContent = [];
+                  let propertyNames = [];
+                  let propertyTypes = [];
+                  let propertyContents = [];
+                  // objects properties: iterate all properties (including those inherited by parent objects)
+                  theObjectTree.getParents(objectID, false).forEach((oID) => {
+                    theObjectTree.getObject(oID).scheme.forEach((item) => {
+                      let props = theObjectTree.getObject(objectID).properties;
+                      if (props && props[oID] && props[oID][item.id]) {
+                        let mapImages = null;
+                        if (
+                          rasteredMaps &&
+                          rasteredMaps[objectID] &&
+                          rasteredMaps[objectID][item.id]
+                        ) {
+                          mapImages = rasteredMaps[objectID][item.id];
+                        }
+                        objectContent.push(
+                          ...this.#propertiesPlacegiver(
+                            profile.objectPropertiesEditor.ops,
+                            item,
+                            profile.exportType,
+                            props[oID][item.id],
+                            mapImages,
+                          ),
+                        );
+                        // elements necessary for tabled export
+                        propertyNames.push(
+                          Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                            item,
+                          ),
+                        );
+                        propertyTypes.push(
+                          Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                            item,
+                          ),
+                        );
+                        propertyContents.push(
+                          Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                            item,
+                            this,
+                            profile.exportType,
+                            props[oID][item.id],
+                            mapImages,
+                          ),
+                        );
+                      }
+                    });
+                  });
+                  // reverse object relations
+                  theObjectTree.reverseRelations(objectID).forEach((revRel) => {
+                    objectContent.push(
+                      ...this.#propertiesPlacegiver(
+                        profile.objectPropertiesEditor.ops,
+                        revRel,
+                        profile.exportType,
+                        revRel.content,
+                      ),
+                    );
+                    // for tabled export
+                    propertyNames.push(
+                      Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                        revRel,
+                      ),
+                    );
+                    propertyTypes.push(
+                      Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                        revRel,
+                      ),
+                    );
+                    propertyContents.push(
+                      Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                        revRel,
+                        this,
+                        profile.exportType,
+                        revRel.content,
+                      ),
+                    );
+                  });
+
+                  objectsExport.push(
+                    ...this.#objectPlacegiver(
+                      profile.objectEditor.ops,
+                      objectID,
+                      profile.exportType,
+                      objectContent,
+                      useCitationTexts,
+                      propertyNames,
+                      propertyTypes,
+                      propertyContents,
+                    ),
+                  );
+                });
+
+                // document
+                resolve(
+                  this.#deltaToDocx(
+                    Exporter.#documentPlacegiver(
+                      profile.documentEditor.ops,
+                      profile.exportType,
+                      documentStatistics,
+                      textsExport,
+                      objectsExport,
+                    ),
+                    profile.textFormats,
+                    profile.objectFormats,
+                  ),
+                );
+              });
+            }
+            break;
+          */
+        }
+      });
     });
   }
 
@@ -2813,6 +2181,7 @@ class Exporter {
    * @returns {Boolean}
    */
   static #doExportProperties(profile) {
+    if (profile.exportType == "txt") return false;
     for (let i = 0; i < profile.documentEditor.ops.length; i++) {
       let op = profile.documentEditor.ops[i];
       if (op.insert && op.insert.placeholder == "objsBlockPlaceholder") {
@@ -2863,7 +2232,7 @@ class Exporter {
     let ops = [];
     let blockBefore = false;
     documentPlaceholderOps.forEach((op) => {
-            let newOp = JSON.parse(JSON.stringify(op));
+      let newOp = JSON.parse(JSON.stringify(op));
       // after a block (textContent) insert, remove next "\n" to avoid an extra empty paragraph
       if (
         blockBefore &&
@@ -2996,14 +2365,13 @@ class Exporter {
    * substitute text content placeholder
    * @static
    *
-   * @param {String} exportType
    * @param {Object[]} textDelta text contents
    * @param {String[]} useObjects ids of objects to use for textObject placeholders
    * @param {Object[]} beforeObjectDelta
    * @param {Object[]} afterObjectDelta
-   * @returns {Object[]} substituted contents in dimOps
+   * @returns {[Object[], Object, Object]} json, formats, objects
    */
-  static #textContentPlacegiver1(
+  static #textContentPlacegiver(
     textDelta,
     useObjects,
     beforeObjectDelta,
@@ -3019,11 +2387,11 @@ class Exporter {
           if (attr.startsWith("object")) {
             let objectID = attr.slice(6);
             if (useObjects.includes(objectID)) {
-              beforeOps = Exporter.#objectTextPlacegiver1(
+              beforeOps = Exporter.#objectTextPlacegiver(
                 beforeObjectDelta,
                 objectID,
               );
-              afterOps = Exporter.#objectTextPlacegiver1(
+              afterOps = Exporter.#objectTextPlacegiver(
                 afterObjectDelta,
                 objectID,
               );
@@ -3037,54 +2405,7 @@ class Exporter {
       ops.push(...beforeOps, newOp, ...afterOps);
     });
 
-    let json = Exporter.#deltaToJSON(ops);
-    console.log("#textContentPlacegiver1", { ops }, { json });
-    return json;
-  }
-
-  static #textContentPlacegiver(
-    exportType,
-    textDelta,
-    useObjects,
-    beforeObjectDelta,
-    afterObjectDelta,
-  ) {
-    let dimOps = [];
-    textDelta.forEach((op) => {
-      let newOp = JSON.parse(JSON.stringify(op));
-      let beforeOps = [];
-      let afterOps = [];
-      if (op.attributes) {
-        Object.keys(op.attributes).forEach((attr) => {
-          if (attr.startsWith("object")) {
-            let objectID = attr.slice(6);
-            if (useObjects.includes(objectID)) {
-              beforeOps = Exporter.#objectTextPlacegiver(
-                beforeObjectDelta,
-                objectID,
-                exportType,
-              );
-              afterOps = Exporter.#objectTextPlacegiver(
-                afterObjectDelta,
-                objectID,
-                exportType,
-              );
-            } else {
-              // if this object is ignored, remove the attribute
-              delete newOp.attributes[attr];
-            }
-          }
-        });
-      }
-      dimOps.push(...beforeOps, newOp, ...afterOps);
-    });
-
-    return [
-      dimOps,
-      dimOps.length &&
-        typeof dimOps[dimOps.length - 1].insert != "object" &&
-        dimOps[dimOps.length - 1].insert.endsWith("\n"),
-    ];
+    return Exporter.#deltaToJSON(ops);
   }
 
   /**
@@ -3093,10 +2414,9 @@ class Exporter {
    *
    * @param {Object[]} objectTextPlaceholderDelta
    * @param {String} objectID
-   * @param {String} exportType
-   * @returns {Object[]}
+   * @returns {[Object[], Object, Object]} json, formats, objects
    */
-  static #objectTextPlacegiver1(objectTextPlaceholderDelta, objectID) {
+  static #objectTextPlacegiver(objectTextPlaceholderDelta, objectID) {
     let dimOps = [];
     objectTextPlaceholderDelta.forEach((op) => {
       if (
@@ -3116,60 +2436,19 @@ class Exporter {
       }
     });
 
-    let json = Exporter.#deltaToJSON(dimOps);
+    let [json, formats, objects] = Exporter.#deltaToJSON(dimOps);
     // remove trailing "\n" -- if only "\n" remove whole op
     if (json.length == 1 && !json[0].content.length) return [];
     if (json.length == 1) return json[0].content;
 
-    return json;
-  }
-
-  static #objectTextPlacegiver(
-    objectTextPlaceholderDelta,
-    objectID,
-    exportType,
-  ) {
-    let dimOps = [];
-    objectTextPlaceholderDelta.forEach((op) => {
-      if (
-        op.insert &&
-        op.insert.placeholder &&
-        Object.keys(Exporter.#objectTextPlaceholders).includes(
-          op.insert.placeholder,
-        )
-      ) {
-        dimOps.push(
-          ...Exporter.#objectTextPlaceholders[op.insert.placeholder].function(
-            objectID,
-            exportType,
-          ),
-        );
-      } else {
-        dimOps.push(JSON.parse(JSON.stringify(op)));
-      }
-    });
-    // remove trailing "\n" -- if only "\n" remove whole op
-    if (dimOps.length) {
-      let lastOp = dimOps.pop();
-      if (
-        typeof lastOp.insert != "object" &&
-        lastOp.insert.endsWith("\n") &&
-        lastOp.insert.length > 1
-      ) {
-        lastOp.insert = lastOp.insert.substring(0, lastOp.insert.length - 1);
-        dimOps.push(lastOp);
-      }
-    }
-
-    return dimOps;
+    return [json, formats, objects];
   }
 
   /**
-   * substitute object placeholders with actual values (not static!)
+   * substitute object placeholders with actual values
    *
    * @param {Object[]} objectPlaceholderDelta
    * @param {String} objectID
-   * @param {String} exportType
    * @param {Object[]} objectContents
    * @param {String[]} useCitationTexts
    * @param {Object[]} propertyNames
@@ -3177,29 +2456,36 @@ class Exporter {
    * @param {Object[]} propertyContents
    * @returns {Object[]}
    */
-  #objectPlacegiver(
+  static #objectPlacegiver(
     objectPlaceholderDelta,
     objectID,
-    exportType,
     objectContents,
     useCitationTexts,
     propertyNames,
     propertyTypes,
     propertyContents,
   ) {
-    let dimOps = [];
+    let ops = [];
+    let blockBefore = false;
     objectPlaceholderDelta.forEach((op) => {
+      let newOp = JSON.parse(JSON.stringify(op));
+      // after a block (textContent) insert, remove next "\n" to avoid an extra empty paragraph
       if (
-        op.insert &&
-        op.insert.placeholder &&
+        blockBefore &&
+        typeof newOp.insert == "string" &&
+        newOp.insert.startsWith("\n")
+      )
+        newOp.insert = newOp.insert.substring(1);
+      if (
+        newOp.insert &&
+        newOp.insert.placeholder &&
         Object.keys(Exporter.#objectPlaceholders).includes(
-          op.insert.placeholder,
+          newOp.insert.placeholder,
         )
       ) {
-        dimOps.push(
-          ...Exporter.#objectPlaceholders[op.insert.placeholder].function(
+        ops.push(
+          Exporter.#objectPlaceholders[newOp.insert.placeholder].function(
             objectID,
-            exportType,
             objectContents,
             useCitationTexts,
             propertyNames,
@@ -3208,81 +2494,52 @@ class Exporter {
             this,
           ),
         );
+        blockBefore =
+          Exporter.#objectPlaceholders[newOp.insert.placeholder].block;
       } else {
-        dimOps.push(JSON.parse(JSON.stringify(op)));
+        ops.push(newOp);
       }
     });
-    return dimOps;
+    return ops;
   }
 
   /**
-   * substitute object property placeholders with actual values (not static!)
+   * substitute object property placeholders with actual values
    *
    * @param {Object[]} objectPropertiesPlaceholderDelta
    * @param {*} item
-   * @param {String} exportType
    * @param {*} content
    * @param {*} mapImages
    * @returns {Object[]}
    */
-  #propertiesPlacegiver(
+  static #propertiesPlacegiver(
     objectPropertiesPlaceholderDelta,
     item,
-    exportType,
     content,
     mapImages,
   ) {
-    let dimOps = [];
+    let ops = [];
     objectPropertiesPlaceholderDelta.forEach((op) => {
+      let newOp = JSON.parse(JSON.stringify(op));
       if (
-        op.insert &&
-        op.insert.placeholder &&
+        newOp.insert &&
+        newOp.insert.placeholder &&
         Object.keys(Exporter.#propertyPlaceholders).includes(
-          op.insert.placeholder,
+          newOp.insert.placeholder,
         )
       ) {
-        dimOps.push(
-          ...Exporter.#propertyPlaceholders[op.insert.placeholder].function(
+        ops.push(
+          Exporter.#propertyPlaceholders[newOp.insert.placeholder].function(
             item,
-            this,
-            exportType,
             content,
             mapImages,
           ),
         );
       } else {
-        dimOps.push(JSON.parse(JSON.stringify(op)));
+        ops.push(newOp);
       }
     });
-    return dimOps;
-  }
-
-  /**
-   * convert delta to simple text
-   * @static
-   *
-   * @param {Object[]} deltaOps
-   * @returns {String}
-   */
-  static #deltaToText(deltaOps) {
-    let text = "";
-    let doImages = theSettings.effectiveSettings().exportTextImage;
-    deltaOps.forEach((op) => {
-      if (typeof op.insert != "object") {
-        text += op.insert;
-      } else if (doImages) {
-        // images
-        text += _("image_reference", {
-          title: op.attributes.title ? ` "${op.attributes.title}"` : "",
-          width: op.attributes.width,
-          height: op.attributes.height,
-        });
-      }
-    });
-    if (text.endsWith("\n")) {
-      text = text.substring(0, text.length - 1);
-    }
-    return text;
+    return ops;
   }
 
   /**
@@ -3465,147 +2722,71 @@ class Exporter {
   }
 
   /**
-   * convert delta to html
-   * this is also needed outside of Exporter, thus not private
-   *
-   * @param {Object[]} deltaOps
-   * @param {} usedFormats
-   * @param {} usedObjects
-   * @returns {String} html result
+   * convert exporter JSON to text
+   * @param {Object[]} json
+   * @returns {String}
    */
-  static deltaToHTML(deltaOps, usedFormats = null, usedObjects = null) {
-    let blocks = [];
-    let text = "";
-    let formatClass = "";
-    let hasFormat = false;
-    for (let i = 0; i < deltaOps.length; i++) {
-      let op = deltaOps[i];
-      if (op.isCooked && op.isBlock) {
-        blocks.push(...Exporter.#textToHTML(text, formatClass));
-        text = "";
-        formatClass = "";
-        blocks.push(op.insert);
-        if (
-          i < deltaOps.length - 1 &&
-          deltaOps[i + 1].insert.startsWith("\n")
-        ) {
-          // ignore "\n" of placeholder block
-          deltaOps[i + 1].insert = deltaOps[i + 1].insert.substring(1);
-        }
-      } else {
-        let objectClasses = [];
-        let exportString;
-        if (op.isCooked) {
-          exportString = op.insert;
-        } else if (typeof op.insert != "object") {
-          exportString = Util.escapeHTML(op.insert);
-        } else {
-          // images
-          let style = "";
-          Object.keys(op.attributes).forEach((att) => {
-            if (att in DIMImage.styles) {
-              for (let [k, v] of Object.entries(
-                DIMImage.styles[att][op.attributes[att]],
-              )) {
-                style += `${k}:${v};`;
-              }
-            }
-          });
-          exportString = `<img src="${op.insert.image}" width="${op.attributes.width}" height="${op.attributes.height}" style="${style}" ${op.attributes.title ? `title="${op.attributes.title}"` : ""}>`;
-        }
-        if ("attributes" in op) {
-          Object.keys(op.attributes).forEach((attr) => {
-            switch (attr) {
-              case "bold":
-                exportString = `<strong>${exportString}</strong>`;
-                break;
-              case "italic":
-                exportString = `<em>${exportString}</em>`;
-                break;
-              case "underline":
-                exportString = `<u>${exportString}</u>`;
-                break;
-              case "strike":
-                exportString = `<s>${exportString}</s>`;
-                break;
-              default:
-                if (attr.startsWith("format") && usedFormats) {
-                  hasFormat = true;
-                  let formatID = attr.substring("format".length);
-                  if (formatID != UUID0) {
-                    usedFormats[formatID] = theFormats.formats[formatID];
-                    formatClass = `${attr}-${op.attributes[attr]}`;
-                  }
-                } else if (attr.startsWith("object") && usedObjects) {
-                  objectClasses.push(`${attr}-${op.attributes[attr]}`);
-                  let objectID = attr.substring("object".length);
-                  usedObjects[objectID] = new StyledObject();
-                  usedObjects[objectID].styleProperties =
-                    theObjectTree.objectStyle(objectID).styleProperties;
-                }
-                break;
-            }
-          });
-        }
-        if (objectClasses.length) {
-          exportString = `<span class="${objectClasses.join(
-            " ",
-          )}">${exportString}</span>`;
-        }
-
-        text += exportString;
-        if (hasFormat) {
-          blocks.push(...Exporter.#textToHTML(text, formatClass));
-          text = "";
-          formatClass = "";
-          hasFormat = false;
-        }
-      }
-    }
-    blocks.push(...Exporter.#textToHTML(text, formatClass));
-    let html = blocks.join("");
-    return html;
-  }
-
-  /**
-   * convert text to html using given format
-   *
-   * @param {String} text
-   * @param {Object} format
-   * @returns {String[]}
-   */
-  static #textToHTML(text, format) {
-    let blocks = [];
-    if (text) {
-      if (text.endsWith("\n")) {
-        text = text.substring(0, text.length - 1);
-      }
-      let paras = text.split("\n");
-      if (format) {
-        let lastPara = paras.pop();
-        blocks.unshift(
-          `<p class="${format}">${lastPara ? lastPara : "<br>"}</p>`,
-        );
-      }
-      for (let i = paras.length - 1; i >= 0; i--) {
-        blocks.unshift(`<p>${paras[i] ? paras[i] : "<br>"}</p>`);
-      }
-    }
-    return blocks;
-  }
-
-  /**
-   * convert JSON to text
-   */
-
-  static #jsonToText(json) {
+  static #JSON2Text(json) {
     let text = "";
     json.forEach((p) => {
       if (p.type == "paragraph") {
         p.content.forEach((c) => {
           switch (c.type) {
             case "text":
-              text += c.content;
+              let toUpper = false;
+              let spacing = "";
+              let transforms = {};
+              if (c.bold)
+                transforms[
+                  theSettings.effectiveSettings().exportSubstituteBold
+                ] = true;
+              if (c.italic)
+                transforms[
+                  theSettings.effectiveSettings().exportSubstituteItalic
+                ] = true;
+              if (c.underline)
+                transforms[
+                  theSettings.effectiveSettings().exportSubstituteUnderline
+                ] = true;
+              if (c.strike)
+                transforms[
+                  theSettings.effectiveSettings().exportSubstituteStrike
+                ] = true;
+              Object.keys(transforms).forEach((t) => {
+                switch (t) {
+                  case "exportSubstituteUpper":
+                    toUpper = true;
+                    break;
+                  case "exportSubstituteSpaced":
+                    spacing = " ";
+                    break;
+                  case "exportSubstituteScored":
+                    spacing = "_";
+                    break;
+                  case "exportSubstituteStriked":
+                    spacing = "-";
+                    break;
+                  case "exportSubstituteUpperSpaced":
+                    spacing = " ";
+                    toUpper = true;
+                    break;
+                  case "exportSubstituteUpperScored":
+                    spacing = "_";
+                    toUpper = true;
+                    break;
+                  case "exportSubstituteUpperStriked":
+                    spacing = "-";
+                    toUpper = true;
+                    break;
+                }
+              });
+              let transformed = toUpper ? c.content.toUpperCase() : c.content;
+              if (spacing)
+                transformed = transformed
+                  .split("")
+                  .map((x) => (x == " " ? spacing : x))
+                  .join(spacing);
+              text += transformed;
               break;
             case "image":
               if (theSettings.effectiveSettings().exportTextImage)
@@ -3614,6 +2795,56 @@ class Exporter {
                   width: c.width,
                   height: c.height,
                 });
+              break;
+            case "table":
+              let objectTable = [];
+              let sCells = [];
+              let rowNo = 0;
+              c.content.forEach((row) => {
+                let objectRow = [];
+                let colNo = 0;
+                row.forEach((cell) => {
+                  objectRow.push(
+                    Exporter.#JSON2Text(
+                      Exporter.#deltaToJSON([cell.content])[0],
+                    ).slice(0, -1),
+                  );
+                  if (cell.rowSpan) {
+                    sCells.push({
+                      col: colNo,
+                      row: rowNo,
+                      colSpan: cell.rowSpan,
+                    });
+                  }
+                  colNo++;
+                });
+                objectTable.push(objectRow);
+                rowNo++;
+              });
+              let columns = [];
+              let width = 0;
+              for (let i = 0; i < c.width.length - 1; i++) {
+                let w = Math.floor(
+                  (c.width[i] / 100) *
+                    theSettings.effectiveSettings().exportTableLineLength,
+                );
+                width += w;
+                columns.push({
+                  width: w - 2,
+                  wrapWord: true,
+                });
+              }
+              columns.push({
+                width:
+                  theSettings.effectiveSettings().exportTableLineLength - width,
+                wrapWord: true,
+              });
+              console.log({ columns });
+              text += table(objectTable, {
+                border: getBorderCharacters("norc"),
+                columns: columns,
+                spanningCells: sCells,
+              });
               break;
           }
         });
@@ -3624,10 +2855,12 @@ class Exporter {
     return text;
   }
 
-    /**
-   * convert JSON to HTML
+  /**
+   * convert exporter JSON to HTML
+   * @param {Object[]} json
+   * @returns {String}
    */
-  static #jsonToHTML(json) {
+  static #JSON2HTML(json) {
     let html = "";
     json.forEach((p) => {
       if (p.type == "paragraph") {
@@ -3635,16 +2868,16 @@ class Exporter {
         p.content.forEach((c) => {
           switch (c.type) {
             case "text":
-              let element = c.content;
-              if (c.bold)
-                element = `<strong>${element}</strong>`;
-              if (c.italic)
-                element = `<em>${element}</em>`;
-              if (c.underline)
-                element = `<u>${element}</u>`;
-              if (c.strike)
-                element = `<s>${element}</s>`;
-              para += element;
+              let element = Util.escapeHTML(c.content);
+              if (c.bold) element = `<strong>${element}</strong>`;
+              if (c.italic) element = `<em>${element}</em>`;
+              if (c.underline) element = `<u>${element}</u>`;
+              if (c.strike) element = `<s>${element}</s>`;
+              if ("objects" in c && c.objects.length)
+                para += `<span class="object${c.objects.join(
+                  "-true object",
+                )}-true">${element}</span>`;
+              else para += element;
               break;
             case "image":
               let style = "";
@@ -3659,9 +2892,38 @@ class Exporter {
               });
               para += `<img src="${c.content}" width="${c.width}px" height="${c.height}px" style="${style}" ${c.title ? `title="${c.title}"` : ""}>`;
               break;
+            case "table":
+              let cellStyle =
+                "vertical-align:top; border:1px solid black; padding:4px";
+              para += `<table style="width:100%"><colgroup>`;
+              c.width.forEach(
+                (w) => (para += `<col span="1" style="width:${w}%"></col>`),
+              );
+              para += "</colgroup>";
+              if (c.header) {
+                para += "<thead><tr>";
+                c.content[0].forEach(
+                  (cell) =>
+                    (para += `<th style="${cellStyle}">${Exporter.#JSON2HTML(Exporter.#deltaToJSON([cell.content])[0])}</th>`),
+                );
+                para += "</tr></thead>";
+              }
+              para += "<tbody>";
+              for (let i = c.header ? 1 : 0; i < c.content.length; i++) {
+                para += "<tr>";
+                for (let j = 0; j < c.content[i].length; j++) {
+                  para += `<td ${c.content[i][j].rowSpan ? `colspan=${c.content[i][j].rowSpan}` : ""} style="${cellStyle}">${Exporter.#JSON2HTML(Exporter.#deltaToJSON([c.content[i][j].content])[0])}</td>`;
+                  if (c.content[i][j].rowSpan) j += c.content[i][j].rowSpan;
+                }
+                para += "</tr>";
+              }
+              para += "</table>";
+              break;
           }
         });
-        html += `<p>${para}</p>`;
+        html += "<p";
+        if (p.format != UUID0) html += ` class="format${p.format}-true"`;
+        html += ">" + para + "</p>";
       }
     });
 
@@ -3669,14 +2931,17 @@ class Exporter {
   }
 
   /**
-   * convert delta/JSON mix to JSON
+   * convert delta/exporter JSON mix to exporter JSON
+   * @param {Object[]} deltaJSON
+   * @returns {Object[]}
    */
-  static #deltaToJSON(deltaOps) {
-    console.log({ deltaOps }, deltaOps.flat(Infinity));
+  static #deltaToJSON(deltaJSON) {
     let paragraphs = [];
     let content = [];
     let formatID = UUID0;
-    deltaOps.flat(Infinity).forEach((op) => {
+    let formats = {};
+    let objects = {};
+    deltaJSON.flat(Infinity).forEach((op) => {
       // already in JSON format
       if ("type" in op) {
         if (op.type == "paragraph") {
@@ -3720,16 +2985,11 @@ class Exporter {
                 default:
                   if (attr.startsWith("format")) {
                     formatID = attr.substring("format".length);
-                    // this.#usedFormats[formatID] = theFormats.formats[formatID];
+                    formats[formatID] = true;
                   } else if (attr.startsWith("object")) {
                     let objectID = attr.substring("object".length);
                     textContent.objects.push(objectID);
-                    // Object.assign(
-                    //   textContent,
-                    //   StylingControls.controls2DOCX(
-                    //     theObjectTree.objectStyle(objectID).styleProperties.text,
-                    //   ),
-                    // );
+                    objects[objectID] = true;
                   }
                   break;
               }
@@ -3762,28 +3022,16 @@ class Exporter {
           }
           formatID = UUID0;
         } else {
-          let alignment;
-          switch (op.attributes.alignment) {
-            case "image_alignmentLeft":
-              alignment = "left";
-              break;
-            case "image_alignmentCenter":
-              alignment = "center";
-              break;
-            case "image_alignmentRight":
-              alignment = "right";
-              break;
-          }
           content.push({
             type: "image",
-            alignment: alignment,
+            alignment: op.attributes.alignment,
             content: op.insert.image,
             width: parseInt(op.attributes.width),
             height: parseInt(op.attributes.height),
-            origWidth: parseInt(op.attributes.origWidth),
-            origHeight: parseInt(op.attributes.origHeight),
+            origwidth: parseInt(op.attributes.origwidth),
+            origheight: parseInt(op.attributes.origheight),
             title: op.attributes.title,
-            shadow: op.attributes.shadow,
+            shadow: Boolean(op.attributes.shadow),
           });
         }
       }
@@ -3794,8 +3042,8 @@ class Exporter {
         content: content,
         format: formatID,
       });
-    console.log({ paragraphs });
-    return paragraphs;
+    console.log({ paragraphs }, { formats }, { objects });
+    return [paragraphs, formats, objects];
   }
 
   /**
