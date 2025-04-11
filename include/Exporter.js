@@ -6,9 +6,8 @@
  */
 
 /*
-@TODO rowspan in text citation table bei gleichen Texten
+@TODO rowspan in text citation table bei gleichen Texten (?)
 @TODO rtf
-@TODO docx
 @TODO odf
 @TODO markdown
 */
@@ -25,7 +24,7 @@ text = { type: "text", content: String, bold: Boolean, ..., objects: [ String* ]
 image = { type: "image", content: String, alignment: String, title: String, width: Int, height: Int }
 table = { type: "table", rows: Int, cols: Int, header: Boolean, width: [ Int* ], content: [ row* ]}
 row = [ cell* ]
-cell = { content: type | image | Object[], rowSpan: Int, colSpan: Int }
+cell = { content: type | image | Object[], rowSpan: Int, colSpan: Int } -- irrespective of colSpan the number if cell items in each row must be the same, so colSpan just skips following cell items
 */
 
 /**
@@ -456,7 +455,7 @@ class Exporter {
             tableContent.push([
               {
                 content: Object.assign({ italic: true }, propertyContents[i]),
-                rowSpan: 3,
+                colSpan: 3,
               },
               { content: { type: "text", content: "" } },
               { content: { type: "text", content: "" } },
@@ -775,7 +774,9 @@ class Exporter {
                   content: [
                     {
                       type: "image",
-                      content: mapImages[0],
+                      content: mapImages[0].data,
+                      width: mapImages[0].width,
+                      height: mapImages[0].height,
                     },
                   ],
                 });
@@ -797,7 +798,14 @@ class Exporter {
                 if (mapImages && mapImages[i + 1])
                   r.push({
                     type: "paragraph",
-                    content: [{ type: "image", content: mapImages[i + 1] }],
+                    content: [
+                      {
+                        type: "image",
+                        content: mapImages[i + 1].data,
+                        width: mapImages[i + 1].width,
+                        height: mapImages[i + 1].height,
+                      },
+                    ],
                   });
               }
               return r;
@@ -872,13 +880,12 @@ class Exporter {
           name: "exportType",
           i18n: "exportWindow_exportType",
           type: "select",
-          values: ["txt", "html", "rtf", "docx", "json"],
+          values: ["txt", "html", "rtf", "docx"],
           i18nValues: [
             "exportWindow_typeTXT",
             "exportWindow_typeHTML",
             "exportWindow_typeRTF",
             "exportWindow_typeDOCX",
-            "json",
           ],
           default: "html",
         },
@@ -1305,7 +1312,7 @@ class Exporter {
           },
         ],
       };
-      profile.objectEditor = { ops: [{insert:"\n"}] };
+      profile.objectEditor = { ops: [{ insert: "\n" }] };
       profile.objectEndEditor = { ops: [{ insert: "\n" }] };
       profile.objectStartEditor = { ops: [{ insert: "\n" }] };
       profile.objectPropertiesEditor = { ops: [{ insert: "\n" }] };
@@ -1502,10 +1509,23 @@ class Exporter {
                         Exporter.#exportFileFinal(fd, file, profile);
                       });
                       break;
+
                     case "docx":
                       ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
                       this.#export(profile).then((result) => {
                         ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
+                        let styles = [];
+                        Object.keys(this.#usedFormats).forEach((formatID) => {
+                          if (formatID != UUID0) {
+                            let style = Formats.formatToDocx(
+                              theFormats.effectiveFormat(formatID),
+                            );
+                            style.id = formatID;
+                            style.name =
+                              theFormats.getFormat(formatID).formats_name;
+                            styles.push(style);
+                          }
+                        });
                         const theDoc = new docx.Document({
                           creator: theProperties.author,
                           description: theProperties.info,
@@ -1523,9 +1543,7 @@ class Exporter {
                                 theFormats.formats[UUID0],
                               ),
                             },
-                            paragraphStyles: this.#formats2Docx(
-                              this.#usedFormats,
-                            ),
+                            paragraphStyles: styles,
                           },
                         });
 
@@ -1671,7 +1689,7 @@ class Exporter {
         if (textContents.length || !profile.ignoreEmptyTexts) {
           // each (non empty) text
           textsExport.push(
-            Exporter.#textPlacegiver1(
+            Exporter.#textPlacegiver(
               profile.textEditor.ops,
               textID,
               textContents,
@@ -1706,6 +1724,7 @@ class Exporter {
         });
       }
       Promise.allSettled(promises).then(() => {
+        console.log({ rasteredMaps });
         let objectsExport = [];
         useObjects.forEach((objectID) => {
           let objectContent = [];
@@ -1722,6 +1741,7 @@ class Exporter {
                 rasteredMaps[objectID][item.id]
               )
                 mapImages = rasteredMaps[objectID][item.id];
+              console.log({ mapImages });
               let props = theObjectTree.getObject(objectID).properties;
               if (props && props[oID] && props[oID][item.id])
                 objectContent.push(
@@ -1822,6 +1842,9 @@ class Exporter {
             break;
           case "html":
             resolve(Exporter.#JSON2HTML(jsonExport));
+            break;
+          case "docx":
+            resolve(Exporter.#JSON2DOCX(jsonExport));
             break;
           /*
           case "rtf":
@@ -1995,178 +2018,6 @@ class Exporter {
               });
             }
             break;
-
-          case "docx":
-            {
-              // texts
-              let textsExport = [];
-              useTexts.forEach((textID) => {
-                let [textContents, trailingNewLine] =
-                  Exporter.#textContentPlacegiver(
-                    profile.exportType,
-                    theTextTree.getText(textID).delta,
-                    useTextObjects,
-                    profile.objectStartEditor.ops,
-                    profile.objectEndEditor.ops,
-                  );
-                if (textContents.length || !profile.ignoreEmptyTexts) {
-                  // each (non empty) text
-                  textsExport.push(
-                    ...Exporter.#textPlacegiver(
-                      profile.exportType,
-                      trailingNewLine
-                        ? profile.textEditor.ops.slice(
-                            0,
-                            profile.textEditor.ops.length - 1,
-                          )
-                        : profile.textEditor.ops,
-                      textID,
-                      textContents,
-                    ),
-                  );
-                }
-              });
-
-              // objects and their properties -- first determine if object properties will be exported as some preliminary steps (such as rasterizing maps) would then be necessary
-              // raster the maps
-              let rasteredMaps = {};
-              let promises = [];
-              if (Exporter.#doExportProperties(profile)) {
-                useObjects.forEach((objectID) => {
-                  theObjectTree.getParents(objectID, false).forEach((oID) => {
-                    theObjectTree.getObject(oID).scheme.forEach((item) => {
-                      if (item.type == "schemeTypes_map") {
-                        let props =
-                          theObjectTree.getObject(objectID).properties;
-                        if (props && props[oID] && props[oID][item.id]) {
-                          promises.push(
-                            Exporter.#rasterize(
-                              rasteredMaps,
-                              objectID,
-                              item.id,
-                              props[oID][item.id],
-                            ),
-                          );
-                        }
-                      }
-                    });
-                  });
-                });
-              }
-              Promise.allSettled(promises).then(() => {
-                let objectsExport = [];
-                useObjects.forEach((objectID) => {
-                  let objectContent = [];
-                  let propertyNames = [];
-                  let propertyTypes = [];
-                  let propertyContents = [];
-                  // objects properties: iterate all properties (including those inherited by parent objects)
-                  theObjectTree.getParents(objectID, false).forEach((oID) => {
-                    theObjectTree.getObject(oID).scheme.forEach((item) => {
-                      let props = theObjectTree.getObject(objectID).properties;
-                      if (props && props[oID] && props[oID][item.id]) {
-                        let mapImages = null;
-                        if (
-                          rasteredMaps &&
-                          rasteredMaps[objectID] &&
-                          rasteredMaps[objectID][item.id]
-                        ) {
-                          mapImages = rasteredMaps[objectID][item.id];
-                        }
-                        objectContent.push(
-                          ...this.#propertiesPlacegiver(
-                            profile.objectPropertiesEditor.ops,
-                            item,
-                            profile.exportType,
-                            props[oID][item.id],
-                            mapImages,
-                          ),
-                        );
-                        // elements necessary for tabled export
-                        propertyNames.push(
-                          Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                            item,
-                          ),
-                        );
-                        propertyTypes.push(
-                          Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                            item,
-                          ),
-                        );
-                        propertyContents.push(
-                          Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                            item,
-                            this,
-                            profile.exportType,
-                            props[oID][item.id],
-                            mapImages,
-                          ),
-                        );
-                      }
-                    });
-                  });
-                  // reverse object relations
-                  theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-                    objectContent.push(
-                      ...this.#propertiesPlacegiver(
-                        profile.objectPropertiesEditor.ops,
-                        revRel,
-                        profile.exportType,
-                        revRel.content,
-                      ),
-                    );
-                    // for tabled export
-                    propertyNames.push(
-                      Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                        revRel,
-                      ),
-                    );
-                    propertyTypes.push(
-                      Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                        revRel,
-                      ),
-                    );
-                    propertyContents.push(
-                      Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                        revRel,
-                        this,
-                        profile.exportType,
-                        revRel.content,
-                      ),
-                    );
-                  });
-
-                  objectsExport.push(
-                    ...this.#objectPlacegiver(
-                      profile.objectEditor.ops,
-                      objectID,
-                      profile.exportType,
-                      objectContent,
-                      useCitationTexts,
-                      propertyNames,
-                      propertyTypes,
-                      propertyContents,
-                    ),
-                  );
-                });
-
-                // document
-                resolve(
-                  this.#deltaToDocx(
-                    Exporter.#documentPlacegiver(
-                      profile.documentEditor.ops,
-                      profile.exportType,
-                      documentStatistics,
-                      textsExport,
-                      objectsExport,
-                    ),
-                    profile.textFormats,
-                    profile.objectFormats,
-                  ),
-                );
-              });
-            }
-            break;
           */
         }
       });
@@ -2303,8 +2154,8 @@ class Exporter {
    * @param {Object[]} textContents substituted text contents in dimOps
    * @returns {Object[]} dimOps
    */
-  static #textPlacegiver1(textPlaceholderOps, textID, textContents) {
-    console.log("textPlacegiver1", { textPlaceholderOps }, { textContents });
+  static #textPlacegiver(textPlaceholderOps, textID, textContents) {
+    console.log("textPlacegiver", { textPlaceholderOps }, { textContents });
     let ops = [];
     let blockBefore = false;
     textPlaceholderOps.forEach((op) => {
@@ -2337,28 +2188,6 @@ class Exporter {
     });
     console.log({ ops });
     return ops;
-  }
-
-  static #textPlacegiver(exportType, textPlaceholderOps, textID, textContents) {
-    let dimOps = [];
-    textPlaceholderOps.forEach((op) => {
-      if (
-        op.insert &&
-        op.insert.placeholder &&
-        Object.keys(Exporter.#textPlaceholders).includes(op.insert.placeholder)
-      ) {
-        dimOps.push(
-          ...Exporter.#textPlaceholders[op.insert.placeholder].function(
-            textID,
-            textContents,
-            exportType,
-          ),
-        );
-      } else {
-        dimOps.push(JSON.parse(JSON.stringify(op)));
-      }
-    });
-    return dimOps;
   }
 
   /**
@@ -2809,11 +2638,11 @@ class Exporter {
                       Exporter.#deltaToJSON([cell.content])[0],
                     ).slice(0, -1),
                   );
-                  if (cell.rowSpan) {
+                  if (cell.colSpan) {
                     sCells.push({
                       col: colNo,
                       row: rowNo,
-                      colSpan: cell.rowSpan,
+                      colSpan: cell.colSpan,
                     });
                   }
                   colNo++;
@@ -2912,8 +2741,8 @@ class Exporter {
               for (let i = c.header ? 1 : 0; i < c.content.length; i++) {
                 para += "<tr>";
                 for (let j = 0; j < c.content[i].length; j++) {
-                  para += `<td ${c.content[i][j].rowSpan ? `colspan=${c.content[i][j].rowSpan}` : ""} style="${cellStyle}">${Exporter.#JSON2HTML(Exporter.#deltaToJSON([c.content[i][j].content])[0])}</td>`;
-                  if (c.content[i][j].rowSpan) j += c.content[i][j].rowSpan;
+                  para += `<td ${c.content[i][j].colSpan ? `colspan=${c.content[i][j].colSpan}` : ""} style="${cellStyle}">${Exporter.#JSON2HTML(Exporter.#deltaToJSON([c.content[i][j].content])[0])}</td>`;
+                  if (c.content[i][j].colSpan) j += c.content[i][j].colSpan-1;
                 }
                 para += "</tr>";
               }
@@ -2928,6 +2757,99 @@ class Exporter {
     });
 
     return html;
+  }
+
+  /**
+   * convert exporter JSON to DOCX
+   * @param {Object[]} json
+   * @returns {docx.Paragraph[]} suitable as children element of a docx section
+   */
+  static #JSON2DOCX(json) {
+    let paragraphs = [];
+    json.forEach((p) => {
+      if (p.type == "paragraph") {
+        let paragraph = { children: [] };
+        if (p.format != UUID0) paragraph.style = p.format;
+        p.content.forEach((c) => {
+          switch (c.type) {
+            case "text":
+              let textRun = { text: c.content };
+              if (c.bold) textRun.bold = true;
+              if (c.italic) textRun.italics = true;
+              if (c.underline) textRun.underline = true;
+              if (c.strike) textRun.strike = true;
+              if (c.objects)
+                c.objects.forEach((id) =>
+                  Object.assign(
+                    textRun,
+                    StylingControls.controls2DOCX(
+                      theObjectTree.objectStyle(id).styleProperties.text,
+                    ),
+                  ),
+                );
+              paragraph.children.push(new docx.TextRun(textRun));
+              break;
+            case "image":
+              paragraph.children.push(
+                new docx.ImageRun({
+                  data: Buffer.from(c.content.split(",")[1], "base64"),
+                  transformation: {
+                    width: c.width,
+                    height: c.height,
+                  },
+                  altText: {
+                    title: c.title,
+                  },
+                }),
+              );
+              switch (c.alignment) {
+                case "image_alignmentLeft":
+                  paragraph.alignment = docx.AlignmentType.LEFT;
+                  break;
+                case "image_alignmentCenter":
+                  paragraph.alignment = docx.AlignmentType.CENTER;
+                  break;
+                case "image_alignmentRight":
+                  paragraph.alignment = docx.AlignmentType.RIGHT;
+                  break;
+              }
+              break;
+            case "table":
+              let tableRows = [];
+              c.content.forEach((row) => {
+                let rowContent = [];
+                for (let colNo = 0; colNo < row.length; colNo++) {
+                  let cellContent = {
+                    children: Exporter.#JSON2DOCX(
+                      Exporter.#deltaToJSON([row[colNo].content])[0],
+                    ),
+                  };
+                  if (row[colNo].colSpan) {
+                    cellContent.columnSpan = row[colNo].colSpan;
+                    colNo += row[colNo].colSpan - 1;
+                  }
+                  rowContent.push(new docx.TableCell(cellContent));
+                }
+                tableRows.push(new docx.TableRow({ children: rowContent }));
+              });
+              paragraphs.push(
+                new docx.Table({
+                  columnWidths: c.width,
+                  rows: tableRows,
+                  width: {
+                    size: 100,
+                    type: docx.WidthType.PERCENTAGE,
+                  },
+                }),
+              );
+              break;
+          }
+        });
+        paragraphs.push(new docx.Paragraph(paragraph));
+      }
+    });
+
+    return paragraphs;
   }
 
   /**
@@ -3047,152 +2969,13 @@ class Exporter {
   }
 
   /**
-   * convert delta to docx structure
+   * convert delta ops to html
    *
    * @param {Object[]} deltaOps
-   * @param {Boolean} doFormats
-   * @param {Boolean} doObjects
-   * @returns {docx.Paragraph[]} suitable as children element of a docx section
+   * @returns {String} html
    */
-  #deltaToDocx(deltaOps, doFormats = true, doObjects = true) {
-    let paragraphs = [];
-    let children = [];
-    let formatID = null;
-    let alignment = null;
-    deltaOps.forEach((op) => {
-      let textRun = {};
-      if (typeof op.insert != "object") {
-        if ("attributes" in op) {
-          Object.keys(op.attributes).forEach((attr) => {
-            switch (attr) {
-              case "bold":
-                textRun.bold = true;
-                break;
-              case "italic":
-                textRun.italics = true;
-                break;
-              case "underline":
-                textRun.underline = {};
-                break;
-              case "strike":
-                textRun.strike = true;
-                break;
-              default:
-                if (attr.startsWith("format") && doFormats) {
-                  formatID = attr.substring("format".length);
-                  if (formatID == UUID0) formatID = null;
-                  else {
-                    this.#usedFormats[formatID] = theFormats.formats[formatID];
-                  }
-                } else if (attr.startsWith("object") && doObjects) {
-                  let objectID = attr.substring("object".length);
-                  Object.assign(
-                    textRun,
-                    StylingControls.controls2DOCX(
-                      theObjectTree.objectStyle(objectID).styleProperties.text,
-                    ),
-                  );
-                }
-                break;
-            }
-          });
-        }
-        let chunks = op.insert.split(/(\n)/).filter((x) => x);
-        for (let i = 0; i < chunks.length; i++) {
-          if (chunks[i] == "\n") {
-            let paragraph = { children: children };
-            if (formatID) paragraph.style = formatID;
-            if (alignment) paragraph.alignment = alignment;
-            paragraphs.push(new docx.Paragraph(paragraph));
-            children = [];
-            // formatID = null;
-            alignment = null;
-          } else {
-            if (Object.keys(textRun).length) {
-              textRun.text = chunks[i];
-              children.push(new docx.TextRun(textRun));
-            } else children.push(new docx.TextRun(chunks[i]));
-          }
-        }
-        formatID = null;
-      } else {
-        switch (op.attributes.alignment) {
-          case "image_alignmentLeft":
-            alignment = docx.AlignmentType.LEFT;
-            break;
-          case "image_alignmentCenter":
-            alignment = docx.AlignmentType.CENTER;
-            break;
-          case "image_alignmentRight":
-            alignment = docx.AlignmentType.RIGHT;
-            break;
-        }
-        children.push(
-          new docx.ImageRun({
-            data: Buffer.from(op.insert.image.split(",")[1], "base64"),
-            transformation: {
-              width: parseInt(op.attributes.width),
-              height: parseInt(op.attributes.height),
-            },
-            altText: {
-              title: op.attributes.title,
-            },
-          }),
-        );
-      }
-    });
-    let paragraph = { children: children };
-    if (formatID) paragraph.style = formatID;
-    paragraphs.push(new docx.Paragraph(paragraph));
-    console.log({ deltaOps }, { paragraphs });
-    return paragraphs;
-  }
-
-  #formats2Docx(formats) {
-    let styles = [];
-    Object.keys(formats).forEach((formatID) => {
-      if (formatID != UUID0) {
-        let style = Formats.formatToDocx(theFormats.effectiveFormat(formatID));
-        style.id = formatID;
-        style.name = formats[formatID].formats_name;
-        styles.push(style);
-      }
-    });
-    return styles;
-  }
-
-  /**
-   * convert text to docx using given format
-   *
-   * @param {String} text
-   * @param {String} format
-   * @returns {docx.Paragraph[]}
-   */
-  static #textToDocx(text, format) {
-    let paragraphs = [];
-    if (text) {
-      if (text.endsWith("\n")) {
-        text = text.substring(0, text.length - 1);
-      }
-      let paras = text.split("\n");
-      if (format) {
-        let lastPara = paras.pop();
-        paragraphs.unshift(
-          new docx.Paragraph({
-            children: [new docx.TextRun(lastPara)],
-            style: format,
-          }),
-        );
-      }
-      for (let i = paras.length - 1; i >= 0; i--) {
-        paragraphs.unshift(
-          new docx.Paragraph({
-            children: [new docx.TextRun(paras[i])],
-          }),
-        );
-      }
-    }
-    return paragraphs;
+  static delta2HTML(deltaOps) {
+    return Exporter.#JSON2HTML(Exporter.#deltaToJSON(deltaOps)[0]);
   }
 
   /**
@@ -3391,7 +3174,11 @@ class Exporter {
       });
 
       leafletImage(rasterizeMap, (err, canvas) => {
-        rasterMap[mapIndex] = canvas.toDataURL();
+        rasterMap[mapIndex] = {
+          data: canvas.toDataURL(),
+          width: width,
+          height: height,
+        };
         $rasterizeDiv.remove();
         resolve("ok");
       });
