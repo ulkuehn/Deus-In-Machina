@@ -459,6 +459,108 @@ class StylingControls {
   }
 
   /**
+   * transform text related style properties to best fitting DOCX
+   *
+   * @param {Object} properties text related style properties
+   * @param {Number} standardFontSize
+   * @returns {Object}
+   */
+  static controls2DOCX(properties) {
+    let styles = {};
+
+    if (properties.formats_fontSize)
+      styles.size = Math.round(properties.formats_fontSize * 2);
+
+    if (properties.formats_fontFamily)
+      styles.font = properties.formats_fontFamily;
+
+    if (properties.formats_textColor)
+      styles.color = properties.formats_textColor.substring(1);
+
+    if (properties.formats_backgroundColor)
+      styles.shading = {
+        type: docx.ShadingType.SOLID,
+        color: properties.formats_backgroundColor.substring(1),
+      };
+
+    // formats_boldness only supported as on/off
+    if (properties.formats_boldness && properties.formats_boldness >= 700)
+      styles.bold = true;
+
+    if (properties.formats_italic) styles.italic = true;
+
+    if (properties.formats_letterSpacing)
+      styles.characterSpacing = Math.round(
+        properties.formats_letterSpacing * 200,
+      );
+
+    // word spacing not implemented
+
+    if (properties.format_capsStyle)
+      switch (properties.format_capsStyle) {
+        case "small-caps":
+          styles.smallCaps = true;
+          break;
+        case "all-small-caps":
+          styles.allCaps = true;
+          break;
+      }
+
+    // text transform not implemented
+
+    if (properties.formats_underline) styles.underline = true;
+    if (properties.formats_strike) styles.strike = true;
+    // overline not implemented
+    // line type, color, thickness not implemented
+
+    // borders get precedence over outlines
+    // individual borders not implemented
+    let bColor=null;
+    let bStyle = docx.BorderStyle.SINGLE;
+    let bSize; // size of the border is in 1/8 pt
+    if (properties.formats_outline && properties.formats_outline[0]) {
+      bColor = properties.formats_outline[0];
+      switch (properties.formats_outline[1]) {
+        case "dotted":
+          bStyle = docx.BorderStyle.DOTTED;
+          break;
+        case "dashed":
+          bStyle = docx.BorderStyle.DASHED;
+          break;
+        case "double":
+          bStyle = docx.BorderStyle.DOUBLE;
+          break;
+      }
+      bSize = properties.formats_outline[2] * 5;
+    }
+    if (properties.formats_border && properties.formats_border[0]) {
+      bColor = properties.formats_border[0];
+      switch (properties.formats_border[1]) {
+        case "dotted":
+          bStyle = docx.BorderStyle.DOTTED;
+          break;
+        case "dashed":
+          bStyle = docx.BorderStyle.DASHED;
+          break;
+        case "double":
+          bStyle = docx.BorderStyle.DOUBLE;
+          break;
+      }
+      bSize = properties.formats_border[2] * 5;
+    }
+    if (bColor)
+      styles.border = {
+        style: bStyle,
+        color: bColor,
+        size: bSize,
+      };
+
+    // text shadow not implemented
+
+    return styles;
+  }
+
+  /**
    * transform text related style properties to best fitting RTF
    *
    * @param {Object} properties text related style properties
@@ -564,11 +666,12 @@ class StylingControls {
     }
 
     // line color and strength not supported in rtf
+    
     if (properties.formats_border && properties.formats_border[0]) {
-      let colorIndex = colorTable.indexOf(properties.formats_border[1]);
+      let colorIndex = colorTable.indexOf(properties.formats_border[0]);
       if (colorIndex >= 0) {
-        rtf += `\\chbrdr\\brdrcf${colorIndex}\\brdrw${properties.formats_border[3] * 10}`;
-        switch (properties.formats_border[2]) {
+        rtf += `\\chbrdr\\brdrcf${colorIndex}\\brdrw${properties.formats_border[2] * 10}`;
+        switch (properties.formats_border[1]) {
           case "solid":
             rtf += `\\brdrs`;
             break;

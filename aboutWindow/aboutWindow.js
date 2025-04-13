@@ -28,6 +28,7 @@ const softwareList = {
     license: "MIT",
   },
   "daterangepicker": { url: "http://www.daterangepicker.com/", license: "MIT" },
+  "docx": { url: "https://github.com/dolanmiu/docx", license: "MIT" },
   "Electron": { url: "https://www.electronjs.org/", license: "MIT" },
   "electron-log": {
     url: "https://github.com/megahertz/electron-log",

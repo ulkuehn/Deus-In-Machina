@@ -231,6 +231,10 @@ class Formats {
     return this.#formats[UUID0];
   }
 
+  getFormat(id) {
+    return this.#formats[id]
+  }
+
   isDirty() {
     return this.#dirty;
   }
@@ -405,6 +409,86 @@ class Formats {
   }
 
   /**
+   * build docx style from format info
+   * @static
+   *
+   * @param {Object} format
+   * @returns {Object}
+   */
+  static formatToDocx(format) {
+    let style = {
+      run: {},
+      paragraph: { spacing: {}, indent: {} },
+    };
+
+    // paragraph level
+    if (format.formats_textAlign)
+      switch (format.formats_textAlign) {
+        case "left":
+          style.paragraph.alignment = docx.AlignmentType.LEFT;
+          break;
+        case "center":
+          style.paragraph.alignment = docx.AlignmentType.CENTER;
+          break;
+        case "right":
+          style.paragraph.alignment = docx.AlignmentType.RIGHT;
+          break;
+      }
+    if (format.formats_topIndent) {
+      style.paragraph.spacing.before = Math.round(
+        format.formats_fontSize * format.formats_topIndent * 15,
+      );
+    }
+    if (format.formats_bottomIndent) {
+      style.paragraph.spacing.after = Math.round(
+        format.formats_fontSize * format.formats_bottomIndent * 15,
+      );
+    }
+    if (format.formats_lineHeight) {
+      style.paragraph.spacing.line = Math.round(
+        format.formats_fontSize * format.formats_lineHeight * 20,
+      );
+      style.paragraph.spacing.lineRule = docx.LineRuleType.AT_LEAST;
+    }
+    if (format.formats_leftIndent) {
+      style.paragraph.indent.left = Math.round(
+        format.formats_fontSize * format.formats_leftIndent * 15,
+      );
+    }
+    if (format.formats_rightIndent) {
+      style.paragraph.indent.right = Math.round(
+        format.formats_fontSize * format.formats_rightIndent * 15,
+      );
+    }
+    if (format.formats_backgroundColor)
+      style.paragraph.shading = {
+        type: docx.ShadingType.SOLID,
+        color: format.formats_backgroundColor.substring(1),
+      };
+
+    // text level
+    if (format.formats_fontFamily) {
+      let fontName = format.formats_fontFamily;
+      let m = fontName.match(/['"](.*)['"]/);
+      if (m) {
+        fontName = m[1];
+      }
+      if (Fonts.docxFamilies[fontName]) {
+        fontName = Fonts.docxFamilies[fontName];
+      }
+      style.run.font = {
+        name: fontName,
+      };
+    }
+    if (format.formats_fontSize)
+      style.run.size = Math.round(format.formats_fontSize * 2);
+    if (format.formats_textColor)
+      style.run.color = format.formats_textColor.substring(1);
+
+    return style;
+  }
+
+  /**
    * build css from format info
    * @static
    *
@@ -434,22 +518,7 @@ class Formats {
   }
 
   /**
-   * return font and color info of a format
-   * @static
-   *
-   * @param {Object} format
-   * @returns {String[]}
-   */
-  static fontAndColors(format) {
-    return [
-      format.formats_fontFamily,
-      format.formats_textColor,
-      format.formats_backgroundColor,
-    ];
-  }
-
-  /**
-   * returns a rtf representaion of a format, taking font, color and style tables into account
+   * returns a rtf representation of a format, taking font, color and style tables into account
    * @static
    *
    * @param {Object} format
@@ -493,13 +562,14 @@ class Formats {
       rtf += `\\q${format.formats_textAlign.substring(0, 1)}`;
     }
 
+    // 1 pt = 20 twips
+    if (format.formats_lineHeight) {
+      rtf += `\\sl${Math.round(format.formats_fontSize * format.formats_lineHeight * 20)}`;
+    }
+
     // factor 15 results from conversion from em to twips:
     // 1 pt = 1/72 in, 1 twip = 1/1440 in = 1/20 pt; 1 em ~ 3/4 * font size in pt
     // thus 1 em = 3/4 * 1440/72 = 15 twips
-    if (format.formats_lineHeight) {
-      rtf += `\\sl${Math.round(format.formats_fontSize * format.formats_lineHeight * 15)}`;
-    }
-
     if (format.formats_topIndent) {
       rtf += `\\sb${Math.round(format.formats_fontSize * format.formats_topIndent * 15)}`;
     }
@@ -529,7 +599,7 @@ class Formats {
     }
 
     // word spacing not supported in rtf
-    console.log("formatToRTF", format, rtf);
+
     return rtf;
   }
 }

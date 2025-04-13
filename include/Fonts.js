@@ -72,6 +72,18 @@ class Fonts {
     fantasy: "fdecor",
   };
 
+  /**
+   * generic families as known in DOCX
+   * @static
+   */
+  static docxFamilies = {
+    sansSerif: "Sans-serif",
+    serif: "Serif",
+    monospace: "Monospace",
+    cursive: "Cursive",
+    fantasy: "Fantasy",
+  };
+
   #availableFamilies; // all font families found on system
 
   /**

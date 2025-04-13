@@ -664,7 +664,7 @@ class StyledText {
   /**
    * verbatim references for all objects this text is connected with
    *
-   * @returns {Object[]} [{object:id, references:[{text:id, citations:[{pos:pos,len:len,text:string,html:boolean},...]}, ...]}, ...]
+   * @returns {Object[]} [{object:id, references:[{text:id, citations:[{pos:pos,len:len,content:string,html:boolean},...]}, ...]}, ...]
    */
   objectReferences() {
     return ObjectReference.citations(

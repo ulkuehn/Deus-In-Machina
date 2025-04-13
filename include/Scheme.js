@@ -254,7 +254,7 @@ class Scheme {
               break;
             case "schemeTypes_editor":
               // the class="ql-editor" attribute is a bit of a hack to streamline styling with editor
-              content = `<div class="ql-editor" style="max-height:${item.params[0]}px; border:1px solid black; overflow:auto; padding:5px; user-select:text">${Exporter.deltaToHTML(value.ops, {}, {})}</div>`;
+              content = `<div class="ql-editor" style="max-height:${item.params[0]}px; border:1px solid black; overflow:auto; padding:5px; user-select:text">${Exporter.delta2HTML(value.ops)}</div>`;
               break;
             case "schemeTypes_map":
               content = `${_("Scheme_locationMap")} ${_(

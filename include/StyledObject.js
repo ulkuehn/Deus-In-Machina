@@ -271,7 +271,7 @@ class StyledObject {
   /**
    * verbatim references for all texts this object is connected with
    *
-   * @returns {Object[]} [{object:id, references:[{text:id, citations:[{pos:pos,len:len,parts:[text:string,html:boolean]},...]}, ...]}, ...]
+   * @returns {Object[]} [{object:id, references:[{text:id, citations:[{pos:pos,len:len,parts:[content:string,html:boolean]},...]}, ...]}, ...]
    */
   textReferences(
     handleImages = theSettings.effectiveSettings().imageReference,
@@ -465,18 +465,13 @@ class StyledObject {
     let colors = {};
     Object.keys(StylingControls.controls).forEach((area) => {
       StylingControls.controls[area].forEach((control) => {
-        if (
-          control.type == "font" &&
-          this.#styleProperties[area][control.name]
-        ) {
+        if (control.type == "font" && this.#styleProperties[area][control.name])
           fonts[this.#styleProperties[area][control.name]] = true;
-        }
         if (
-          control.type == "color" &&
+          (control.type == "color" || control.type == "emptycolor") &&
           this.#styleProperties[area][control.name]
-        ) {
+        )
           colors[this.#styleProperties[area][control.name]] = true;
-        }
         if (
           control.type == "multi" &&
           this.#styleProperties[area][control.name]
@@ -484,16 +479,15 @@ class StyledObject {
           for (let i = 0; i < control.controls.length; i++) {
             if (
               control.controls[i].type == "font" &&
-              this.#styleProperties[area][control.name][i + 1]
-            ) {
-              fonts[this.#styleProperties[area][control.name][i + 1]] = true;
-            }
+              this.#styleProperties[area][control.name][i]
+            )
+              fonts[this.#styleProperties[area][control.name][i]] = true;
             if (
-              control.controls[i].type == "color" &&
-              this.#styleProperties[area][control.name][i + 1]
-            ) {
-              colors[this.#styleProperties[area][control.name][i + 1]] = true;
-            }
+              (control.controls[i].type == "color" ||
+                control.controls[i].type == "emptycolor") &&
+              this.#styleProperties[area][control.name][i]
+            )
+              colors[this.#styleProperties[area][control.name][i]] = true;
           }
         }
       });
@@ -734,7 +728,7 @@ class StyledObject {
             for (let part of citation.parts) {
               if (!part.html) {
                 rex.lastIndex = -1;
-                if ((r = rex.exec(part.text))) break;
+                if ((r = rex.exec(part.content))) break;
               }
               index++;
             }
@@ -747,25 +741,30 @@ class StyledObject {
                   citation.parts
                     .slice(0, index)
                     .map((part) =>
-                      part.html ? part.text : Util.escapeHTML(part.text),
+                      part.html ? part.content : Util.escapeHTML(part.content),
                     )
                     .join("") +
                     Util.escapeHTML(
-                      citation.parts[index].text.substring(0, r.indices[0][0]),
+                      citation.parts[index].content.substring(
+                        0,
+                        r.indices[0][0],
+                      ),
                     ),
                   Util.escapeHTML(
-                    citation.parts[index].text.substring(
+                    citation.parts[index].content.substring(
                       r.indices[0][0],
                       r.indices[0][1],
                     ),
                   ),
                   Util.escapeHTML(
-                    citation.parts[index].text.substring(r.indices[0][1]),
+                    citation.parts[index].content.substring(r.indices[0][1]),
                   ) +
                     citation.parts
                       .slice(index + 1)
                       .map((part) =>
-                        part.html ? part.text : Util.escapeHTML(part.text),
+                        part.html
+                          ? part.content
+                          : Util.escapeHTML(part.content),
                       )
                       .join(""),
                 ],

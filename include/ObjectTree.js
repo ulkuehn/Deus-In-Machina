@@ -459,7 +459,7 @@ class ObjectTree {
   }
 
   /**
-   * remove quill format attributes with given ids from all editors in all objects in the tree
+   * remove quill format attributes with given ids from all editors in all objects in the tree (called when a format is deleted)
    *
    * @param {String[]} ids
    */

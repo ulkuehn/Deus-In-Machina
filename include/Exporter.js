@@ -6,7 +6,7 @@
  */
 
 /**
- * @classdesc Exporter combines all functionality to export a project's information to common formats like RTF
+ * @classdesc Exporter combines all functionality to export a project's information to common formats like HTML or RTF
  */
 
 class Exporter {
@@ -44,21 +44,10 @@ class Exporter {
   }
 
   /**
-   * helper methods
-   */
-  static #escapeUncookedHTML(x) {
-    return x.isCooked ? x.insert : Util.escapeHTML(x.insert);
-  }
-  static #escapeUncookedRTF(x) {
-    return x.isCooked ? x.insert : Exporter.#escapeRTF(x.insert);
-  }
-
-  /**
-   * strings for drawing rtf tables
+   * string for path building (text and object paths)
    * @static
    */
-  static #rtfBorder = `\\clbrdrt\\brdrs\\brdrw1\\brdrcf0\\clbrdrr\\brdrs\\brdrw1\\brdrcf0\\clbrdrl\\brdrs\\brdrw1\\brdrcf0\\clbrdrb\\brdrs\\brdrw1\\brdrcf0`;
-  static #rtfRow = `\\trowd\\trpaddb50\\trpaddt50\\trpaddl50\\trpaddr50`;
+  static #pathSeparator = " &#10142; ";
 
   /**
    * document level placeholders
@@ -67,52 +56,43 @@ class Exporter {
     // document title
     projectTitlePlaceholder: {
       function: () => {
-        return { insert: theProperties.title };
+        return { type: "text", content: theProperties.title };
       },
     },
     // document subtitle
     projectSubtitlePlaceholder: {
       function: () => {
-        return { insert: theProperties.subtitle };
+        return { type: "text", content: theProperties.subtitle };
       },
     },
     // document author
     projectAuthorPlaceholder: {
       function: () => {
-        return { insert: theProperties.author };
+        return { type: "text", content: theProperties.author };
       },
     },
-    // document infos (multiple paragraphs)
+    // document infos (possibly multiple paragraphs)
     projectInfoPlaceholder: {
-      function: (exportType) => {
-        switch (exportType) {
-          case "txt":
-            return { insert: theProperties.info };
-            break;
-          case "html":
-            return {
-              insert: Util.escapeHTML(theProperties.info)
-                .split("\n")
-                .join("<br>"),
-              isCooked: true,
-            };
-            break;
-          case "rtf":
-            return {
-              insert: Exporter.#escapeRTF(theProperties.info)
-                .split("\n")
-                .join("\\line "),
-              isCooked: true,
-            };
-            break;
-        }
+      function: () => {
+        let result = [];
+        let infoParagraphs = theProperties.info.split("\n");
+        let lastPara = infoParagraphs.pop();
+        infoParagraphs.forEach((p) =>
+          result.push({
+            type: "paragraph",
+            content: [{ type: "text", content: p }],
+          }),
+        );
+        result.push({ type: "text", content: lastPara });
+        return result;
       },
     },
     // creation time
     projectCreatedPlaceholder: {
       function: () => {
         return {
-          insert: theProject.created
+          type: "text",
+          content: theProject.created
             ? theProject.created.toLocalString(
                 theSettings.effectiveSettings().dateTimeFormatLong,
               )
@@ -124,7 +104,8 @@ class Exporter {
     projectChangedPlaceholder: {
       function: () => {
         return {
-          insert: theProject.changed
+          type: "text",
+          content: theProject.changed
             ? theProject.changed.toLocalString(
                 theSettings.effectiveSettings().dateTimeFormatLong,
               )
@@ -136,7 +117,8 @@ class Exporter {
     projectNowPlaceholder: {
       function: () => {
         return {
-          insert: new Timestamp().toLocalString(
+          type: "text",
+          content: new Timestamp().toLocalString(
             theSettings.effectiveSettings().dateTimeFormatLong,
           ),
         };
@@ -145,40 +127,45 @@ class Exporter {
     // storage version
     projectVersionPlaceholder: {
       function: () => {
-        return { insert: theProject.version ? theProject.version : "---" };
+        return {
+          type: "text",
+          content: theProject.version ? theProject.version : "---",
+        };
       },
     },
     // storage path
     projectPathPlaceholder: {
-      function: (exportType) => {
-        return { insert: theProject.path ? theProject.path : "---" };
+      function: () => {
+        return {
+          type: "text",
+          content: theProject.path ? theProject.path : "---",
+        };
       },
     },
     // character count
     projectCharactersPlaceholder: {
-      function: (exportType, statistics) => {
-        return { insert: statistics.characters };
+      function: (statistics) => {
+        return { type: "text", content: statistics.characters };
       },
     },
     // word count
     projectWordsPlaceholder: {
-      function: (exportType, statistics) => {
-        return { insert: statistics.words };
+      function: (statistics) => {
+        return { type: "text", content: statistics.words };
       },
     },
     // exported texts (see textPlaceholders)
     textsBlockPlaceholder: {
       block: true,
-      function: (exportType, statistics, textsExport) => {
-        return { insert: textsExport, isCooked: true, isBlock: true };
+      function: (statistics, textsExport) => {
+        return textsExport;
       },
     },
     // exported objects (see objectPlaceholders)
     objsBlockPlaceholder: {
       block: true,
-      html: true,
-      function: (exportType, statistics, textsExport, objectsExport) => {
-        return { insert: objectsExport, isCooked: true, isBlock: true };
+      function: (statistics, textsExport, objectsExport) => {
+        return objectsExport;
       },
     },
   };
@@ -192,35 +179,18 @@ class Exporter {
     textNamePlaceholder: {
       function: (textID) => {
         return {
-          insert: theTextTree.getText(textID).name,
+          type: "text",
+          content: theTextTree.getText(textID).name,
         };
       },
     },
     // text path in tree
     textPathPlaceholder: {
-      function: (textID, textContents, exportType) => {
-        switch (exportType) {
-          case "txt":
-            return { insert: theTextTree.getParents(textID).join(" --> ") };
-            break;
-          case "html":
-            return {
-              insert: theTextTree
-                .getParents(textID)
-                .map((x) => Util.escapeHTML(x))
-                .join(" &#10142; "),
-              isCooked: true,
-            };
-            break;
-          case "rtf":
-            return {
-              insert: theTextTree
-                .getParents(textID)
-                .map((x) => Exporter.#escapeRTF(x))
-                .join(" \\u10142? "),
-              isCooked: true,
-            };
-        }
+      function: (textID) => {
+        return {
+          type: "text",
+          content: theTextTree.getParents(textID).join(Exporter.#pathSeparator),
+        };
       },
     },
     // text status
@@ -236,7 +206,8 @@ class Exporter {
             theTextTree.getText(textID).status
           ) {
             return {
-              insert:
+              type: "text",
+              content:
                 theProperties.categories.categories_status[i]
                   .categories_statusName,
             };
@@ -257,7 +228,8 @@ class Exporter {
             theTextTree.getText(textID).type
           ) {
             return {
-              insert:
+              type: "text",
+              content:
                 theProperties.categories.categories_type[i].categories_typeName,
             };
           }
@@ -277,7 +249,8 @@ class Exporter {
             theTextTree.getText(textID).userValue
           ) {
             return {
-              insert:
+              type: "text",
+              content:
                 theProperties.categories.categories_user[i].categories_userName,
             };
           }
@@ -288,7 +261,8 @@ class Exporter {
     textCreatedPlaceholder: {
       function: (textID) => {
         return {
-          insert: theTextTree
+          type: "text",
+          content: theTextTree
             .getText(textID)
             .created.toLocalString(
               theSettings.effectiveSettings().dateTimeFormatLong,
@@ -300,7 +274,8 @@ class Exporter {
     textChangedPlaceholder: {
       function: (textID) => {
         return {
-          insert: theTextTree
+          type: "text",
+          content: theTextTree
             .getText(textID)
             .changed.toLocalString(
               theSettings.effectiveSettings().dateTimeFormatLong,
@@ -311,20 +286,23 @@ class Exporter {
     // character count
     textCharactersPlaceholder: {
       function: (textID) => {
-        return { insert: theTextTree.getText(textID).characters };
+        return {
+          type: "text",
+          content: theTextTree.getText(textID).characters,
+        };
       },
     },
     // word count
     textWordsPlaceholder: {
       function: (textID) => {
-        return { insert: theTextTree.getText(textID).words };
+        return { type: "text", content: theTextTree.getText(textID).words };
       },
     },
     // text contents
     textContentBlockPlaceholder: {
       block: true,
       function: (textID, textContents) => {
-        return { insert: textContents, isCooked: true, isBlock: true };
+        return textContents;
       },
     },
   };
@@ -338,44 +316,28 @@ class Exporter {
     objNamePlaceholder: {
       function: (objectID) => {
         return {
-          insert: theObjectTree.getObject(objectID).name,
+          type: "text",
+          content: theObjectTree.getObject(objectID).name,
         };
       },
     },
     // object path in tree
     objPathPlaceholder: {
-      function: (objectID, exportType) => {
-        switch (exportType) {
-          case "txt":
-            return {
-              insert: theObjectTree.getParents(objectID).join(" --> "),
-            };
-            break;
-          case "html":
-            return {
-              insert: theObjectTree
-                .getParents(objectID)
-                .map((x) => Util.escapeHTML(x))
-                .join(" &#10142; "),
-              isCooked: true,
-            };
-            break;
-          case "rtf":
-            return {
-              insert: theObjectTree
-                .getParents(objectID)
-                .map((x) => Exporter.#escapeRTF(x))
-                .join(" \\u10142? "),
-              isCooked: true,
-            };
-        }
+      function: (objectID) => {
+        return {
+          type: "text",
+          content: theObjectTree
+            .getParents(objectID)
+            .join(Exporter.#pathSeparator),
+        };
       },
     },
     // creation time
     objCreatedPlaceholder: {
       function: (objectID) => {
         return {
-          insert: theObjectTree
+          type: "text",
+          content: theObjectTree
             .getObject(objectID)
             .created.toLocalString(
               theSettings.effectiveSettings().dateTimeFormatLong,
@@ -387,7 +349,8 @@ class Exporter {
     objChangedPlaceholder: {
       function: (objectID) => {
         return {
-          insert: theObjectTree
+          type: "text",
+          content: theObjectTree
             .getObject(objectID)
             .changed.toLocalString(
               theSettings.effectiveSettings().dateTimeFormatLong,
@@ -398,8 +361,8 @@ class Exporter {
     // object contents (as list)
     objContentBlockPlaceholder: {
       block: true,
-      function: (objectID, exportType, objectContents) => {
-        return { insert: objectContents, isCooked: true, isBlock: true };
+      function: (objectID, objectContents) => {
+        return objectContents;
       },
     },
     // objects contents (as table)
@@ -407,466 +370,212 @@ class Exporter {
       block: true,
       function: (
         objectID,
-        exportType,
         objectContents,
         useCitationTexts,
         propertyNames,
         propertyTypes,
         propertyContents,
       ) => {
-        switch (exportType) {
-          case "txt":
-            let data = [];
-            let sCells = [];
-            data.push([
-              _("Scheme_propertyName"),
-              _("Scheme_propertyType"),
-              _("Scheme_propertyContent"),
+        let tableContent = [
+          [
+            {
+              content: {
+                type: "text",
+                content: _("Scheme_propertyName"),
+                bold: true,
+              },
+            },
+            {
+              content: {
+                type: "text",
+                content: _("Scheme_propertyType"),
+                bold: true,
+              },
+            },
+            {
+              content: {
+                type: "text",
+                content: _("Scheme_propertyContent"),
+                bold: true,
+              },
+            },
+          ],
+        ];
+        for (let i = 0; i < propertyNames.length; i++) {
+          if ("content" in propertyNames[i]) {
+            tableContent.push([
+              {
+                content: propertyNames[i],
+              },
+              { content: propertyTypes[i] },
+              { content: propertyContents[i] },
             ]);
-            for (let i = 0; i < propertyNames.length; i++) {
-              if (propertyTypes[i].insert == "") {
-                data.push([propertyContents[i].insert, "", ""]);
-                sCells.push({ col: 0, row: i + 1, colSpan: 3 });
-              } else {
-                data.push([
-                  propertyNames[i].insert,
-                  propertyTypes[i].insert,
-                  propertyContents[i].insert,
-                ]);
-              }
-            }
-            return {
-              insert: table(data, {
-                border: getBorderCharacters("norc"),
-                columns: [
-                  {
-                    width: 15,
-                    paddingLeft: 0,
-                    paddingRight: 2,
-                    wrapWord: true,
-                  },
-                  {
-                    width: 15,
-                    paddingLeft: 0,
-                    paddingRight: 2,
-                    wrapWord: true,
-                  },
-                  {
-                    width:
-                      theSettings.effectiveSettings().exportTableLineLength -
-                      (15 + 2 + 15 + 2),
-                    paddingLeft: 0,
-                    paddingRight: 0,
-                    wrapWord: true,
-                  },
-                ],
-                spanningCells: sCells,
-              }),
-            };
-          case "html":
-            {
-              let html = `<table style="width:100%"><thead><tr><th style="font-weight:bold; padding:0 10px 4px 0"><p>${_(
-                "Scheme_propertyName",
-              )}</p></th><th style="font-weight:bold; padding:0 10px 4px 0"><p>${_("Scheme_propertyType")}</p></th><th style="font-weight:bold; padding:0 10px 4px 0"><p>${_(
-                "Scheme_propertyContent",
-              )}</p></th></tr></thead><tbody>`;
-              for (let i = 0; i < propertyNames.length; i++) {
-                if (propertyTypes[i].insert == "") {
-                  html += `<tr><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0" colspan=3><p>${Exporter.#escapeUncookedHTML(
-                    propertyContents[i],
-                  )}</p></td></tr>`;
-                } else {
-                  html += `<tr><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0"><p>${Exporter.#escapeUncookedHTML(
-                    propertyNames[i],
-                  )}</p></td><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0"><p>${Exporter.#escapeUncookedHTML(
-                    propertyTypes[i],
-                  )}</p></td><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0"><p>${Exporter.#escapeUncookedHTML(
-                    propertyContents[i],
-                  )}</p></td></tr>`;
-                }
-              }
-              html += "</table>";
-              return { insert: html, isCooked: true, isBlock: true };
-            }
-            break;
-          case "rtf":
-            {
-              let cell1Def = `${Exporter.#rtfBorder}\\cellx2000`;
-              let cell2Def = `${Exporter.#rtfBorder}\\cellx4000`;
-              let cell3Def = `${Exporter.#rtfBorder}\\cellx9000`;
-              let rtf = `${
-                Exporter.#rtfRow
-              }${cell1Def}${cell2Def}${cell3Def}\\pard\\intbl ${_(
-                "Scheme_propertyName",
-              )}\\cell \\pard\\intbl ${_(
-                "Scheme_propertyType",
-              )}\\cell \\pard\\intbl ${_(
-                "Scheme_propertyContent",
-              )}\\cell\\row\n`;
-              for (let i = 0; i < propertyNames.length; i++) {
-                if (propertyTypes[i].insert == "") {
-                  rtf += `${
-                    Exporter.#rtfRow
-                  }\\clmgf${cell1Def}\\clmrg${cell2Def}\\clmrg${cell3Def}\\pard\\intbl ${Exporter.#escapeUncookedRTF(
-                    propertyContents[i],
-                  )}\\cell \\pard\\intbl \\cell \\pard\\intbl \\cell\\row\n`;
-                } else {
-                  rtf += `${
-                    Exporter.#rtfRow
-                  }${cell1Def}${cell2Def}${cell3Def}\\pard\\intbl ${Exporter.#escapeUncookedRTF(
-                    propertyNames[i],
-                  )}\\cell \\pard\\intbl ${Exporter.#escapeUncookedRTF(
-                    propertyTypes[i],
-                  )}\\cell \\pard\\intbl ${Exporter.#escapeUncookedRTF(
-                    propertyContents[i],
-                  )}\\cell\\row\n`;
-                }
-              }
-              return { insert: rtf, isCooked: true, isBlock: true };
-            }
-            break;
+          }
+          // scheme headers - they span the whole row
+          else {
+            tableContent.push([
+              {
+                content: Object.assign({ italic: true }, propertyContents[i]),
+                colSpan: 3,
+              },
+              { content: { type: "text", content: "" } },
+              { content: { type: "text", content: "" } },
+            ]);
+          }
         }
+        return {
+          type: "table",
+          rows: propertyNames.length,
+          cols: 3,
+          width: [20, 20, 60],
+          header: true,
+          content: tableContent,
+        };
       },
     },
-    // sample text styled with object style
+    // sample text styled with object style (useless for txt exports)
     objStyleSamplePlaceholder: {
       block: true,
-      function: (
-        objectID,
-        exportType,
-        objectContents,
-        useCitationTexts,
-        propertyNames,
-        propertyTypes,
-        propertyContents,
-        that,
-      ) => {
-        switch (exportType) {
-          case "txt":
-            return { insert: "" };
-            break;
-          case "html":
-            {
-              // set object style (in case it is not already set)
-              let so = new StyledObject();
-              so.styleProperties =
-                theObjectTree.objectStyle(objectID).styleProperties;
-              that.useObjectStyle(objectID, so);
-              return {
-                insert:
-                  `<p><span class="object${objectID}-true">` +
-                  (
-                    theSettings.effectiveSettings().exportTextSample ||
-                    _("sampleTexts_medium")
-                  )
-                    .split("\n")
-                    .join("<br>") +
-                  "</span></p>",
-                isCooked: true,
-                isBlock: true,
-              };
-            }
-            break;
-          case "rtf":
-            {
-              let fac = theObjectTree.objectStyle(objectID).fontsAndColors();
-              fac.fonts.forEach((font) => {
-                if (!that.#fontTable.includes(font)) {
-                  that.#fontTable.push(font);
-                }
-              });
-              fac.colors.forEach((color) => {
-                if (!that.#colorTable.includes(color)) {
-                  that.#colorTable.push(color);
-                }
-              });
-              return {
-                insert:
-                  `\\pard\\plain${Formats.formatToRTF(
-                    theFormats.formats[UUID0],
-                    that.#fontTable,
-                    that.#colorTable,
-                    that.#styleTable.indexOf(UUID0),
-                  )}{${StylingControls.controls2RTF(
-                    theObjectTree.objectStyle(objectID).styleProperties.text,
-                    theFormats.formats[UUID0].formats_fontSize,
-                    that.#fontTable,
-                    that.#colorTable,
-                  )} ` +
-                  Exporter.#escapeRTF(
-                    theSettings.effectiveSettings().exportTextSample ||
-                      _("sampleTexts_medium"),
-                  )
-                    .split("\n")
-                    .join("\\line ") +
-                  "}\\par\n",
-                isCooked: true,
-                isBlock: true,
-              };
-            }
-            break;
-        }
+      function: (objectID) => {
+        let paras = [];
+        (
+          theSettings.effectiveSettings().exportTextSample ||
+          _("sampleTexts_medium")
+        )
+          .split("\n")
+          .forEach((p) => {
+            paras.push({
+              type: "paragraph",
+              content: [{ type: "text", content: p, objects: [objectID] }],
+            });
+          });
+        return paras;
       },
     },
     // object references (text passages linked with the object)
     objTextReferencesPlaceholder: {
       block: true,
-      function: (
-        objectID,
-        exportType,
-        objectContents,
-        useCitationTexts,
-        propertyNames,
-        propertyTypes,
-        propertyContents,
-        that,
-      ) => {
-        switch (exportType) {
-          case "txt":
-            {
-              let text = "";
-              theObjectTree
-                .getObject(objectID)
-                .textReferences(
-                  theSettings.effectiveSettings().exportTextImage
-                    ? "imageReferenceExportText"
-                    : "imageReferenceEmpty",
-                )
-                .forEach((objRef) => {
-                  if (objRef.object == objectID) {
-                    objRef.references.forEach((textRef) => {
-                      if (useCitationTexts.includes(textRef.text)) {
-                        let name = theTextTree.getText(textRef.text).name;
-                        textRef.citations.forEach((citation) => {
-                          text += `${name}:\n${citation.parts.map((c) => c.text).join("")}\n`;
+      function: (objectID, objectContents, useCitationTexts) => {
+        let paras = [];
+        theObjectTree
+          .getObject(objectID)
+          .textReferences("") // return as raw
+          .forEach((objRef) => {
+            if (objRef.object == objectID) {
+              objRef.references.forEach((textRef) => {
+                if (useCitationTexts.includes(textRef.text)) {
+                  paras.push({
+                    type: "paragraph",
+                    content: [
+                      {
+                        type: "text",
+                        content: theTextTree.getText(textRef.text).name,
+                        bold: true,
+                      },
+                    ],
+                  });
+                  textRef.citations.forEach((citation) => {
+                    let c = [];
+                    citation.parts.forEach((part) => {
+                      if (typeof part.content == "object")
+                        c.push({
+                          type: "image",
+                          content: part.content.insert.image,
+                          width: part.content.attributes.width,
+                          height: part.content.attributes.height,
+                          title: part.content.attributes.title,
                         });
-                      }
-                    });
-                  }
-                });
-              return {
-                insert: text + "\n",
-              };
-            }
-            break;
-          case "html":
-            {
-              let html = "";
-              theObjectTree
-                .getObject(objectID)
-                .textReferences()
-                .forEach((objRef) => {
-                  if (objRef.object == objectID) {
-                    objRef.references.forEach((textRef) => {
-                      if (useCitationTexts.includes(textRef.text)) {
-                        let name = theTextTree.getText(textRef.text).name;
-                        textRef.citations.forEach((citation) => {
-                          html += `<p><b>${Util.escapeHTML(
-                            name,
-                          )}:</b></p><p>${citation.parts
-                            .map((part) =>
-                              part.html
-                                ? part.text
-                                : Util.escapeHTML(part.text),
-                            )
-                            .join("")}</p>`;
+                      else
+                        c.push({
+                          type: "text",
+                          content: part.content,
                         });
-                      }
                     });
-                  }
-                });
-              return { insert: html, isCooked: true, isBlock: true };
-            }
-            break;
-          case "rtf":
-            {
-              let rtf = "";
-              theObjectTree
-                .getObject(objectID)
-                .textReferences(
-                  theSettings.effectiveSettings().exportTextImage
-                    ? "imageReferenceExportText"
-                    : "imageReferenceEmpty",
-                )
-                .forEach((objRef) => {
-                  if (objRef.object == objectID) {
-                    objRef.references.forEach((textRef) => {
-                      if (useCitationTexts.includes(textRef.text)) {
-                        let name = theTextTree.getText(textRef.text).name;
-                        let format = Formats.formatToRTF(
-                          theFormats.formats[UUID0],
-                          that.#fontTable,
-                          that.#colorTable,
-                          that.#styleTable.indexOf(UUID0),
-                        );
-                        textRef.citations.forEach((citation) => {
-                          rtf += `\\pard\\plain${format}{\\b1 ${Exporter.#escapeRTF(
-                            name,
-                          )}:}\\par\n\\pard\\plain${format} ${Exporter.#escapeRTF(
-                            citation.parts.map((c) => c.text).join(""),
-                          )}\\par\n`;
-                        });
-                      }
+                    paras.push({
+                      type: "paragraph",
+                      content: c,
                     });
-                  }
-                });
-              return { insert: rtf, isCooked: true, isBlock: true };
+                  });
+                }
+              });
             }
-            break;
-        }
+          });
+        return paras;
       },
     },
     // object references as table
     objTextReferencesTablePlaceholder: {
       block: true,
-      function: (
-        objectID,
-        exportType,
-        objectContents,
-        useCitationTexts,
-        propertyNames,
-        propertyTypes,
-        propertyContents,
-        that,
-      ) => {
-        switch (exportType) {
-          case "txt":
+      function: (objectID, objectContents, useCitationTexts) => {
+        let tableContent = [
+          [
             {
-              let data = [];
-              data.push([_("mainWindow_textName"), _("mainWindow_citation")]);
-              let prevName = "";
-              theObjectTree
-                .getObject(objectID)
-                .textReferences(
-                  theSettings.effectiveSettings().exportTextImage
-                    ? "imageReferenceExportText"
-                    : "imageReferenceEmpty",
-                )
-                .forEach((objRef) => {
-                  if (objRef.object == objectID) {
-                    objRef.references.forEach((textRef) => {
-                      if (useCitationTexts.includes(textRef.text)) {
-                        let name = theTextTree.getText(textRef.text).name;
-                        textRef.citations.forEach((citation) => {
-                          data.push([
-                            name == prevName ? "" : name,
-                            citation.parts.map((c) => c.text).join(""),
-                          ]);
-                          prevName = name;
-                        });
-                      }
-                    });
-                  }
-                });
-              return {
-                insert: table(data, {
-                  border: getBorderCharacters("norc"),
-                  columns: [
-                    {
-                      width: 15,
-                      paddingLeft: 0,
-                      paddingRight: 2,
-                      wrapWord: true,
-                    },
-                    {
-                      width:
-                        theSettings.effectiveSettings().exportTableLineLength -
-                        17,
-                      paddingLeft: 0,
-                      paddingRight: 0,
-                      wrapWord: true,
-                    },
-                  ],
-                }),
-              };
-            }
-            break;
-          case "html":
+              content: {
+                type: "text",
+                content: _("mainWindow_textName"),
+                bold: true,
+              },
+            },
             {
-              let html = `<table style="width:100%"><thead><tr><th style="font-weight:bold; padding:0 10px 4px 0"><p>${_(
-                "mainWindow_textName",
-              )}</p></th><th style="font-weight:bold; padding:0 10px 4px 0"><p>${_(
-                "mainWindow_citation",
-              )}</p></th></tr></thead><tbody>`;
-
-              theObjectTree
-                .getObject(objectID)
-                .textReferences()
-                .forEach((objRef) => {
-                  if (objRef.object == objectID) {
-                    objRef.references.forEach((textRef) => {
-                      if (useCitationTexts.includes(textRef.text)) {
-                        let row = `<td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0" rowspan=${textRef.citations.length}>${Util.escapeHTML(
-                          theTextTree.getText(textRef.text).name,
-                        )}</td>`;
-
-                        textRef.citations.forEach((citation) => {
-                          row += `<td style="white-space:pre-wrap; vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0">${citation.parts
-                            .map((part) =>
-                              part.html
-                                ? part.text
-                                : Util.escapeHTML(part.text),
-                            )
-                            .join("")}</td>`;
-                          html += `<tr>${row}</tr>`;
-                          row = "";
+              content: {
+                type: "text",
+                content: _("mainWindow_citation"),
+                bold: true,
+              },
+            },
+          ],
+        ];
+        let rows = 1;
+        theObjectTree
+          .getObject(objectID)
+          .textReferences("") // return as raw
+          .forEach((objRef) => {
+            if (objRef.object == objectID) {
+              objRef.references.forEach((textRef) => {
+                if (useCitationTexts.includes(textRef.text)) {
+                  textRef.citations.forEach((citation) => {
+                    rows++;
+                    let tableRow = [
+                      {
+                        content: {
+                          type: "text",
+                          content: theTextTree.getText(textRef.text).name,
+                        },
+                      },
+                    ];
+                    let c = [];
+                    citation.parts.forEach((part) => {
+                      if (typeof part.content == "object")
+                        c.push({
+                          type: "image",
+                          content: part.content.insert.image,
+                          width: part.content.attributes.width,
+                          height: part.content.attributes.height,
+                          title: part.content.attributes.title,
                         });
-                      }
-                    });
-                  }
-                });
-              html += "</tbody></table>";
-              return { insert: html, isCooked: true, isBlock: true };
-            }
-            break;
-          case "rtf":
-            {
-              let cell1Def = `${Exporter.#rtfBorder}\\cellx3000`;
-              let cell2Def = `${Exporter.#rtfBorder}\\cellx9000`;
-              let rtf = `${
-                Exporter.#rtfRow
-              }${cell1Def}${cell2Def}\\pard\\intbl ${_(
-                "mainWindow_textName",
-              )}\\cell \\pard\\intbl ${_("mainWindow_citation")}\\cell\\row\n`;
-              let prevName = null;
-
-              theObjectTree
-                .getObject(objectID)
-                .textReferences(
-                  theSettings.effectiveSettings().exportTextImage
-                    ? "imageReferenceExportText"
-                    : "imageReferenceEmpty",
-                )
-                .forEach((objRef) => {
-                  if (objRef.object == objectID) {
-                    objRef.references.forEach((textRef) => {
-                      if (useCitationTexts.includes(textRef.text)) {
-                        let name = theTextTree.getText(textRef.text).name;
-                        let format = Formats.formatToRTF(
-                          theFormats.formats[UUID0],
-                          that.#fontTable,
-                          that.#colorTable,
-                          that.#styleTable.indexOf(UUID0),
-                        );
-                        textRef.citations.forEach((citation) => {
-                          rtf += `${
-                            Exporter.#rtfRow
-                          }${cell1Def}${cell2Def}\\pard\\intbl${format} ${
-                            prevName == name ? "" : Exporter.#escapeRTF(name)
-                          }\\cell \\pard\\intbl${format} ${Exporter.#escapeRTF(
-                            citation.parts.map((c) => c.text).join(""),
-                          )}\\cell\\row\n`;
-                          prevName = name;
+                      else
+                        c.push({
+                          type: "text",
+                          content: part.content,
                         });
-                      }
                     });
-                  }
-                });
-
-              return { insert: rtf, isCooked: true, isBlock: true };
+                    tableRow.push({
+                      content: c,
+                    });
+                    tableContent.push(tableRow);
+                  });
+                }
+              });
             }
-            break;
-        }
+          });
+        return {
+          type: "table",
+          rows: rows,
+          cols: 2,
+          width: [30, 70],
+          header: true,
+          content: tableContent,
+        };
       },
     },
   };
@@ -880,7 +589,8 @@ class Exporter {
     objTextNamePlaceholder: {
       function: (objectID) => {
         return {
-          insert: theObjectTree.getObject(objectID).name,
+          type: "text",
+          content: theObjectTree.getObject(objectID).name,
         };
       },
     },
@@ -888,57 +598,32 @@ class Exporter {
     objTextNameUpperPlaceholder: {
       function: (objectID) => {
         return {
-          insert: theObjectTree.getObject(objectID).name.toUpperCase(),
+          type: "text",
+          content: theObjectTree.getObject(objectID).name.toUpperCase(),
         };
       },
     },
     // path in object tree
     objTextPathPlaceholder: {
-      /**
-       * @todo implement way to insert cooked ops into text content, so they won't be escaped (again) and change arrow symbol to respective html / rtf code
-       */
-      function: (objectID, exportType) => {
-        switch (exportType) {
-          case "txt":
-            return {
-              insert: theObjectTree.getParents(objectID).join(" --> "),
-            };
-            break;
-          case "html":
-          case "rtf":
-            return {
-              insert: theObjectTree
-                .getParents(objectID)
-                // .map((x) => Util.escapeHTML(x))
-                .join(" ➞ "), // .join(" &#10142; ")
-              // isCooked: true,
-            };
-            break;
-        }
+      function: (objectID) => {
+        return {
+          type: "text",
+          content: theObjectTree
+            .getParents(objectID)
+            .join(Exporter.#pathSeparator),
+        };
       },
     },
     // upper cased
     objTextPathUpperPlaceholder: {
-      function: (objectID, exportType) => {
-        switch (exportType) {
-          case "txt":
-            return {
-              insert: theObjectTree
-                .getParents(objectID)
-                .join(" --> ")
-                .toUpperCase(),
-            };
-            break;
-          case "html":
-          case "rtf":
-            return {
-              insert: theObjectTree
-                .getParents(objectID)
-                .join(" ➞ ")
-                .toUpperCase(),
-            };
-            break;
-        }
+      function: (objectID) => {
+        return {
+          type: "text",
+          content: theObjectTree
+            .getParents(objectID)
+            .join(Exporter.#pathSeparator)
+            .toUpperCase(),
+        };
       },
     },
   };
@@ -953,10 +638,10 @@ class Exporter {
       function: (item) => {
         switch (item.type) {
           case "schemeTypes_header":
-            return { insert: "" };
+            return [];
             break;
           default:
-            return { insert: item.name };
+            return { type: "text", content: item.name };
             break;
         }
       },
@@ -966,26 +651,28 @@ class Exporter {
       function: (item) => {
         switch (item.type) {
           case "schemeTypes_header":
-            return { insert: "" };
+            return [];
             break;
           case "schemeTypes_select":
           case "schemeTypes_radio":
             return {
-              insert: `${_(item.type)} (${_("Scheme_selectList", {
+              type: "text",
+              content: `${_(item.type)} (${_("Scheme_selectList", {
                 list: item.params[0].split("#").join(", "),
               })})`,
             };
             break;
           case "schemeTypes_range":
             return {
-              insert: `${_(item.type)} (${_("Scheme_rangeMinMax", {
+              type: "text",
+              content: `${_(item.type)} (${_("Scheme_rangeMinMax", {
                 min: item.params[0],
                 max: item.params[1],
               })})`,
             };
             break;
           default:
-            return { insert: _(item.type) };
+            return { type: "text", content: _(item.type) };
             break;
         }
       },
@@ -993,46 +680,26 @@ class Exporter {
     // property content
     propertyContentPlaceholder: {
       block: true,
-      html: true,
-      function: (item, that, exportType, content, mapImages) => {
-        // header
+      function: (item, content, mapImages) => {
+        // for headers we put their name as content, while name and type fields are empty
         if (item.type == "schemeTypes_header")
-          switch (exportType) {
-            case "txt":
-              return {
-                insert: item.name.toUpperCase().split("").join(" "),
-              };
-            case "html":
-              return {
-                insert: `<span style="font-weight:bold; letter-spacing:1ex;">${Util.escapeHTML(
-                  item.name,
-                )}</span>`,
-                isCooked: true,
-              };
-            case "rtf":
-              return {
-                insert: `{\\b1\\expnd${Math.round(
-                  theFormats.formats[UUID0].formats_fontSize * 4,
-                )}\\expndtw${Math.round(
-                  theFormats.formats[UUID0].formats_fontSize * 20,
-                )} ${Exporter.#escapeRTF(item.name)}}`,
-                isCooked: true,
-              };
-              break;
-          }
-        if (content == null) return { insert: "---" };
+          return { type: "text", content: item.name };
+        if (content == null) return { type: "text", content: "---" };
         else
           switch (item.type) {
             // object relation
             case "schemeTypes_relation":
             case "schemeTypes_irelation":
               return {
-                insert: theObjectTree.getObject(content).name,
+                type: "text",
+                content: theObjectTree.getObject(content).name,
               };
+              break;
             // checkbox
             case "schemeTypes_checkbox":
               return {
-                insert: content
+                type: "text",
+                content: content
                   ? _("Scheme_checkTrue")
                   : _("Scheme_checkFalse"),
               };
@@ -1043,207 +710,71 @@ class Exporter {
             case "schemeTypes_radio":
             case "schemeTypes_date":
             case "schemeTypes_dateRange":
-              return { insert: content };
-              break;
-            // color
             case "schemeTypes_color":
-              switch (exportType) {
-                case "txt":
-                case "rtf":
-                  return { insert: content };
-                case "html": {
-                  let html = content;
-                  for (let c = 255; c >= 0; c -= 55) {
-                    let h = ("0" + c.toString(16)).slice(-2);
-                    html += `<div style="display:inline-block; margin-right:25px; height:100px; width:100px; border:#${h}${h}${h} solid 25px; background-color:${content}"></div>`;
-                  }
-                  return { insert: html, isCooked: true };
-                }
-              }
+              return { type: "text", content: content };
               break;
             // editor
             case "schemeTypes_editor":
-              switch (exportType) {
-                case "txt":
-                  return { insert: Exporter.#deltaToText(content.ops) };
-                case "html":
-                  return {
-                    insert: Exporter.deltaToHTML(
-                      content.ops,
-                      that.#usedFormats,
-                      that.#usedObjects,
-                    ),
-                    isCooked: true,
-                    isBlock: true,
-                  };
-                case "rtf":
-                  return {
-                    insert: that.#deltaToRTF(content.ops),
-                    isCooked: true,
-                    isBlock: true,
-                  };
-                  break;
-              }
+              return content.ops;
               break;
             // range / slider
             case "schemeTypes_range":
-              return { insert: `${content} ${item.params[3]}` };
+              return { type: "text", content: `${content} ${item.params[3]}` };
               break;
             // map
             case "schemeTypes_map":
-              switch (exportType) {
-                case "txt":
-                  return {
-                    insert: content.marker
-                      .map(
-                        (marker) =>
-                          `${marker.info ? marker.info : "---"}: ${_(
-                            "Scheme_locationLatLong",
-                            {
-                              lat: marker.latLng.lat.toFixed(6),
-                              lng: marker.latLng.lng.toFixed(6),
-                            },
-                          )}`,
-                      )
-                      .join("\n"),
-                  };
-                case "html":
-                  let html = "";
-                  if (mapImages) {
-                    if (mapImages[0]) {
-                      html += `<p>${_("Scheme_overviewMap")}<br><img src="${
-                        mapImages[0]
-                      }"/></p>`;
-                    }
-                    for (let i = 0; i < content.marker.length; i++) {
-                      html += `<p style="margin-top:10px">${
-                        content.marker[i].info
-                          ? `${Util.escapeHTML(content.marker[i].info)}: `
-                          : ""
-                      }${_("Scheme_locationLatLong", {
+              let r = [];
+              if (mapImages && mapImages[0]) {
+                r.push({
+                  type: "paragraph",
+                  content: [{ type: "text", content: _("Scheme_overviewMap") }],
+                });
+                r.push({
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "image",
+                      content: mapImages[0].data,
+                      width: mapImages[0].width,
+                      height: mapImages[0].height,
+                    },
+                  ],
+                });
+              }
+              for (let i = 0; i < content.marker.length; i++) {
+                r.push({
+                  type: "paragraph",
+                  content: [
+                    { type: "text", content: content.marker[i].info + ": " },
+                    {
+                      type: "text",
+                      content: _("Scheme_locationLatLong", {
                         lat: content.marker[i].latLng.lat.toFixed(6),
                         lng: content.marker[i].latLng.lng.toFixed(6),
-                      })}${
-                        mapImages[i + 1]
-                          ? `<br><img src="${mapImages[i + 1]}"/>`
-                          : ""
-                      }</p>`;
-                    }
-                  } else if (content.marker.length) {
-                    html += `<table><thead><tr><th style="padding:0 10px 4px 0">${_(
-                      "Scheme_locationName",
-                    )}</th><th style="padding:0 10px 4px 0">${_(
-                      "Scheme_locationLat",
-                    )}</th><th style="padding:0 10px 4px 0">${_(
-                      "Scheme_locationLon",
-                    )}</th></tr><tbody>`;
-                    content.marker.map((marker) => {
-                      html += `<tr><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0">${Util.escapeHTML(
-                        marker.info,
-                      )}</td><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0">${marker.latLng.lat.toFixed(
-                        6,
-                      )}</td><td style="vertical-align:top; border-top:1px solid black; padding:4px 10px 4px 0">${marker.latLng.lng.toFixed(
-                        6,
-                      )}</td></tr>`;
-                    });
-                    html += "</table>";
-                  } else {
-                    html = `<p>${_("Scheme_locationNoMarkers")}</p>`;
-                  }
-                  return {
-                    insert: html,
-                    isCooked: true,
-                    isBlock: true,
-                  };
-                case "rtf":
-                  {
-                    let rtf = "";
-                    if (mapImages) {
-                      if (mapImages[0]) {
-                        rtf += `\\pard\\plain\\sl1 ${Exporter.#escapeRTF(
-                          _("Scheme_overviewMap"),
-                        )}\\line{\\pict\\pngblip\\picwgoal${Math.floor(
-                          (theSettings.effectiveSettings()
-                            .exportOverwiewmapWidth /
-                            180) *
-                            1440,
-                        )}\\pichgoal${Math.floor(
-                          (theSettings.effectiveSettings()
-                            .exportOverwiewmapHeight /
-                            180) *
-                            1440,
-                        )}\n`;
-                        let bytes = Buffer.from(
-                          mapImages[0].split(",")[1],
-                          "base64",
-                        ).toString("hex");
-                        while (bytes.length) {
-                          rtf += `${bytes.substring(0, 128)}\n`;
-                          bytes = bytes.substring(128);
-                        }
-                        rtf += `}\\par\n`;
-                      }
-                      for (let i = 0; i < content.marker.length; i++) {
-                        rtf += `\\pard\\plain\\sl1 ${
-                          content.marker[i].info
-                            ? `${Exporter.#escapeRTF(content.marker[i].info)}: `
-                            : ""
-                        }${Exporter.#escapeRTF(
-                          _("Scheme_locationLatLong", {
-                            lat: content.marker[i].latLng.lat.toFixed(6),
-                            lng: content.marker[i].latLng.lng.toFixed(6),
-                          }),
-                        )}\\line{\\pict\\pngblip\\picwgoal${Math.floor(
-                          (theSettings.effectiveSettings()
-                            .exportDetailmapWidth /
-                            180) *
-                            1440,
-                        )}\\pichgoal${Math.floor(
-                          (theSettings.effectiveSettings()
-                            .exportDetailmapHeight /
-                            180) *
-                            1440,
-                        )}\n`;
-                        let bytes = Buffer.from(
-                          mapImages[i + 1].split(",")[1],
-                          "base64",
-                        ).toString("hex");
-                        while (bytes.length) {
-                          rtf += `${bytes.substring(0, 128)}\n`;
-                          bytes = bytes.substring(128);
-                        }
-                        rtf += `}\\par\n`;
-                      }
-                    } else if (content.marker.length) {
-                      content.marker.map((marker) => {
-                        rtf += `\\pard\\plain ${
-                          marker.info
-                            ? `${Exporter.#escapeRTF(marker.info)}: `
-                            : ""
-                        }${Exporter.#escapeRTF(
-                          _("Scheme_locationLatLong", {
-                            lat: marker.latLng.lat.toFixed(6),
-                            lng: marker.latLng.lng.toFixed(6),
-                          }),
-                        )}\\par\n`;
-                      });
-                    } else {
-                      rtf = `\\pard\\plain ${_("Scheme_locationNoMarkers")}\\par`;
-                    }
-                    return {
-                      insert: rtf,
-                      isCooked: true,
-                      isBlock: true,
-                    };
-                    //TODO
-                  }
-                  break;
+                      }),
+                    },
+                  ],
+                });
+                if (mapImages && mapImages[i + 1])
+                  r.push({
+                    type: "paragraph",
+                    content: [
+                      {
+                        type: "image",
+                        content: mapImages[i + 1].data,
+                        width: mapImages[i + 1].width,
+                        height: mapImages[i + 1].height,
+                      },
+                    ],
+                  });
               }
+              return r;
               break;
             // file
             case "schemeTypes_file":
               return {
-                insert: `${_("Scheme_fileName")}: ${
+                type: "text",
+                content: `${_("Scheme_fileName")}: ${
                   content && content.filePath ? content.filePath : "---"
                 }, ${_("Scheme_fileSize")}: ${
                   content && content.id && theFiles[content.id]
@@ -1309,11 +840,12 @@ class Exporter {
           name: "exportType",
           i18n: "exportWindow_exportType",
           type: "select",
-          values: ["txt", "html", "rtf"],
+          values: ["txt", "html", "rtf", "docx"],
           i18nValues: [
             "exportWindow_typeTXT",
             "exportWindow_typeHTML",
             "exportWindow_typeRTF",
+            "exportWindow_typeDOCX",
           ],
           default: "html",
         },
@@ -1574,50 +1106,44 @@ class Exporter {
   /**
    * build css style for given formats
    *
-   * @param {String} id
+   * @param {String} domID id of stylesheet
    * @param {Object} formats
    * @returns {String}
    */
-  static formats2CSS(id, formats) {
-    let formatCSS = `<style id="${id}">\n`;
-    for (let [id, format] of Object.entries(formats)) {
-      formatCSS += Formats.toCSS(
-        id,
-        format,
-        undefined,
-        undefined,
-        undefined,
-        true,
-      );
-    }
+  static formats2CSS(domID, formats) {
+    let formatCSS = `<style id="${domID}">\n`;
+    Object.keys(formats).forEach(
+      (id) =>
+        (formatCSS += Formats.toCSS(
+          id,
+          theFormats.getFormat(id),
+          undefined,
+          undefined,
+          undefined,
+          true,
+        )),
+    );
     return formatCSS + "</style>\n";
   }
 
   /**
    * build css style for given objects
    *
-   * @param {String} id
+   * @param {String} domID
    * @param {Object} objects
    * @returns {String}
    */
-  static objects2CSS(id, objects) {
-    let objectCSS = `<style id="${id}">\n`;
-    for (let [id, object] of Object.entries(objects)) {
-      objectCSS += `.object${id}-true { ${object.toCSS("text")} }\n`;
-      objectCSS += `.object${id}-true img { ${object.toCSS("image")} }\n`;
-    }
+  static objects2CSS(domID, objects) {
+    let objectCSS = `<style id="${domID}">\n`;
+    Object.keys(objects).forEach((id) => {
+      objectCSS += `.object${id}-true { ${theObjectTree.getObject(id).toCSS("text")} }\n`;
+      objectCSS += `.object${id}-true img { ${theObjectTree.getObject(id).toCSS("image")} }\n`;
+    });
     return objectCSS + "</style>\n";
   }
 
   /**
-   * add style to list for object with given id
-   */
-  useObjectStyle(objectID, style) {
-    this.#usedObjects[objectID] = style;
-  }
-
-  /**
-   * remove quill format attributes with given ids from all editors in all profiles
+   * remove quill format attributes with given ids from all editors in all profiles (called when a format is deleted)
    *
    * @param {String[]} ids
    */
@@ -1702,12 +1228,17 @@ class Exporter {
                         theSettings.effectiveSettings().dateTimeFormatShort,
                       ),
                     ]);
-                    ipcRenderer.invoke("mainProcess_infoMessage", [
-                      _("mainWindow_exportComplete"),
-                      _("mainWindow_exportSuccess", {
-                        file: file,
-                      }),
-                    ]);
+                    ipcRenderer
+                      .invoke("mainProcess_yesNoDialog", [
+                        _("mainWindow_exportComplete"),
+                        _("mainWindow_exportSuccess", {
+                          file: file,
+                        }),
+                      ])
+                      .then((result) => {
+                        !result &&
+                          ipcRenderer.invoke("mainProcess_openPath", file);
+                      });
                   }
                 });
               }
@@ -1717,10 +1248,12 @@ class Exporter {
       });
   }
 
+  /**
+   * do a text only export to print the editor content
+   */
   exportForPrint() {
     this.#usedFonts = {};
-    this.#usedFormats = {};
-    this.#usedFormats[UUID0] = theFormats.formats[UUID0];
+    this.#usedFormats = { [UUID0]: true };
     this.#usedObjects = {};
 
     return new Promise((resolve) => {
@@ -1735,22 +1268,13 @@ class Exporter {
           },
         ],
       };
-      profile.objectEditor = { ops: [] };
-      profile.objectEndEditor = { ops: [] };
-      profile.objectStartEditor = { ops: [] };
-      profile.objectPropertiesEditor = { ops: [] };
+      profile.objectEditor = { ops: [{ insert: "\n" }] };
+      profile.objectEndEditor = { ops: [{ insert: "\n" }] };
+      profile.objectStartEditor = { ops: [{ insert: "\n" }] };
+      profile.objectPropertiesEditor = { ops: [{ insert: "\n" }] };
 
       this.#export(profile).then((result) => {
-        Object.values(this.#usedFormats).forEach((format) => {
-          if (format.formats_fontFamily) {
-            this.#usedFonts[format.formats_fontFamily] = true;
-          }
-        });
-        Object.values(this.#usedObjects).forEach((object) => {
-          if (object.styleProperties.formats_fontFamily) {
-            this.#usedFonts[object.styleProperties.formats_fontFamily] = true;
-          }
-        });
+        // resolve as html head, html body
         resolve([
           `${Exporter.formats2CSS(
             "formatSheet",
@@ -1773,14 +1297,7 @@ class Exporter {
    */
   export(profile, preview) {
     this.#usedFonts = {};
-    this.#usedFormats = {};
-    this.#usedFormats[UUID0] =
-      profile.exportType == "txt"
-        ? {
-            formats_fontFamily: "'monospace'",
-            formats_fontSize: 12,
-          }
-        : theFormats.formats[UUID0];
+    this.#usedFormats = { [UUID0]: true };
     this.#usedObjects = {};
     // rtf related tables
     this.#colorTable = ["#000000"];
@@ -1791,14 +1308,16 @@ class Exporter {
       ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
       this.#export(profile).then((result) => {
         ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
-        Object.values(this.#usedFormats).forEach((format) => {
-          if (format.formats_fontFamily) {
-            this.#usedFonts[format.formats_fontFamily] = true;
+        Object.keys(this.#usedFormats).forEach((id) => {
+          if (theFormats.getFormat(id).formats_fontFamily) {
+            this.#usedFonts[theFormats.getFormat(id).formats_fontFamily] = true;
           }
         });
-        Object.values(this.#usedObjects).forEach((object) => {
-          if (object.styleProperties.formats_fontFamily) {
-            this.#usedFonts[object.styleProperties.formats_fontFamily] = true;
+        Object.keys(this.#usedObjects).forEach((id) => {
+          if (theObjectTree.getObject(id).styleProperties.formats_fontFamily) {
+            this.#usedFonts[
+              theObjectTree.getObject(id).styleProperties.formats_fontFamily
+            ] = true;
           }
         });
         ipcRenderer.invoke("mainProcess_openWindow", [
@@ -1824,18 +1343,30 @@ class Exporter {
             result,
             profile,
             Object.keys(this.#usedFonts),
-            this.#usedFormats,
+            Object.fromEntries(
+              Object.keys(this.#usedFormats).map((id) => [
+                id,
+                profile.exportType == "txt" && id == UUID0
+                  ? {
+                      formats_fontFamily: "'monospace'",
+                      formats_fontSize: 12,
+                    }
+                  : theFormats.getFormat(id),
+              ]),
+            ),
             // transport only styleProps, as complex objs cannot be handed over (or only as JSON)
             Object.fromEntries(
-              Object.entries(this.#usedObjects).map(([k, v]) => [
-                k,
-                v.styleProperties,
+              Object.keys(this.#usedObjects).map((id) => [
+                id,
+                theObjectTree.getObject(id).styleProperties,
               ]),
             ),
           ],
         ]);
       });
-    } else {
+    }
+    // real export, no preview
+    else {
       ipcRenderer
         .invoke("mainProcess_fileSaveDialog", [
           {
@@ -1868,6 +1399,49 @@ class Exporter {
                         Exporter.#exportFileFinal(fd, file, profile);
                       });
                       break;
+
+                    case "html":
+                      ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
+                      this.#export(profile).then((result) => {
+                        ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
+                        fs.writeSync(
+                          fd,
+                          `<html><meta charset="utf-8"><meta name="author" content="${Util.escapeHTML(
+                            theProperties.author,
+                          )}"><meta name="description" content="${Util.escapeHTML(
+                            theProperties.info,
+                          )}"><meta name="generator" content="${theProgramLongName} (${theProgramID})"><head><title>${Util.escapeHTML(
+                            _("mainWindow_exportTitle", {
+                              title:
+                                theProperties.fulltitle || theProgramLongName,
+                              time: new Timestamp().toLocalString(
+                                theSettings.effectiveSettings()
+                                  .dateTimeFormatShort,
+                              ),
+                            }),
+                          )}</title>`,
+                        );
+                        fs.writeSync(
+                          fd,
+                          Exporter.formats2CSS(
+                            "formatSheet",
+                            this.#usedFormats,
+                          ),
+                        );
+                        fs.writeSync(
+                          fd,
+                          Exporter.objects2CSS(
+                            "objectSheet",
+                            this.#usedObjects,
+                          ),
+                        );
+                        fs.writeSync(fd, `</head>\n<body>\n`);
+                        fs.writeSync(fd, result);
+                        fs.writeSync(fd, "</body></html>");
+                        Exporter.#exportFileFinal(fd, file, profile);
+                      });
+                      break;
+
                     case "rtf":
                       fs.writeSync(fd, `{\\rtf1\\ansi\n`);
                       ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
@@ -1891,56 +1465,48 @@ class Exporter {
                         Exporter.#exportFileFinal(fd, file, profile);
                       });
                       break;
-                    case "html":
-                      fs.writeSync(
-                        fd,
-                        `<html><meta charset="utf-8"><meta name="author" content="${Util.escapeHTML(
-                          theProperties.author,
-                        )}"><meta name="description" content="${Util.escapeHTML(
-                          theProperties.info,
-                        )}"><meta name="generator" content="${theProgramLongName} (${theProgramID})"><head><title>${Util.escapeHTML(
-                          _("mainWindow_exportTitle", {
-                            title:
-                              theProperties.fulltitle || theProgramLongName,
-                            time: new Timestamp().toLocalString(
-                              theSettings.effectiveSettings()
-                                .dateTimeFormatShort,
-                            ),
-                          }),
-                        )}</title></head>\n<body>\n`,
-                      );
+
+                    case "docx":
                       ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
                       this.#export(profile).then((result) => {
                         ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
-                        fs.writeSync(fd, result);
-                        Object.values(this.#usedFormats).forEach((format) => {
-                          if (format.formats_fontFamily) {
-                            this.#usedFonts[format.formats_fontFamily] = true;
+                        let styles = [];
+                        Object.keys(this.#usedFormats).forEach((formatID) => {
+                          if (formatID != UUID0) {
+                            let style = Formats.formatToDocx(
+                              theFormats.effectiveFormat(formatID),
+                            );
+                            style.id = formatID;
+                            style.name =
+                              theFormats.getFormat(formatID).formats_name;
+                            styles.push(style);
                           }
                         });
-                        Object.values(this.#usedObjects).forEach((object) => {
-                          if (object.styleProperties.formats_fontFamily) {
-                            this.#usedFonts[
-                              object.styleProperties.formats_fontFamily
-                            ] = true;
-                          }
+                        const theDoc = new docx.Document({
+                          creator: theProperties.author,
+                          description: theProperties.info,
+                          title: theProperties.fulltitle,
+                          revision: theProject.version,
+                          sections: [
+                            {
+                              properties: {},
+                              children: result,
+                            },
+                          ],
+                          styles: {
+                            default: {
+                              document: Formats.formatToDocx(
+                                theFormats.formats[UUID0],
+                              ),
+                            },
+                            paragraphStyles: styles,
+                          },
                         });
-                        fs.writeSync(
-                          fd,
-                          Exporter.formats2CSS(
-                            "formatSheet",
-                            this.#usedFormats,
-                          ),
-                        );
-                        fs.writeSync(
-                          fd,
-                          Exporter.objects2CSS(
-                            "objectSheet",
-                            this.#usedObjects,
-                          ),
-                        );
-                        fs.writeSync(fd, "</body></html>");
-                        Exporter.#exportFileFinal(fd, file, profile);
+
+                        docx.Packer.toBuffer(theDoc).then((buffer) => {
+                          fs.writeSync(fd, buffer);
+                          Exporter.#exportFileFinal(fd, file, profile);
+                        });
                       });
                       break;
                   }
@@ -2064,497 +1630,207 @@ class Exporter {
 
       let documentStatistics = theProject.statistics(useTexts);
 
-      switch (profile.exportType) {
-        case "txt":
-          {
-            // texts
-            let textsExport = "";
-            useTexts.forEach((textID) => {
-              let textContents = Exporter.#deltaToText(
-                Exporter.#textContentPlacegiver(
-                  profile.exportType,
-                  theTextTree.getText(textID).delta,
-                  useTextObjects,
-                  profile.objectStartEditor.ops,
-                  profile.objectEndEditor.ops,
-                ),
-              );
-              // each (non empty) text
-              if (textContents != "" || !profile.ignoreEmptyTexts) {
-                textsExport += Exporter.#deltaToText(
-                  Exporter.#textPlacegiver(
-                    profile.exportType,
-                    profile.textEditor.ops,
-                    textID,
-                    textContents,
-                  ),
-                );
+      // texts
+      let textsExport = [];
+      useTexts.forEach((textID) => {
+        let [textContents, formats, objects] = Exporter.#textContentPlacegiver(
+          theTextTree.getText(textID).delta,
+          useTextObjects,
+          profile.objectStartEditor.ops,
+          profile.objectEndEditor.ops,
+        );
+        Object.assign(this.#usedFormats, formats);
+        Object.assign(this.#usedObjects, objects);
+        if (textContents.length || !profile.ignoreEmptyTexts) {
+          // each (non empty) text
+          textsExport.push(
+            Exporter.#textPlacegiver(
+              profile.textEditor.ops,
+              textID,
+              textContents,
+            ),
+          );
+        }
+      });
+
+      // objects and their properties
+      let rasteredMaps = {};
+      let promises = [];
+      // raster the maps (if they are exported)
+      if (Exporter.#doExportProperties(profile)) {
+        useObjects.forEach((objectID) => {
+          theObjectTree.getParents(objectID, false).forEach((oID) => {
+            theObjectTree.getObject(oID).scheme.forEach((item) => {
+              if (item.type == "schemeTypes_map") {
+                let props = theObjectTree.getObject(objectID).properties;
+                if (props && props[oID] && props[oID][item.id]) {
+                  promises.push(
+                    Exporter.#rasterize(
+                      rasteredMaps,
+                      objectID,
+                      item.id,
+                      props[oID][item.id],
+                    ),
+                  );
+                }
               }
             });
-
-            // objects and their properties
-            let objectsExport = "";
-            useObjects.forEach((objectID) => {
-              let objectContent = "";
-              let propertyNames = [];
-              let propertyTypes = [];
-              let propertyContents = [];
-              // objects properties: iterate all properties (including those inherited by parent objects)
-              theObjectTree.getParents(objectID, false).forEach((oID) => {
-                theObjectTree.getObject(oID).scheme.forEach((item) => {
-                  let content = null;
-                  let props = theObjectTree.getObject(objectID).properties;
-                  if (props && props[oID] && props[oID][item.id]) {
-                    content = props[oID][item.id];
-                  }
-                  objectContent += Exporter.#deltaToText(
-                    this.#propertiesPlacegiver(
-                      profile.objectPropertiesEditor.ops,
-                      item,
-                      profile.exportType,
-                      content,
-                    ),
-                  );
-                  // elements necessary for tabled export
-                  propertyNames.push(
-                    Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                      item,
-                    ),
-                  );
-                  propertyTypes.push(
-                    Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                      item,
-                    ),
-                  );
-                  propertyContents.push(
-                    Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                      item,
-                      this,
-                      profile.exportType,
-                      content,
-                    ),
-                  );
-                });
-              });
-              // reverse object relations
-              theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-                objectContent += Exporter.#deltaToText(
-                  this.#propertiesPlacegiver(
+          });
+        });
+      }
+      Promise.allSettled(promises).then(() => {
+        let objectsExport = [];
+        useObjects.forEach((objectID) => {
+          let objectContent = [];
+          let propertyNames = [];
+          let propertyTypes = [];
+          let propertyContents = [];
+          // objects properties: iterate all properties (including those inherited by parent objects)
+          theObjectTree.getParents(objectID, false).forEach((oID) => {
+            theObjectTree.getObject(oID).scheme.forEach((item) => {
+              let mapImages = null;
+              if (
+                rasteredMaps &&
+                rasteredMaps[objectID] &&
+                rasteredMaps[objectID][item.id]
+              )
+                mapImages = rasteredMaps[objectID][item.id];
+              let props = theObjectTree.getObject(objectID).properties;
+              if (props && props[oID] && props[oID][item.id])
+                objectContent.push(
+                  Exporter.#propertiesPlacegiver(
                     profile.objectPropertiesEditor.ops,
-                    revRel,
-                    profile.exportType,
-                    revRel.content,
+                    item,
+                    props[oID][item.id],
+                    mapImages,
                   ),
                 );
-                // for tabled export
+              // elements necessary for tabled export
+              if (
+                (props && props[oID] && props[oID][item.id]) ||
+                item.type == "schemeTypes_header"
+              )
                 propertyNames.push(
                   Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                    revRel,
+                    item,
                   ),
                 );
-                propertyTypes.push(
-                  Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                    revRel,
-                  ),
-                );
-                propertyContents.push(
-                  Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                    revRel,
-                    this,
-                    profile.exportType,
-                    revRel.content,
-                  ),
-                );
-              });
-
-              objectsExport += Exporter.#deltaToText(
-                this.#objectPlacegiver(
-                  profile.objectEditor.ops,
-                  objectID,
-                  profile.exportType,
-                  objectContent,
-                  useCitationTexts,
-                  propertyNames,
-                  propertyTypes,
-                  propertyContents,
+              propertyTypes.push(
+                Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                  item,
+                ),
+              );
+              propertyContents.push(
+                Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                  item,
+                  props[oID][item.id],
+                  mapImages,
                 ),
               );
             });
-
-            // document
-            resolve(
-              Exporter.#deltaToText(
-                Exporter.#documentPlacegiver(
-                  profile.documentEditor.ops,
-                  profile.exportType,
-                  documentStatistics,
-                  textsExport,
-                  objectsExport,
-                ),
+          });
+          // reverse object relations
+          theObjectTree.reverseRelations(objectID).forEach((revRel) => {
+            objectContent.push(
+              Exporter.#propertiesPlacegiver(
+                profile.objectPropertiesEditor.ops,
+                revRel,
+                revRel.content,
               ),
             );
-          }
-          break;
+            // for tabled export
+            propertyNames.push(
+              Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
+                revRel,
+              ),
+            );
+            propertyTypes.push(
+              Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
+                revRel,
+              ),
+            );
+            propertyContents.push(
+              Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
+                revRel,
+                revRel.content,
+              ),
+            );
+          });
 
-        case "html":
-          {
-            // texts
-            let textsExport = "";
-            useTexts.forEach((textID) => {
-              let textContents = Exporter.deltaToHTML(
-                Exporter.#textContentPlacegiver(
-                  profile.exportType,
-                  theTextTree.getText(textID).delta,
-                  useTextObjects,
-                  profile.objectStartEditor.ops,
-                  profile.objectEndEditor.ops,
-                ),
-                profile.textFormats ? this.#usedFormats : null,
-                profile.objectFormats ? this.#usedObjects : null,
-              );
-              // each (non empty) text
-              if (textContents != "" || !profile.ignoreEmptyTexts) {
-                textsExport += Exporter.deltaToHTML(
-                  Exporter.#textPlacegiver(
-                    profile.exportType,
-                    profile.textEditor.ops,
-                    textID,
-                    textContents,
-                  ),
-                  profile.textFormats ? this.#usedFormats : null,
-                  profile.objectFormats ? this.#usedObjects : null,
-                );
-              }
+          objectsExport.push(
+            Exporter.#objectPlacegiver(
+              profile.objectEditor.ops,
+              objectID,
+              objectContent,
+              useCitationTexts,
+              propertyNames,
+              propertyTypes,
+              propertyContents,
+            ),
+          );
+        });
+
+        // document
+        let documentExport = Exporter.#documentPlacegiver(
+          profile.documentEditor.ops,
+          documentStatistics,
+          textsExport,
+          objectsExport,
+        );
+
+        // JSON
+        let [jsonExport, formats, objects] =
+          Exporter.#deltaToJSON(documentExport);
+
+        // tables
+        Object.assign(this.#usedFormats, formats);
+        Object.assign(this.#usedObjects, objects);
+
+        switch (profile.exportType) {
+          case "txt":
+            resolve(Exporter.#JSON2Text(jsonExport));
+            break;
+          case "html":
+            resolve(Exporter.#JSON2HTML(jsonExport));
+            break;
+          case "docx":
+            resolve(Exporter.#JSON2DOCX(jsonExport));
+            break;
+          case "rtf":
+            Object.keys(this.#usedFormats).forEach((id) => {
+              this.#styleTable.push(id);
+              let format = theFormats.getFormat(id);
+              if (
+                format.formats_fontFamily &&
+                !this.#fontTable.includes(format.formats_fontFamily)
+              )
+                this.#fontTable.push(format.formats_fontFamily);
+              if (
+                format.formats_textColor &&
+                !this.#colorTable.includes(format.formats_textColor)
+              )
+                this.#colorTable.push(format.formats_textColor);
+              if (
+                format.formats_backgroundColor &&
+                !this.#colorTable.includes(format.formats_backgroundColor)
+              )
+                this.#colorTable.push(format.formats_backgroundColor);
             });
-
-            // raster the maps
-            let rasteredMaps = {};
-            let promises = [];
-            if (Exporter.#doExportProperties(profile)) {
-              useObjects.forEach((objectID) => {
-                theObjectTree.getParents(objectID, false).forEach((oID) => {
-                  theObjectTree.getObject(oID).scheme.forEach((item) => {
-                    if (item.type == "schemeTypes_map") {
-                      let props = theObjectTree.getObject(objectID).properties;
-                      if (props && props[oID] && props[oID][item.id]) {
-                        promises.push(
-                          Exporter.#rasterize(
-                            rasteredMaps,
-                            objectID,
-                            item.id,
-                            props[oID][item.id],
-                          ),
-                        );
-                      }
-                    }
-                  });
-                });
+            Object.keys(this.#usedObjects).forEach((id) => {
+              this.#styleTable.push(id);
+              let fac = theObjectTree.objectStyle(id).fontsAndColors();
+              fac.fonts.forEach((font) => {
+                if (!this.#fontTable.includes(font)) this.#fontTable.push(font);
               });
-            }
-            Promise.allSettled(promises).then(() => {
-              let objectsExport = "";
-              useObjects.forEach((objectID) => {
-                let objectContent = "";
-                let propertyNames = [];
-                let propertyTypes = [];
-                let propertyContents = [];
-                // objects properties: iterate all properties (including those inherited by parent objects)
-                theObjectTree.getParents(objectID, false).forEach((oID) => {
-                  theObjectTree.getObject(oID).scheme.forEach((item) => {
-                    let content = null;
-                    let props = theObjectTree.getObject(objectID).properties;
-                    if (props && props[oID] && props[oID][item.id]) {
-                      content = props[oID][item.id];
-                    }
-                    let mapImages = null;
-                    if (
-                      rasteredMaps &&
-                      rasteredMaps[objectID] &&
-                      rasteredMaps[objectID][item.id]
-                    ) {
-                      mapImages = rasteredMaps[objectID][item.id];
-                    }
-                    objectContent += Exporter.deltaToHTML(
-                      this.#propertiesPlacegiver(
-                        profile.objectPropertiesEditor.ops,
-                        item,
-                        profile.exportType,
-                        content,
-                        mapImages,
-                      ),
-                      profile.textFormats ? this.#usedFormats : null,
-                      profile.objectFormats ? this.#usedObjects : null,
-                    );
-                    // elements necessary for tabled export
-                    propertyNames.push(
-                      Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                        item,
-                      ),
-                    );
-                    propertyTypes.push(
-                      Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                        item,
-                      ),
-                    );
-                    propertyContents.push(
-                      Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                        item,
-                        this,
-                        profile.exportType,
-                        content,
-                        mapImages,
-                      ),
-                    );
-                  });
-                });
-                // reverse object relations
-                theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-                  objectContent += Exporter.deltaToHTML(
-                    this.#propertiesPlacegiver(
-                      profile.objectPropertiesEditor.ops,
-                      revRel,
-                      profile.exportType,
-                      revRel.content,
-                      null,
-                    ),
-                    profile.textFormats ? this.#usedFormats : null,
-                    profile.objectFormats ? this.#usedObjects : null,
-                  );
-                  // for tabled export
-                  propertyNames.push(
-                    Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                      revRel,
-                    ),
-                  );
-                  propertyTypes.push(
-                    Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                      revRel,
-                    ),
-                  );
-                  propertyContents.push(
-                    Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                      revRel,
-                      this,
-                      profile.exportType,
-                      revRel.content,
-                      null,
-                    ),
-                  );
-                });
-
-                objectsExport += Exporter.deltaToHTML(
-                  this.#objectPlacegiver(
-                    profile.objectEditor.ops,
-                    objectID,
-                    profile.exportType,
-                    objectContent,
-                    useCitationTexts,
-                    propertyNames,
-                    propertyTypes,
-                    propertyContents,
-                  ),
-                  profile.textFormats ? this.#usedFormats : null,
-                  profile.objectFormats ? this.#usedObjects : null,
-                );
+              fac.colors.forEach((color) => {
+                if (!this.#colorTable.includes(color))
+                  this.#colorTable.push(color);
               });
-
-              // document
-              resolve(
-                Exporter.deltaToHTML(
-                  Exporter.#documentPlacegiver(
-                    profile.documentEditor.ops,
-                    profile.exportType,
-                    documentStatistics,
-                    textsExport,
-                    objectsExport,
-                  ),
-                  profile.textFormats ? this.#usedFormats : null,
-                  profile.objectFormats ? this.#usedObjects : null,
-                ),
-              );
             });
-          }
-          break;
-
-        case "rtf":
-          {
-            // texts
-            let textsExport = "";
-            useTexts.forEach((textID) => {
-              let textContents = this.#deltaToRTF(
-                Exporter.#textContentPlacegiver(
-                  profile.exportType,
-                  theTextTree.getText(textID).delta,
-                  useTextObjects,
-                  profile.objectStartEditor.ops,
-                  profile.objectEndEditor.ops,
-                ),
-                profile.textFormats,
-                profile.objectFormats,
-              );
-              // each (non empty) text
-              if (textContents != "" || !profile.ignoreEmptyTexts) {
-                textsExport += this.#deltaToRTF(
-                  Exporter.#textPlacegiver(
-                    profile.exportType,
-                    profile.textEditor.ops,
-                    textID,
-                    textContents,
-                  ),
-                  profile.textFormats,
-                  profile.objectFormats,
-                );
-              }
-            });
-
-            // objects and their properties -- first determine if object properties will be exported as some preliminary steps (such as rasterizing maps) would then be necessary
-            // raster the maps
-            let rasteredMaps = {};
-            let promises = [];
-            if (Exporter.#doExportProperties(profile)) {
-              useObjects.forEach((objectID) => {
-                theObjectTree.getParents(objectID, false).forEach((oID) => {
-                  theObjectTree.getObject(oID).scheme.forEach((item) => {
-                    if (item.type == "schemeTypes_map") {
-                      let props = theObjectTree.getObject(objectID).properties;
-                      if (props && props[oID] && props[oID][item.id]) {
-                        promises.push(
-                          Exporter.#rasterize(
-                            rasteredMaps,
-                            objectID,
-                            item.id,
-                            props[oID][item.id],
-                          ),
-                        );
-                      }
-                    }
-                  });
-                });
-              });
-            }
-            Promise.allSettled(promises).then(() => {
-              let objectsExport = "";
-              useObjects.forEach((objectID) => {
-                let objectContent = "";
-                let propertyNames = [];
-                let propertyTypes = [];
-                let propertyContents = [];
-                // objects properties: iterate all properties (including those inherited by parent objects)
-                theObjectTree.getParents(objectID, false).forEach((oID) => {
-                  theObjectTree.getObject(oID).scheme.forEach((item) => {
-                    let content = null;
-                    let props = theObjectTree.getObject(objectID).properties;
-                    if (props && props[oID] && props[oID][item.id]) {
-                      content = props[oID][item.id];
-                    }
-                    let mapImages = null;
-                    if (
-                      rasteredMaps &&
-                      rasteredMaps[objectID] &&
-                      rasteredMaps[objectID][item.id]
-                    ) {
-                      mapImages = rasteredMaps[objectID][item.id];
-                    }
-                    objectContent += this.#deltaToRTF(
-                      this.#propertiesPlacegiver(
-                        profile.objectPropertiesEditor.ops,
-                        item,
-                        profile.exportType,
-                        content,
-                        mapImages,
-                      ),
-                      profile.textFormats,
-                      profile.objectFormats,
-                    );
-                    // elements necessary for tabled export
-                    propertyNames.push(
-                      Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                        item,
-                      ),
-                    );
-                    propertyTypes.push(
-                      Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                        item,
-                      ),
-                    );
-                    propertyContents.push(
-                      Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                        item,
-                        this,
-                        profile.exportType,
-                        content,
-                        mapImages,
-                      ),
-                    );
-                  });
-                });
-                // reverse object relations
-                theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-                  objectContent += this.#deltaToRTF(
-                    this.#propertiesPlacegiver(
-                      profile.objectPropertiesEditor.ops,
-                      revRel,
-                      profile.exportType,
-                      revRel.content,
-                    ),
-                    profile.textFormats,
-                    profile.objectFormats,
-                  );
-                  // for tabled export
-                  propertyNames.push(
-                    Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                      revRel,
-                    ),
-                  );
-                  propertyTypes.push(
-                    Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                      revRel,
-                    ),
-                  );
-                  propertyContents.push(
-                    Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                      revRel,
-                      this,
-                      profile.exportType,
-                      revRel.content,
-                    ),
-                  );
-                });
-
-                objectsExport += this.#deltaToRTF(
-                  this.#objectPlacegiver(
-                    profile.objectEditor.ops,
-                    objectID,
-                    profile.exportType,
-                    objectContent,
-                    useCitationTexts,
-                    propertyNames,
-                    propertyTypes,
-                    propertyContents,
-                  ),
-                  profile.textFormats,
-                  profile.objectFormats,
-                );
-              });
-
-              // document
-              resolve(
-                this.#deltaToRTF(
-                  Exporter.#documentPlacegiver(
-                    profile.documentEditor.ops,
-                    profile.exportType,
-                    documentStatistics,
-                    textsExport,
-                    objectsExport,
-                  ),
-                  profile.textFormats,
-                  profile.objectFormats,
-                ),
-              );
-            });
-          }
-          break;
-      }
+            resolve(this.#JSON2RTF(jsonExport));
+            break;
+        }
+      });
     });
   }
 
@@ -2566,6 +1842,7 @@ class Exporter {
    * @returns {Boolean}
    */
   static #doExportProperties(profile) {
+    if (profile.exportType == "txt") return false;
     for (let i = 0; i < profile.documentEditor.ops.length; i++) {
       let op = profile.documentEditor.ops[i];
       if (op.insert && op.insert.placeholder == "objsBlockPlaceholder") {
@@ -2600,116 +1877,129 @@ class Exporter {
    * substitute document placeholders with actual values
    * @static
    *
-   * @param {Object[]} deltaOps
-   * @param {String} exportType
+   * @param {Object[]} documentPlaceholderOps
    * @param {Object} statistics
-   * @param {String} textsExport
-   * @param {String} objectsExport
-   * @returns {Object[]}
+   * @param {Object[]} textsExport dimOps of all exported texts
+   * @param {Object[]} objectsExport dimOps of all exported objects
+   * @returns {Object[]} dimOps
    */
   static #documentPlacegiver(
-    deltaOps,
-    exportType,
+    documentPlaceholderOps,
     statistics,
     textsExport,
     objectsExport,
   ) {
-    let newOps = [];
-    deltaOps.forEach((op) => {
+    let ops = [];
+    let blockBefore = false;
+    documentPlaceholderOps.forEach((op) => {
       let newOp = JSON.parse(JSON.stringify(op));
-      if (op.insert && op.insert.placeholder) {
-        if (
-          Object.keys(Exporter.#documentPlaceholders).includes(
-            op.insert.placeholder,
-          )
-        ) {
-          Object.assign(
-            newOp,
-            Exporter.#documentPlaceholders[op.insert.placeholder].function(
-              exportType,
-              statistics,
-              textsExport,
-              objectsExport,
-            ),
-          );
-        }
+      // after a block insert, remove next "\n" to avoid an extra empty paragraph
+      if (
+        blockBefore &&
+        typeof newOp.insert == "string" &&
+        newOp.insert.startsWith("\n")
+      )
+        newOp.insert = newOp.insert.substring(1);
+      if (
+        newOp.insert &&
+        newOp.insert.placeholder &&
+        Object.keys(Exporter.#documentPlaceholders).includes(
+          newOp.insert.placeholder,
+        )
+      ) {
+        ops.push(
+          Exporter.#documentPlaceholders[newOp.insert.placeholder].function(
+            statistics,
+            textsExport,
+            objectsExport,
+          ),
+        );
+        blockBefore =
+          Exporter.#documentPlaceholders[newOp.insert.placeholder].block;
+      } else {
+        ops.push(newOp);
+        blockBefore = false;
       }
-      newOps.push(newOp);
     });
-    return newOps;
+    return ops;
   }
 
   /**
    * substitute text placeholders with actual values
    *
-   * @param {String} exportType
-   * @param {Object[]} deltaOps
+   * @param {Object[]} textPlaceholderOps
    * @param {String} textID
-   * @param {String} textContents
-   * @returns {Object[]}
+   * @param {Object[]} textContents substituted text contents in dimOps
+   * @returns {Object[]} dimOps
    */
-  static #textPlacegiver(exportType, deltaOps, textID, textContents) {
-    let newOps = [];
-    deltaOps.forEach((op) => {
+  static #textPlacegiver(textPlaceholderOps, textID, textContents) {
+    let ops = [];
+    let blockBefore = false;
+    textPlaceholderOps.forEach((op) => {
       let newOp = JSON.parse(JSON.stringify(op));
-      if (op.insert && op.insert.placeholder) {
-        if (
-          Object.keys(Exporter.#textPlaceholders).includes(
-            op.insert.placeholder,
-          )
-        ) {
-          Object.assign(
-            newOp,
-            Exporter.#textPlaceholders[op.insert.placeholder].function(
-              textID,
-              textContents,
-              exportType,
-            ),
-          );
-        }
+      // after a block insert, remove next "\n" to avoid an extra empty paragraph
+      if (
+        blockBefore &&
+        typeof newOp.insert == "string" &&
+        newOp.insert.startsWith("\n")
+      )
+        newOp.insert = newOp.insert.substring(1);
+      if (
+        newOp.insert &&
+        newOp.insert.placeholder &&
+        Object.keys(Exporter.#textPlaceholders).includes(
+          newOp.insert.placeholder,
+        )
+      ) {
+        ops.push(
+          Exporter.#textPlaceholders[newOp.insert.placeholder].function(
+            textID,
+            textContents,
+          ),
+        );
+        blockBefore =
+          Exporter.#textPlaceholders[newOp.insert.placeholder].block;
+      } else {
+        ops.push(newOp);
+        blockBefore = false;
       }
-      newOps.push(newOp);
     });
-    return newOps;
+    return ops;
   }
 
   /**
    * substitute text content placeholder
    * @static
    *
-   * @param {String} exportType
-   * @param {Object[]} deltaOps
-   * @param {String[]} useObjects ids of obejcts to use for textObject placeholders
-   * @param {Object[]} startOps
-   * @param {Object[]} endOps
-   * @returns {Object[]}
+   * @param {Object[]} textDelta text contents
+   * @param {String[]} useObjects ids of objects to use for textObject placeholders
+   * @param {Object[]} beforeObjectDelta
+   * @param {Object[]} afterObjectDelta
+   * @returns {[Object[], Object, Object]} json, formats, objects
    */
   static #textContentPlacegiver(
-    exportType,
-    deltaOps,
+    textDelta,
     useObjects,
-    startOps,
-    endOps,
+    beforeObjectDelta,
+    afterObjectDelta,
   ) {
-    let newOps = [];
-    deltaOps.forEach((op) => {
+    let ops = [];
+    textDelta.forEach((op) => {
       let newOp = JSON.parse(JSON.stringify(op));
-      let before = "";
-      let after = "";
+      let beforeOps = [];
+      let afterOps = [];
       if (op.attributes) {
         Object.keys(op.attributes).forEach((attr) => {
           if (attr.startsWith("object")) {
             let objectID = attr.slice(6);
             if (useObjects.includes(objectID)) {
-              before += Exporter.#objectTextPlacegiver(
-                startOps,
+              beforeOps = Exporter.#objectTextPlacegiver(
+                beforeObjectDelta,
                 objectID,
-                exportType,
               );
-              after += Exporter.#objectTextPlacegiver(
-                endOps,
+              afterOps = Exporter.#objectTextPlacegiver(
+                afterObjectDelta,
                 objectID,
-                exportType,
               );
             } else {
               // if this object is ignored, remove the attribute
@@ -2718,472 +2008,695 @@ class Exporter {
           }
         });
       }
-      if (typeof op.insert != "object") {
-        newOp.insert = before + op.insert + after;
-        newOps.push(newOp);
-      } else {
-        if (before) {
-          newOps.push({ insert: before });
-        }
-        newOps.push(newOp);
-        if (after) {
-          newOps.push({ insert: after });
-        }
-      }
+      ops.push(...beforeOps, newOp, ...afterOps);
     });
-    return newOps;
+
+    return Exporter.#deltaToJSON(ops);
   }
 
   /**
    * substitute text objects placeholders
    * @static
    *
-   * @param {Object[]} deltaOps
+   * @param {Object[]} objectTextPlaceholderDelta
    * @param {String} objectID
-   * @param {String} exportType
-   * @returns {Object[]}
+   * @returns {[Object[], Object, Object]} json, formats, objects
    */
-  static #objectTextPlacegiver(deltaOps, objectID, exportType) {
-    let text = "";
-    deltaOps.forEach((op) => {
-      let insert = op.insert;
-      if (op.insert && op.insert.placeholder) {
-        if (
-          Object.keys(Exporter.#objectTextPlaceholders).includes(
-            op.insert.placeholder,
-          )
-        ) {
-          insert = Exporter.#objectTextPlaceholders[
-            op.insert.placeholder
-          ].function(objectID, exportType).insert;
-        }
+  static #objectTextPlacegiver(objectTextPlaceholderDelta, objectID) {
+    let dimOps = [];
+    objectTextPlaceholderDelta.forEach((op) => {
+      if (
+        op.insert &&
+        op.insert.placeholder &&
+        Object.keys(Exporter.#objectTextPlaceholders).includes(
+          op.insert.placeholder,
+        )
+      ) {
+        dimOps.push(
+          Exporter.#objectTextPlaceholders[op.insert.placeholder].function(
+            objectID,
+          ),
+        );
+      } else {
+        dimOps.push(JSON.parse(JSON.stringify(op)));
       }
-      text += insert;
     });
-    // remove all "\n"
-    return text.replace(/\n/g, "");
+
+    let [json, formats, objects] = Exporter.#deltaToJSON(dimOps);
+    // remove trailing "\n" -- if only "\n" remove whole op
+    if (json.length == 1 && !json[0].content.length) return [];
+    if (json.length == 1) return json[0].content;
+
+    return [json, formats, objects];
   }
 
   /**
-   * substitute object placeholders with actual values (not static!)
+   * substitute object placeholders with actual values
    *
-   * @param {Object[]} deltaOps
+   * @param {Object[]} objectPlaceholderDelta
    * @param {String} objectID
-   * @param {String} exportType
-   * @param {String} objectContents
+   * @param {Object[]} objectContents
    * @param {String[]} useCitationTexts
    * @param {Object[]} propertyNames
    * @param {Object[]} propertyTypes
    * @param {Object[]} propertyContents
    * @returns {Object[]}
    */
-  #objectPlacegiver(
-    deltaOps,
+  static #objectPlacegiver(
+    objectPlaceholderDelta,
     objectID,
-    exportType,
     objectContents,
     useCitationTexts,
     propertyNames,
     propertyTypes,
     propertyContents,
   ) {
-    let newOps = [];
-    deltaOps.forEach((op) => {
+    let ops = [];
+    let blockBefore = false;
+    objectPlaceholderDelta.forEach((op) => {
       let newOp = JSON.parse(JSON.stringify(op));
-      if (op.insert && op.insert.placeholder) {
-        if (
-          Object.keys(Exporter.#objectPlaceholders).includes(
-            op.insert.placeholder,
-          )
-        ) {
-          Object.assign(
-            newOp,
-            Exporter.#objectPlaceholders[op.insert.placeholder].function(
-              objectID,
-              exportType,
-              objectContents,
-              useCitationTexts,
-              propertyNames,
-              propertyTypes,
-              propertyContents,
-              this,
-            ),
-          );
-        }
+      // after a block insert, remove next "\n" to avoid an extra empty paragraph
+      if (
+        blockBefore &&
+        typeof newOp.insert == "string" &&
+        newOp.insert.startsWith("\n")
+      )
+        newOp.insert = newOp.insert.substring(1);
+      if (
+        newOp.insert &&
+        newOp.insert.placeholder &&
+        Object.keys(Exporter.#objectPlaceholders).includes(
+          newOp.insert.placeholder,
+        )
+      ) {
+        ops.push(
+          Exporter.#objectPlaceholders[newOp.insert.placeholder].function(
+            objectID,
+            objectContents,
+            useCitationTexts,
+            propertyNames,
+            propertyTypes,
+            propertyContents,
+            this,
+          ),
+        );
+        blockBefore =
+          Exporter.#objectPlaceholders[newOp.insert.placeholder].block;
+      } else {
+        ops.push(newOp);
+        blockBefore = false;
       }
-      newOps.push(newOp);
     });
-    return newOps;
+    return ops;
   }
 
   /**
-   * substitute object property placeholders with actual values (not static!)
+   * substitute object property placeholders with actual values
    *
-   * @param {Object[]} deltaOps
+   * @param {Object[]} objectPropertiesPlaceholderDelta
    * @param {*} item
-   * @param {String} exportType
    * @param {*} content
    * @param {*} mapImages
    * @returns {Object[]}
    */
-  #propertiesPlacegiver(deltaOps, item, exportType, content, mapImages) {
-    let newOps = [];
-    deltaOps.forEach((op) => {
+  static #propertiesPlacegiver(
+    objectPropertiesPlaceholderDelta,
+    item,
+    content,
+    mapImages,
+  ) {
+    let ops = [];
+    objectPropertiesPlaceholderDelta.forEach((op) => {
       let newOp = JSON.parse(JSON.stringify(op));
-      if (op.insert && op.insert.placeholder) {
-        if (
-          Object.keys(Exporter.#propertyPlaceholders).includes(
-            op.insert.placeholder,
-          )
-        ) {
-          Object.assign(
-            newOp,
-            Exporter.#propertyPlaceholders[op.insert.placeholder].function(
-              item,
-              this,
-              exportType,
-              content,
-              mapImages,
-            ),
-          );
-        }
+      if (
+        newOp.insert &&
+        newOp.insert.placeholder &&
+        Object.keys(Exporter.#propertyPlaceholders).includes(
+          newOp.insert.placeholder,
+        )
+      ) {
+        ops.push(
+          Exporter.#propertyPlaceholders[newOp.insert.placeholder].function(
+            item,
+            content,
+            mapImages,
+          ),
+        );
+      } else {
+        ops.push(newOp);
       }
-      newOps.push(newOp);
     });
-    return newOps;
+    return ops;
   }
 
   /**
-   * convert delta to simple text
-   * @static
-   *
-   * @param {Object[]} deltaOps
+   * convert exporter JSON to text
+   * @param {Object[]} json
    * @returns {String}
    */
-  static #deltaToText(deltaOps) {
+  static #JSON2Text(json) {
     let text = "";
-    let doImages = theSettings.effectiveSettings().exportTextImage;
-    deltaOps.forEach((op) => {
-      if (typeof op.insert != "object") {
-        text += op.insert;
-      } else if (doImages) {
-        // images
-        text += _("image_reference", {
-          title: op.attributes.title ? ` "${op.attributes.title}"` : "",
-          width: op.attributes.width,
-          height: op.attributes.height,
+    json.forEach((p) => {
+      if (p.type == "paragraph") {
+        p.content.forEach((c) => {
+          switch (c.type) {
+            case "text":
+              let toUpper = false;
+              let spacing = "";
+              let transforms = {};
+              if (c.bold)
+                transforms[
+                  theSettings.effectiveSettings().exportSubstituteBold
+                ] = true;
+              if (c.italic)
+                transforms[
+                  theSettings.effectiveSettings().exportSubstituteItalic
+                ] = true;
+              if (c.underline)
+                transforms[
+                  theSettings.effectiveSettings().exportSubstituteUnderline
+                ] = true;
+              if (c.strike)
+                transforms[
+                  theSettings.effectiveSettings().exportSubstituteStrike
+                ] = true;
+              Object.keys(transforms).forEach((t) => {
+                switch (t) {
+                  case "exportSubstituteUpper":
+                    toUpper = true;
+                    break;
+                  case "exportSubstituteSpaced":
+                    spacing = " ";
+                    break;
+                  case "exportSubstituteScored":
+                    spacing = "_";
+                    break;
+                  case "exportSubstituteStriked":
+                    spacing = "-";
+                    break;
+                  case "exportSubstituteUpperSpaced":
+                    spacing = " ";
+                    toUpper = true;
+                    break;
+                  case "exportSubstituteUpperScored":
+                    spacing = "_";
+                    toUpper = true;
+                    break;
+                  case "exportSubstituteUpperStriked":
+                    spacing = "-";
+                    toUpper = true;
+                    break;
+                }
+              });
+              let transformed = toUpper ? c.content.toUpperCase() : c.content;
+              if (spacing)
+                transformed = transformed
+                  .split("")
+                  .map((x) => (x == " " ? spacing : x))
+                  .join(spacing);
+              text += transformed;
+              break;
+            case "image":
+              if (theSettings.effectiveSettings().exportTextImage)
+                text += _("image_reference", {
+                  title: c.title ? ` "${c.title}"` : "",
+                  width: c.width,
+                  height: c.height,
+                });
+              break;
+            case "table":
+              let objectTable = [];
+              let sCells = [];
+              let rowNo = 0;
+              c.content.forEach((row) => {
+                let objectRow = [];
+                let colNo = 0;
+                row.forEach((cell) => {
+                  objectRow.push(
+                    Exporter.#JSON2Text(
+                      Exporter.#deltaToJSON([cell.content])[0],
+                    ).slice(0, -1),
+                  );
+                  if (cell.colSpan) {
+                    sCells.push({
+                      col: colNo,
+                      row: rowNo,
+                      colSpan: cell.colSpan,
+                    });
+                  }
+                  colNo++;
+                });
+                objectTable.push(objectRow);
+                rowNo++;
+              });
+              let columns = [];
+              let width = 0;
+              for (let i = 0; i < c.width.length - 1; i++) {
+                let w = Math.floor(
+                  (c.width[i] / 100) *
+                    theSettings.effectiveSettings().exportTableLineLength,
+                );
+                width += w;
+                columns.push({
+                  width: w - 2,
+                  wrapWord: true,
+                });
+              }
+              columns.push({
+                width:
+                  theSettings.effectiveSettings().exportTableLineLength - width,
+                wrapWord: true,
+              });
+              text += table(objectTable, {
+                border: getBorderCharacters("norc"),
+                columns: columns,
+                spanningCells: sCells,
+              });
+              break;
+          }
         });
+        text += "\n";
       }
     });
+
     return text;
   }
 
   /**
-   * convert delta to rtf
-   *
-   * @param {Object[]} deltaOps
-   * @param {Boolean} doFormats
-   * @param {Boolean} doObjects
+   * convert exporter JSON to HTML
+   * @param {Object[]} json
    * @returns {String}
    */
-  #deltaToRTF(deltaOps, doFormats = true, doObjects = true) {
-    let blocks = [];
-    let text = "";
-    let formatID = UUID0;
-    let hasFormat = false;
-    for (let i = 0; i < deltaOps.length; i++) {
-      let op = deltaOps[i];
-      if (op.isCooked && op.isBlock) {
-        blocks.push(...this.#textToRTF(text, formatID));
-        text = "";
-        formatID = UUID0;
-        blocks.push(op.insert);
-        if (
-          i < deltaOps.length - 1 &&
-          deltaOps[i + 1].insert.startsWith("\n")
-        ) {
-          // ignore "\n" of placeholder block
-          deltaOps[i + 1].insert = deltaOps[i + 1].insert.substring(1);
-        }
-      } else {
-        let objectIDs = [];
-        let exportString = "";
-        if (op.isCooked) {
-          exportString = op.insert;
-        } else if (typeof op.insert != "object") {
-          exportString = Exporter.#escapeRTF(op.insert);
-        } else {
-          exportString = `{\\*\\shppict{\\pict\\picw${parseInt(
-            op.attributes.width,
-          )}\\pich${parseInt(op.attributes.height)}\\picwgoal${Math.floor(
-            (parseInt(op.attributes.width) / 180) * 1440,
-          )}\\pichgoal${Math.floor(
-            (parseInt(op.attributes.height) / 180) * 1440,
-          )}\\pngblip ${Buffer.from(
-            op.insert.image.split(",")[1],
-            "base64",
-          ).toString("hex")}}}`;
-          // for block alignments put image in a paragraph
-          // @todo to reflect left/center/right alignment we could create a new block accordingly -- this is left for future enhancement
-          if (DIMImage.alignments.slice(3).includes(op.attributes.alignment)) {
-            exportString = `\n${exportString}\n`;
-          }
-        }
-        if ("attributes" in op) {
-          let rtfControls = "";
-          Object.keys(op.attributes).forEach((attr) => {
-            switch (attr) {
-              case "bold":
-                rtfControls += "\\b1";
-                break;
-              case "italic":
-                rtfControls += "\\i1";
-                break;
-              case "underline":
-                rtfControls += "\\ul1";
-                break;
-              case "strike":
-                rtfControls += "\\strike1";
-                break;
-              default:
-                if (attr.startsWith("format") && doFormats) {
-                  hasFormat = true;
-                  formatID = attr.substring("format".length);
-                } else if (attr.startsWith("object") && doObjects) {
-                  let objectID = attr.substring("object".length);
-                  objectIDs.push(objectID);
-                  let fac = theObjectTree
-                    .objectStyle(objectID)
-                    .fontsAndColors();
-                  fac.fonts.forEach((font) => {
-                    if (!this.#fontTable.includes(font)) {
-                      this.#fontTable.push(font);
-                    }
-                  });
-                  fac.colors.forEach((color) => {
-                    if (!this.#colorTable.includes(color)) {
-                      this.#colorTable.push(color);
-                    }
-                  });
-                  rtfControls += StylingControls.controls2RTF(
-                    theObjectTree.objectStyle(objectID).styleProperties.text,
-                    theFormats.formats[UUID0].formats_fontSize,
-                    this.#fontTable,
-                    this.#colorTable,
-                  );
+  static #JSON2HTML(json) {
+    let html = "";
+    json.forEach((p) => {
+      if (p.type == "paragraph") {
+        let para = "";
+        p.content.forEach((c) => {
+          switch (c.type) {
+            case "text":
+              let element = Util.escapeHTML(c.content);
+              if (c.bold) element = `<strong>${element}</strong>`;
+              if (c.italic) element = `<em>${element}</em>`;
+              if (c.underline) element = `<u>${element}</u>`;
+              if (c.strike) element = `<s>${element}</s>`;
+              if ("objects" in c && c.objects.length)
+                para += `<span class="object${c.objects.join(
+                  "-true object",
+                )}-true">${element}</span>`;
+              else para += element;
+              break;
+            case "image":
+              let style = "";
+              Object.keys(c).forEach((att) => {
+                if (att in DIMImage.styles) {
+                  for (let [k, v] of Object.entries(
+                    DIMImage.styles[att][c[att]],
+                  )) {
+                    style += `${k}:${v};`;
+                  }
                 }
-                break;
-            }
-          });
-          if (rtfControls) {
-            exportString = `{${rtfControls} ${exportString}}`;
-          }
-        }
-        if (formatID && !this.#styleTable.includes(formatID)) {
-          this.#styleTable.push(formatID);
-          this.#usedFormats[formatID] = theFormats.formats[formatID];
-          let [font, c1, c2] = Formats.fontAndColors(
-            theFormats.formats[formatID],
-          );
-          if (font && !this.#fontTable.includes(font)) {
-            this.#fontTable.push(font);
-          }
-          if (c1 && !this.#colorTable.includes(c1)) {
-            this.#colorTable.push(c1);
-          }
-          if (c2 && !this.#colorTable.includes(c2)) {
-            this.#colorTable.push(c2);
-          }
-        }
-        objectIDs.forEach((objectID) => {
-          if (!this.#styleTable.includes(objectID)) {
-            this.#styleTable.push(objectID);
-            this.#usedObjects[objectID] = new StyledObject();
-            this.#usedObjects[objectID].styleProperties =
-              theObjectTree.objectStyle(objectID).styleProperties;
+              });
+              para += `<img src="${c.content}" width="${c.width}px" height="${c.height}px" style="${style}" ${c.title ? `title="${c.title}"` : ""}>`;
+              break;
+            case "table":
+              let cellStyle =
+                "vertical-align:top; border:1px solid black; padding:4px";
+              para += `</p><table style="width:100%"><colgroup>`;
+              c.width.forEach(
+                (w) => (para += `<col span="1" style="width:${w}%"></col>`),
+              );
+              para += "</colgroup>";
+              if (c.header) {
+                para += "<thead><tr>";
+                c.content[0].forEach(
+                  (cell) =>
+                    (para += `<th style="${cellStyle}">${Exporter.#JSON2HTML(Exporter.#deltaToJSON([cell.content])[0])}</th>`),
+                );
+                para += "</tr></thead>";
+              }
+              para += "<tbody>";
+              for (let i = c.header ? 1 : 0; i < c.content.length; i++) {
+                para += "<tr>";
+                for (let j = 0; j < c.content[i].length; j++) {
+                  para += `<td ${c.content[i][j].colSpan ? `colspan=${c.content[i][j].colSpan}` : ""} style="${cellStyle}">${Exporter.#JSON2HTML(Exporter.#deltaToJSON([c.content[i][j].content])[0])}</td>`;
+                  if (c.content[i][j].colSpan) j += c.content[i][j].colSpan - 1;
+                }
+                para += "</tr>";
+              }
+              para += "</table><p";
+              if (p.format != UUID0) para += ` class="format${p.format}-true">`;
+              break;
           }
         });
+        html += "<p";
+        if (p.format != UUID0) html += ` class="format${p.format}-true"`;
+        html += ">" + para + "</p>";
+      }
+    });
 
-        text += exportString;
-        if (hasFormat) {
-          blocks.push(...this.#textToRTF(text, formatID));
-          text = "";
-          formatID = UUID0;
-          hasFormat = false;
-        }
-      }
-    }
-    blocks.push(...this.#textToRTF(text, formatID));
-    let rtf = blocks.join("");
-    return rtf;
-  }
-
-  /**
-   * convert text to rtf using given format
-   *
-   * @param {String} text
-   * @param {Object} format
-   * @returns {String[]}
-   */
-  #textToRTF(text, format) {
-    let blocks = [];
-    if (text) {
-      if (text.endsWith("\n")) {
-        text = text.substring(0, text.length - 1);
-      }
-      let paras = text.split("\n");
-      if (format) {
-        let lastPara = paras.pop();
-        blocks.unshift(
-          `\\pard\\plain${Formats.formatToRTF(
-            theFormats.effectiveFormat(format),
-            this.#fontTable,
-            this.#colorTable,
-            this.#styleTable.indexOf(format),
-          )} ${lastPara}\\par\n`,
-        );
-      }
-      for (let i = paras.length - 1; i >= 0; i--) {
-        blocks.unshift(
-          `\\pard\\plain${Formats.formatToRTF(
-            this.#usedFormats[UUID0],
-            this.#fontTable,
-            this.#colorTable,
-            this.#styleTable.indexOf(UUID0),
-          )} ${paras[i]}\\par\n`,
-        );
-      }
-    }
-    return blocks;
-  }
-
-  /**
-   * convert delta to html
-   *
-   * @param {Object[]} deltaOps
-   * @param {} usedFormats
-   * @param {} usedObjects
-   * @returns {String} html result
-   */
-  static deltaToHTML(deltaOps, usedFormats = null, usedObjects = null) {
-    let blocks = [];
-    let text = "";
-    let formatClass = "";
-    let hasFormat = false;
-    for (let i = 0; i < deltaOps.length; i++) {
-      let op = deltaOps[i];
-      if (op.isCooked && op.isBlock) {
-        blocks.push(...Exporter.#textToHTML(text, formatClass));
-        text = "";
-        formatClass = "";
-        blocks.push(op.insert);
-        if (
-          i < deltaOps.length - 1 &&
-          deltaOps[i + 1].insert.startsWith("\n")
-        ) {
-          // ignore "\n" of placeholder block
-          deltaOps[i + 1].insert = deltaOps[i + 1].insert.substring(1);
-        }
-      } else {
-        let objectClasses = [];
-        let exportString;
-        if (op.isCooked) {
-          exportString = op.insert;
-        } else if (typeof op.insert != "object") {
-          exportString = Util.escapeHTML(op.insert);
-        } else {
-          // images
-          let style = "";
-          Object.keys(op.attributes).forEach((att) => {
-            if (att in DIMImage.styles) {
-              for (let [k, v] of Object.entries(
-                DIMImage.styles[att][op.attributes[att]],
-              )) {
-                style += `${k}:${v};`;
-              }
-            }
-          });
-          exportString = `<img src="${op.insert.image}" width="${op.attributes.width}" height="${op.attributes.height}" style="${style}" ${op.attributes.title ? `title="${op.attributes.title}"` : ""}>`;
-        }
-        if ("attributes" in op) {
-          Object.keys(op.attributes).forEach((attr) => {
-            switch (attr) {
-              case "bold":
-                exportString = `<strong>${exportString}</strong>`;
-                break;
-              case "italic":
-                exportString = `<em>${exportString}</em>`;
-                break;
-              case "underline":
-                exportString = `<u>${exportString}</u>`;
-                break;
-              case "strike":
-                exportString = `<s>${exportString}</s>`;
-                break;
-              default:
-                if (attr.startsWith("format") && usedFormats) {
-                  hasFormat = true;
-                  let formatID = attr.substring("format".length);
-                  if (formatID != UUID0) {
-                    usedFormats[formatID] = theFormats.formats[formatID];
-                    formatClass = `${attr}-${op.attributes[attr]}`;
-                  }
-                } else if (attr.startsWith("object") && usedObjects) {
-                  objectClasses.push(`${attr}-${op.attributes[attr]}`);
-                  let objectID = attr.substring("object".length);
-                  usedObjects[objectID] = new StyledObject();
-                  usedObjects[objectID].styleProperties =
-                    theObjectTree.objectStyle(objectID).styleProperties;
-                }
-                break;
-            }
-          });
-        }
-        if (objectClasses.length) {
-          exportString = `<span class="${objectClasses.join(
-            " ",
-          )}">${exportString}</span>`;
-        }
-
-        text += exportString;
-        if (hasFormat) {
-          blocks.push(...Exporter.#textToHTML(text, formatClass));
-          text = "";
-          formatClass = "";
-          hasFormat = false;
-        }
-      }
-    }
-    blocks.push(...Exporter.#textToHTML(text, formatClass));
-    let html = blocks.join("");
     return html;
   }
 
   /**
-   * convert text to html using given format
-   *
-   * @param {String} text
-   * @param {Object} format
-   * @returns {String}
+   * convert exporter JSON to DOCX
+   * @param {Object[]} json
+   * @returns {docx.Paragraph[]} suitable as children element of a docx section
    */
-  static #textToHTML(text, format) {
-    let blocks = [];
-    if (text) {
-      if (text.endsWith("\n")) {
-        text = text.substring(0, text.length - 1);
+  static #JSON2DOCX(json) {
+    let paragraphs = [];
+    json.forEach((p) => {
+      if (p.type == "paragraph") {
+        let paragraph = { children: [] };
+        if (p.format != UUID0) paragraph.style = p.format;
+        p.content.forEach((c) => {
+          switch (c.type) {
+            case "text":
+              let textRun = { text: c.content };
+              if (c.bold) textRun.bold = true;
+              if (c.italic) textRun.italics = true;
+              if (c.underline) textRun.underline = true;
+              if (c.strike) textRun.strike = true;
+              if (c.objects)
+                c.objects.forEach((id) =>
+                  Object.assign(
+                    textRun,
+                    StylingControls.controls2DOCX(
+                      theObjectTree.objectStyle(id).styleProperties.text,
+                    ),
+                  ),
+                );
+              paragraph.children.push(new docx.TextRun(textRun));
+              break;
+            case "image":
+              paragraph.children.push(
+                new docx.ImageRun({
+                  data: Buffer.from(c.content.split(",")[1], "base64"),
+                  transformation: {
+                    width: c.width,
+                    height: c.height,
+                  },
+                  altText: {
+                    title: c.title,
+                  },
+                }),
+              );
+              switch (c.alignment) {
+                case "image_alignmentLeft":
+                  paragraph.alignment = docx.AlignmentType.LEFT;
+                  break;
+                case "image_alignmentCenter":
+                  paragraph.alignment = docx.AlignmentType.CENTER;
+                  break;
+                case "image_alignmentRight":
+                  paragraph.alignment = docx.AlignmentType.RIGHT;
+                  break;
+              }
+              break;
+            case "table":
+              let tableRows = [];
+              c.content.forEach((row) => {
+                let rowContent = [];
+                for (let colNo = 0; colNo < row.length; colNo++) {
+                  let cellContent = {
+                    children: Exporter.#JSON2DOCX(
+                      Exporter.#deltaToJSON([row[colNo].content])[0],
+                    ),
+                  };
+                  if (row[colNo].colSpan) {
+                    cellContent.columnSpan = row[colNo].colSpan;
+                    colNo += row[colNo].colSpan - 1;
+                  }
+                  rowContent.push(new docx.TableCell(cellContent));
+                }
+                tableRows.push(new docx.TableRow({ children: rowContent }));
+              });
+              paragraphs.push(
+                new docx.Table({
+                  columnWidths: c.width,
+                  rows: tableRows,
+                  width: {
+                    size: 100,
+                    type: docx.WidthType.PERCENTAGE,
+                  },
+                }),
+              );
+              break;
+          }
+        });
+        paragraphs.push(new docx.Paragraph(paragraph));
       }
-      let paras = text.split("\n");
-      if (format) {
-        let lastPara = paras.pop();
-        blocks.unshift(
-          `<p class="${format}">${lastPara ? lastPara : "<br>"}</p>`,
+    });
+
+    return paragraphs;
+  }
+
+  /**
+   * convert exporter JSON to RTF
+   * @param {Object[]} json
+   * @returns {String} rtf
+   */
+  #JSON2RTF(json) {
+    let rtf = "";
+
+    json.forEach((p) => {
+      if (p.type == "paragraph") {
+        let paraContent = "";
+        let stdFmt = Formats.formatToRTF(
+          theFormats.effectiveFormat(UUID0),
+          this.#fontTable,
+          this.#colorTable,
+          this.#styleTable.indexOf(UUID0),
         );
+        let paraFmt = Formats.formatToRTF(
+          theFormats.effectiveFormat(p.format),
+          this.#fontTable,
+          this.#colorTable,
+          this.#styleTable.indexOf(p.format),
+        );
+        p.content.forEach((c) => {
+          switch (c.type) {
+            case "text":
+              let rtfControls = "";
+              if (c.bold) rtfControls += "\\b1";
+              if (c.italic) rtfControls += "\\i1";
+              if (c.underline) rtfControls += "\\ul1";
+              if (c.strike) rtfControls += "\\strike1";
+              if ("objects" in c)
+                c.objects.forEach((id) => {
+                  rtfControls += StylingControls.controls2RTF(
+                    theObjectTree.objectStyle(id).styleProperties.text,
+                    theFormats.formats[UUID0].formats_fontSize,
+                    this.#fontTable,
+                    this.#colorTable,
+                  );
+                });
+              if (rtfControls)
+                paraContent += `{${rtfControls} ${Exporter.#escapeRTF(c.content)}}`;
+              else paraContent += Exporter.#escapeRTF(c.content);
+              break;
+
+            case "image":
+              if (c.alignment)
+                switch (c.alignment) {
+                  case "image_alignmentCenter":
+                    paraFmt += `\\qc`;
+                    break;
+                  case "image_alignmentRight":
+                    paraFmt += `\\qr`;
+                    break;
+                }
+              paraContent += `{\\*\\shppict{\\pict\\picw${parseInt(
+                c.width,
+              )}\\pich${parseInt(c.height)}\\picwgoal${Math.floor(
+                (parseInt(c.width) / 180) * 1440,
+              )}\\pichgoal${Math.floor(
+                (parseInt(c.height) / 180) * 1440,
+              )}\\pngblip ${Buffer.from(
+                c.content.split(",")[1],
+                "base64",
+              ).toString("hex")}}}`;
+              break;
+
+            case "table":
+              paraContent += `\\plain${stdFmt}`;
+              c.content.forEach((row) => {
+                paraContent += `\\trowd\\trpaddb50\\trpaddt50\\trpaddl50\\trpaddr50\n`;
+                let percentWidth = 0;
+                let span = 0;
+                let doSpan = "";
+                for (let colNo = 0; colNo < row.length; colNo++) {
+                  percentWidth += c.width[colNo];
+                  if (row[colNo].colSpan) {
+                    span = row[colNo].colSpan - 1;
+                    doSpan = `\\clmgf`;
+                  }
+                  // cell width is relative in 50th percent by \clwWidth
+                  // and absolute in twips by \cellx, based on 9071 twips = 9071/20/72 inch = 6.3 inch = 16 cm total table width
+                  paraContent += `${doSpan}\\clbrdrt\\brdrs\\brdrw1\\brdrcf0\\clbrdrr\\brdrs\\brdrw1\\brdrcf0\\clbrdrl\\brdrs\\brdrw1\\brdrcf0\\clbrdrb\\brdrs\\brdrw1\\brdrcf0\\clftsWidth2\\clwWidth${c.width[colNo] * 50}\\cellx${Math.floor((percentWidth / 100) * 9071)}\n`;
+                  if (span) {
+                    doSpan = `\\clmrg`;
+                    span--;
+                  }
+                }
+                for (let colNo = 0; colNo < row.length; colNo++) {
+                  // chopping off the last \par\n
+                  paraContent += `\\pard\\intbl ${this.#JSON2RTF(
+                    Exporter.#deltaToJSON([row[colNo].content])[0],
+                  ).slice(0, -5)}\\cell\n`;
+                }
+                paraContent += `\\row\n`;
+              });
+              paraContent += `\\pard\\plain${paraFmt} `;
+              break;
+          }
+        });
+        rtf += `\\pard\\plain${paraFmt} ${paraContent}\\par\n`;
       }
-      for (let i = paras.length - 1; i >= 0; i--) {
-        blocks.unshift(`<p>${paras[i] ? paras[i] : "<br>"}</p>`);
+    });
+
+    return rtf;
+  }
+
+  /**
+   * convert delta/exporter JSON mix to exporter JSON
+   *
+   * this JSON format ist derived from deltaOps and inserted by ...placegiver functions
+   * the eventual export format (text | html | rtf | docx | ...) is built from this JSON format
+   *
+   * structure of exporter JSON intermediate format:
+   *    document = [ paragraph* ]
+   *    paragraph = { content: [ element* ], format: String }
+   *    element = text | image | table
+   *    text = { type: "text", content: String, bold: Boolean, ..., objects: [ String* ] }
+   *    image = { type: "image", content: String, alignment: String,
+   *              title: String, width: Int, height: Int }
+   *    table = { type: "table", rows: Int, cols: Int, header: Boolean,
+   *              width: [ Int* ], content: [ row* ]} -- width in percent
+   *    row = [ cell* ]
+   *    cell = { content: type | image | Object[], colSpan: Int } -- irrespective of colSpan the number if cell items in each row must be the same, so colSpan just skips following cell items
+   *
+   * @param {Object[]} deltaJSON
+   * @returns {Object[]}
+   */
+  static #deltaToJSON(deltaJSON) {
+    let paragraphs = [];
+    let content = [];
+    let formatID = UUID0;
+    let formats = {};
+    let objects = {};
+    deltaJSON.flat(Infinity).forEach((op) => {
+      // already in JSON format
+      if ("type" in op) {
+        if (op.type == "paragraph") {
+          if (content.length)
+            paragraphs.push({
+              type: "paragraph",
+              content: content,
+              format: formatID,
+            });
+          content = [];
+          formatID = UUID0;
+          paragraphs.push(op);
+        } else {
+          content.push(op);
+        }
       }
-    }
-    return blocks;
+      // delta format
+      else {
+        let textContent = {
+          type: "text",
+          content: "",
+          objects: [],
+          style: {},
+        };
+        if (typeof op.insert != "object") {
+          if ("attributes" in op) {
+            Object.keys(op.attributes).forEach((attr) => {
+              switch (attr) {
+                case "bold":
+                  textContent.bold = true;
+                  break;
+                case "italic":
+                  textContent.italic = true;
+                  break;
+                case "underline":
+                  textContent.underline = true;
+                  break;
+                case "strike":
+                  textContent.strike = true;
+                  break;
+                default:
+                  if (attr.startsWith("format")) {
+                    formatID = attr.substring("format".length);
+                    formats[formatID] = true;
+                  } else if (attr.startsWith("object")) {
+                    let objectID = attr.substring("object".length);
+                    textContent.objects.push(objectID);
+                    objects[objectID] = true;
+                  }
+                  break;
+              }
+            });
+          }
+          let chunks = op.insert.split(/(\n)/).filter((x) => x);
+          for (let i = 0; i < chunks.length; i++) {
+            if (chunks[i] == "\n") {
+              content.push(textContent);
+              let paragraph = { type: "paragraph", content: content };
+              paragraph.format = formatID;
+              paragraphs.push(paragraph);
+              content = [];
+              textContent = {
+                type: "text",
+                content: "",
+                objects: [],
+                style: {},
+              };
+            } else {
+              textContent.content = chunks[i];
+              content.push(textContent);
+              textContent = {
+                type: "text",
+                content: "",
+                objects: [],
+                style: {},
+              };
+            }
+          }
+          formatID = UUID0;
+        } else {
+          content.push({
+            type: "image",
+            alignment: op.attributes.alignment,
+            content: op.insert.image,
+            width: parseInt(op.attributes.width),
+            height: parseInt(op.attributes.height),
+            origwidth: parseInt(op.attributes.origwidth),
+            origheight: parseInt(op.attributes.origheight),
+            title: op.attributes.title,
+            shadow: Boolean(op.attributes.shadow),
+          });
+        }
+      }
+    });
+    if (content.length)
+      paragraphs.push({
+        type: "paragraph",
+        content: content,
+        format: formatID,
+      });
+    return [paragraphs, formats, objects];
+  }
+
+  /**
+   * convert delta ops to html directly (needed by other classes)
+   *
+   * @param {Object[]} deltaOps
+   * @returns {String} html
+   */
+  static delta2HTML(deltaOps) {
+    return Exporter.#JSON2HTML(Exporter.#deltaToJSON(deltaOps)[0]);
   }
 
   /**
@@ -3351,6 +2864,8 @@ class Exporter {
    * @param {*} maxZoom
    * @param {*} markers
    * @returns
+   *
+   * @TODO should we honour window.devicePixelRatio? see https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio
    */
   static #rasterizeOne(
     rasterMap,
@@ -3382,7 +2897,11 @@ class Exporter {
       });
 
       leafletImage(rasterizeMap, (err, canvas) => {
-        rasterMap[mapIndex] = canvas.toDataURL();
+        rasterMap[mapIndex] = {
+          data: canvas.toDataURL(),
+          width: width,
+          height: height,
+        };
         $rasterizeDiv.remove();
         resolve("ok");
       });

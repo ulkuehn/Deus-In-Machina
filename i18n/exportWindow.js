@@ -48,6 +48,8 @@ const translationExportWindow = {
       exportWindow_typeHTML: "HTML (alle Formatierungen werden unterstützt)",
       exportWindow_typeRTF:
         "RTF (die meisten Formatierungen werden unterstützt)",
+      exportWindow_typeDOCX:
+        "DOCX (die meisten Formatierungen werden unterstützt)",
       exportWindow_documentEditor: "Dokumentenmuster",
 
       // texts tab
@@ -113,8 +115,9 @@ const translationExportWindow = {
       exportWindow_documentTab: "Document",
       exportWindow_exportType: "Export format",
       exportWindow_typeTXT: "Plain text (no paragraph or character formatting)",
-      exportWindow_typeHTML: "HTML (all formatting supported)",
-      exportWindow_typeRTF: "RTF (most formatting supported)",
+      exportWindow_typeHTML: "HTML (all formatting is supported)",
+      exportWindow_typeRTF: "RTF (most formatting is supported)",
+      exportWindow_typeDOCX: "DOCX (most formatting is supported)",
       exportWindow_documentEditor: "Document Pattern",
 
       // texts tab
