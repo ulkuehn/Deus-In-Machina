@@ -256,7 +256,9 @@ function menuList(left, right, bottom) {
   // populate recent exports menu item
   let exportItems = [];
   theState.recentExports.forEach((exported) => {
-    if ([".txt", ".html", ".rtf", ".docx"].includes(path.parse(exported.path).ext)) {
+    if (
+      [".txt", ".html", ".rtf", ".docx"].includes(path.parse(exported.path).ext)
+    ) {
       exportItems.push({
         label: `${exported.path}  [ ${exported.time} / ${exported.type} ]`,
         click() {
@@ -1432,8 +1434,9 @@ ipcMain.handle(
  * show an overlay window to signal being busy with some lengthy op
  *
  * @param {Number} ms overlay only shows if not cancelled before ms millisecs -- to cancel, call with ms<=0
+ * @param {String} message busy message to display 
  */
-ipcMain.handle("mainProcess_busyOverlayWindow", (event, ms) => {
+ipcMain.handle("mainProcess_busyOverlayWindow", (event, ms, message="") => {
   if (busyTimer) {
     clearTimeout(busyTimer);
     busyTimer = null;
@@ -1454,12 +1457,21 @@ ipcMain.handle("mainProcess_busyOverlayWindow", (event, ms) => {
         resizable: false,
         frame: false,
         transparent: true,
-        opacity: 0.75,
+        opacity: 0.9,
+        webPreferences: {
+          nodeIntegration: true,
+          contextIsolation: false,
+          sandbox: false,
+        },
       });
+      // busyWindow.webContents.openDevTools({
+      //   mode: "detach",
+      // });
       busyWindow.setMenu(null);
       busyWindow.loadFile("./dimBusy.html");
       busyWindow.once("ready-to-show", () => {
         theLogger.verbose("showing busy window");
+        busyWindow.webContents.send("busyWindow_setMessage", message);
         busyWindow.show();
       });
     }, ms);
@@ -1470,6 +1482,15 @@ ipcMain.handle("mainProcess_busyOverlayWindow", (event, ms) => {
       busyWindow = null;
     }
   }
+});
+
+/**
+ * display or clear a message in busy window
+ * 
+ * @param {String} message busy message to display 
+ */
+ipcMain.handle("mainProcess_busyMessage", (event, message) => {
+  if (busyWindow) busyWindow.webContents.send("busyWindow_setMessage", message);
 });
 
 /**

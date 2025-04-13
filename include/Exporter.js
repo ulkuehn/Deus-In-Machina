@@ -1305,7 +1305,11 @@ class Exporter {
     this.#fontTable = [];
 
     if (preview) {
-      ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
+      ipcRenderer.invoke(
+        "mainProcess_busyOverlayWindow",
+        500,
+        _("busy_exportExporting"),
+      );
       this.#export(profile).then((result) => {
         ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
         Object.keys(this.#usedFormats).forEach((id) => {
@@ -1392,7 +1396,11 @@ class Exporter {
                 try {
                   switch (profile.exportType) {
                     case "txt":
-                      ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
+                      ipcRenderer.invoke(
+                        "mainProcess_busyOverlayWindow",
+                        500,
+                        _("busy_exportExporting"),
+                      );
                       this.#export(profile).then((result) => {
                         ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
                         fs.writeSync(fd, result);
@@ -1401,7 +1409,11 @@ class Exporter {
                       break;
 
                     case "html":
-                      ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
+                      ipcRenderer.invoke(
+                        "mainProcess_busyOverlayWindow",
+                        500,
+                        _("busy_exportExporting"),
+                      );
                       this.#export(profile).then((result) => {
                         ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
                         fs.writeSync(
@@ -1444,7 +1456,11 @@ class Exporter {
 
                     case "rtf":
                       fs.writeSync(fd, `{\\rtf1\\ansi\n`);
-                      ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
+                      ipcRenderer.invoke(
+                        "mainProcess_busyOverlayWindow",
+                        500,
+                        _("busy_exportExporting"),
+                      );
                       this.#export(profile).then((result) => {
                         ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
                         fs.writeSync(fd, this.#rtfFontTable());
@@ -1467,7 +1483,11 @@ class Exporter {
                       break;
 
                     case "docx":
-                      ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
+                      ipcRenderer.invoke(
+                        "mainProcess_busyOverlayWindow",
+                        500,
+                        _("busy_exportExporting"),
+                      );
                       this.#export(profile).then((result) => {
                         ipcRenderer.invoke("mainProcess_busyOverlayWindow", 0);
                         let styles = [];
@@ -2846,6 +2866,12 @@ class Exporter {
           }
         }
         Promise.allSettled(promises).then(() => {
+          ipcRenderer.invoke(
+            "mainProcess_busyMessage",
+            _("busy_exportRastered", {
+              object: theObjectTree.getObject(objectID).name,
+            }),
+          );
           resolve("ok");
         });
       }
@@ -2903,7 +2929,7 @@ class Exporter {
           height: height,
         };
         $rasterizeDiv.remove();
-        resolve("ok");
+        resolve("ok")
       });
     });
   }

@@ -7,6 +7,7 @@
 
 const { translationGeneral } = require("./include/general.js");
 const { translationTime } = require("./include/time.js");
+const { translationBusy } = require("./include/busy.js");
 const { translationSettingDefaults } = require("./include/SettingDefaults.js");
 const { translationSampleTexts } = require("./include/sampleTexts.js");
 const { translationEditorBars } = require("./include/editorBars.js");
@@ -39,6 +40,7 @@ const translationMainWindow = {
     values: {
       ...translationGeneral.de,
       ...translationTime.de,
+      ...translationBusy.de,
       ...translationSettingDefaults.de,
       ...translationEditorBars.de,
       ...translationSearch.de,
@@ -77,6 +79,7 @@ const translationMainWindow = {
     values: {
       ...translationGeneral.en,
       ...translationTime.en,
+      ...translationBusy.en,
       ...translationSettingDefaults.en,
       ...translationEditorBars.en,
       ...translationSearch.en,
