@@ -591,6 +591,9 @@ class TextEditor {
         this.#adjustSearch();
       }
     });
+    $("#searchText").on("keydown", (e) => {
+      if (e.code == "Enter") setTimeout(() => this.#search(), 250);
+    });
     $("#searchNext").on("click", () => {
       this.#search();
     });

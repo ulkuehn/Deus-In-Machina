@@ -1004,6 +1004,10 @@ ipcRenderer.on(
         adjustSearch();
       }
     });
+    $("#searchText").on("keydown", (e) =>{
+      if (e.code == "Enter")
+        setTimeout(() => search(), 250);
+    });
     $("#searchNext").on("click", () => {
       search();
     });
