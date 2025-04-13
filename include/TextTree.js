@@ -1235,7 +1235,8 @@ class TextTree {
    * @param {*} event
    */
   #dblClick(event) {
-    this.editProps(this.#treeDiv.jstree().get_node(event.target).id);
+    if (!this.#editMode)
+      this.editProps(this.#treeDiv.jstree().get_node(event.target).id);
   }
 
   /**

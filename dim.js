@@ -1434,9 +1434,9 @@ ipcMain.handle(
  * show an overlay window to signal being busy with some lengthy op
  *
  * @param {Number} ms overlay only shows if not cancelled before ms millisecs -- to cancel, call with ms<=0
- * @param {String} message busy message to display 
+ * @param {String} message busy message to display
  */
-ipcMain.handle("mainProcess_busyOverlayWindow", (event, ms, message="") => {
+ipcMain.handle("mainProcess_busyOverlayWindow", (event, ms, message = "") => {
   if (busyTimer) {
     clearTimeout(busyTimer);
     busyTimer = null;
@@ -1486,8 +1486,8 @@ ipcMain.handle("mainProcess_busyOverlayWindow", (event, ms, message="") => {
 
 /**
  * display or clear a message in busy window
- * 
- * @param {String} message busy message to display 
+ *
+ * @param {String} message busy message to display
  */
 ipcMain.handle("mainProcess_busyMessage", (event, message) => {
   if (busyWindow) busyWindow.webContents.send("busyWindow_setMessage", message);
