@@ -5,28 +5,6 @@
  * @file implementation of Exporter class
  */
 
-/*
-@TODO rowspan in text citation table bei gleichen Texten (?)
-@TODO rtf
-@TODO odf
-@TODO markdown
-*/
-
-/*
-structure of exporter JSON intermediate format
-this JSON format ist derived from deltaOps and inserted by ...placegiver functions
-the eventual export format (text | html | rtf | docx | ...) is built from this JSON format
-
-document = [ paragraph* ]
-paragraph = { content: [ element* ], format: String }
-element = text | image | table
-text = { type: "text", content: String, bold: Boolean, ..., objects: [ String* ] }
-image = { type: "image", content: String, alignment: String, title: String, width: Int, height: Int }
-table = { type: "table", rows: Int, cols: Int, header: Boolean, width: [ Int* ], content: [ row* ]}
-row = [ cell* ]
-cell = { content: type | image | Object[], rowSpan: Int, colSpan: Int } -- irrespective of colSpan the number if cell items in each row must be the same, so colSpan just skips following cell items
-*/
-
 /**
  * @classdesc Exporter combines all functionality to export a project's information to common formats like HTML or RTF
  */
@@ -64,23 +42,6 @@ class Exporter {
 
     return rtfString;
   }
-
-  /**
-   * helper methods
-   */
-  static #escapeUncookedHTML(x) {
-    return x.isCooked ? x.insert : Util.escapeHTML(x.insert);
-  }
-  static #escapeUncookedRTF(x) {
-    return x.isCooked ? x.insert : Exporter.#escapeRTF(x.insert);
-  }
-
-  /**
-   * strings for drawing rtf tables
-   * @static
-   */
-  static #rtfBorder = `\\clbrdrt\\brdrs\\brdrw1\\brdrcf0\\clbrdrr\\brdrs\\brdrw1\\brdrcf0\\clbrdrl\\brdrs\\brdrw1\\brdrcf0\\clbrdrb\\brdrs\\brdrw1\\brdrcf0`;
-  static #rtfRow = `\\trowd\\trpaddb50\\trpaddt50\\trpaddl50\\trpaddr50`;
 
   /**
    * string for path building (text and object paths)
@@ -462,7 +423,6 @@ class Exporter {
             ]);
           }
         }
-        console.log({ tableContent });
         return {
           type: "table",
           rows: propertyNames.length,
@@ -1183,13 +1143,6 @@ class Exporter {
   }
 
   /**
-   * add style to list for object with given id
-   */
-  useObjectStyle(objectID, style) {
-    this.#usedObjects[objectID] = style;
-  }
-
-  /**
    * remove quill format attributes with given ids from all editors in all profiles (called when a format is deleted)
    *
    * @param {String[]} ids
@@ -1295,6 +1248,9 @@ class Exporter {
       });
   }
 
+  /**
+   * do a text only export to print the editor content
+   */
   exportForPrint() {
     this.#usedFonts = {};
     this.#usedFormats = { [UUID0]: true };
@@ -1685,7 +1641,6 @@ class Exporter {
         );
         Object.assign(this.#usedFormats, formats);
         Object.assign(this.#usedObjects, objects);
-        console.log({ textContents });
         if (textContents.length || !profile.ignoreEmptyTexts) {
           // each (non empty) text
           textsExport.push(
@@ -1724,7 +1679,6 @@ class Exporter {
         });
       }
       Promise.allSettled(promises).then(() => {
-        console.log({ rasteredMaps });
         let objectsExport = [];
         useObjects.forEach((objectID) => {
           let objectContent = [];
@@ -1741,7 +1695,6 @@ class Exporter {
                 rasteredMaps[objectID][item.id]
               )
                 mapImages = rasteredMaps[objectID][item.id];
-              console.log({ mapImages });
               let props = theObjectTree.getObject(objectID).properties;
               if (props && props[oID] && props[oID][item.id])
                 objectContent.push(
@@ -1818,7 +1771,7 @@ class Exporter {
         });
 
         // document
-        let documentExport = Exporter.#documentPlacegiver1(
+        let documentExport = Exporter.#documentPlacegiver(
           profile.documentEditor.ops,
           documentStatistics,
           textsExport,
@@ -1828,15 +1781,12 @@ class Exporter {
         // JSON
         let [jsonExport, formats, objects] =
           Exporter.#deltaToJSON(documentExport);
+
+        // tables
         Object.assign(this.#usedFormats, formats);
         Object.assign(this.#usedObjects, objects);
-        console.log("usedFormats", this.#usedFormats);
-        console.log("usedObjects", this.#usedObjects);
 
         switch (profile.exportType) {
-          case "json":
-            resolve(JSON.stringify(jsonExport, null, "  "));
-            break;
           case "txt":
             resolve(Exporter.#JSON2Text(jsonExport));
             break;
@@ -1846,179 +1796,39 @@ class Exporter {
           case "docx":
             resolve(Exporter.#JSON2DOCX(jsonExport));
             break;
-          /*
           case "rtf":
-            {
-              // texts
-              let textsExport = [];
-              useTexts.forEach((textID) => {
-                let [textContents, trailingNewLine] =
-                  Exporter.#textContentPlacegiver(
-                    profile.exportType,
-                    theTextTree.getText(textID).delta,
-                    useTextObjects,
-                    profile.objectStartEditor.ops,
-                    profile.objectEndEditor.ops,
-                  );
-                // each (non empty) text
-                if (textContents.length || !profile.ignoreEmptyTexts) {
-                  textsExport.push(
-                    ...Exporter.#textPlacegiver(
-                      profile.exportType,
-                      trailingNewLine
-                        ? profile.textEditor.ops.slice(
-                            0,
-                            profile.textEditor.ops.length - 1,
-                          )
-                        : profile.textEditor.ops,
-                      textID,
-                      textContents,
-                    ),
-                  );
-                }
+            Object.keys(this.#usedFormats).forEach((id) => {
+              this.#styleTable.push(id);
+              let format = theFormats.getFormat(id);
+              if (
+                format.formats_fontFamily &&
+                !this.#fontTable.includes(format.formats_fontFamily)
+              )
+                this.#fontTable.push(format.formats_fontFamily);
+              if (
+                format.formats_textColor &&
+                !this.#colorTable.includes(format.formats_textColor)
+              )
+                this.#colorTable.push(format.formats_textColor);
+              if (
+                format.formats_backgroundColor &&
+                !this.#colorTable.includes(format.formats_backgroundColor)
+              )
+                this.#colorTable.push(format.formats_backgroundColor);
+            });
+            Object.keys(this.#usedObjects).forEach((id) => {
+              this.#styleTable.push(id);
+              let fac = theObjectTree.objectStyle(id).fontsAndColors();
+              fac.fonts.forEach((font) => {
+                if (!this.#fontTable.includes(font)) this.#fontTable.push(font);
               });
-
-              // objects and their properties -- first determine if object properties will be exported as some preliminary steps (such as rasterizing maps) would then be necessary
-              // raster the maps
-              let rasteredMaps = {};
-              let promises = [];
-              if (Exporter.#doExportProperties(profile)) {
-                useObjects.forEach((objectID) => {
-                  theObjectTree.getParents(objectID, false).forEach((oID) => {
-                    theObjectTree.getObject(oID).scheme.forEach((item) => {
-                      if (item.type == "schemeTypes_map") {
-                        let props =
-                          theObjectTree.getObject(objectID).properties;
-                        if (props && props[oID] && props[oID][item.id]) {
-                          promises.push(
-                            Exporter.#rasterize(
-                              rasteredMaps,
-                              objectID,
-                              item.id,
-                              props[oID][item.id],
-                            ),
-                          );
-                        }
-                      }
-                    });
-                  });
-                });
-              }
-              Promise.allSettled(promises).then(() => {
-                let objectsExport = [];
-                useObjects.forEach((objectID) => {
-                  let objectContent = [];
-                  let propertyNames = [];
-                  let propertyTypes = [];
-                  let propertyContents = [];
-                  // objects properties: iterate all properties (including those inherited by parent objects)
-                  theObjectTree.getParents(objectID, false).forEach((oID) => {
-                    theObjectTree.getObject(oID).scheme.forEach((item) => {
-                      let props = theObjectTree.getObject(objectID).properties;
-                      if (props && props[oID] && props[oID][item.id]) {
-                        let mapImages = null;
-                        if (
-                          rasteredMaps &&
-                          rasteredMaps[objectID] &&
-                          rasteredMaps[objectID][item.id]
-                        ) {
-                          mapImages = rasteredMaps[objectID][item.id];
-                        }
-                        objectContent.push(
-                          ...this.#propertiesPlacegiver(
-                            profile.objectPropertiesEditor.ops,
-                            item,
-                            profile.exportType,
-                            props[oID][item.id],
-                            mapImages,
-                          ),
-                        );
-                        // elements necessary for tabled export
-                        propertyNames.push(
-                          Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                            item,
-                          ),
-                        );
-                        propertyTypes.push(
-                          Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                            item,
-                          ),
-                        );
-                        propertyContents.push(
-                          Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                            item,
-                            this,
-                            profile.exportType,
-                            props[oID][item.id],
-                            mapImages,
-                          ),
-                        );
-                      }
-                    });
-                  });
-                  // reverse object relations
-                  theObjectTree.reverseRelations(objectID).forEach((revRel) => {
-                    objectContent.push(
-                      ...this.#propertiesPlacegiver(
-                        profile.objectPropertiesEditor.ops,
-                        revRel,
-                        profile.exportType,
-                        revRel.content,
-                      ),
-                    );
-                    // for tabled export
-                    propertyNames.push(
-                      Exporter.#propertyPlaceholders.propertyNamePlaceholder.function(
-                        revRel,
-                      ),
-                    );
-                    propertyTypes.push(
-                      Exporter.#propertyPlaceholders.propertyTypePlaceholder.function(
-                        revRel,
-                      ),
-                    );
-                    propertyContents.push(
-                      Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
-                        revRel,
-                        this,
-                        profile.exportType,
-                        revRel.content,
-                      ),
-                    );
-                  });
-
-                  objectsExport.push(
-                    ...this.#objectPlacegiver(
-                      profile.objectEditor.ops,
-                      objectID,
-                      profile.exportType,
-                      objectContent,
-                      useCitationTexts,
-                      propertyNames,
-                      propertyTypes,
-                      propertyContents,
-                    ),
-                  );
-                });
-
-                // document
-                resolve(
-                  this.#deltaToRTF(
-                    Exporter.#documentPlacegiver(
-                      profile.documentEditor.ops,
-                      profile.exportType,
-                      documentStatistics,
-                      textsExport,
-                      objectsExport,
-                    ),
-                    profile.textFormats,
-                    profile.objectFormats,
-                  ),
-                );
+              fac.colors.forEach((color) => {
+                if (!this.#colorTable.includes(color))
+                  this.#colorTable.push(color);
               });
-            }
+            });
+            resolve(this.#JSON2RTF(jsonExport));
             break;
-          */
         }
       });
     });
@@ -2068,13 +1878,12 @@ class Exporter {
    * @static
    *
    * @param {Object[]} documentPlaceholderOps
-   * @param {String} exportType
    * @param {Object} statistics
    * @param {Object[]} textsExport dimOps of all exported texts
    * @param {Object[]} objectsExport dimOps of all exported objects
    * @returns {Object[]} dimOps
    */
-  static #documentPlacegiver1(
+  static #documentPlacegiver(
     documentPlaceholderOps,
     statistics,
     textsExport,
@@ -2084,7 +1893,7 @@ class Exporter {
     let blockBefore = false;
     documentPlaceholderOps.forEach((op) => {
       let newOp = JSON.parse(JSON.stringify(op));
-      // after a block (textContent) insert, remove next "\n" to avoid an extra empty paragraph
+      // after a block insert, remove next "\n" to avoid an extra empty paragraph
       if (
         blockBefore &&
         typeof newOp.insert == "string" &&
@@ -2109,58 +1918,26 @@ class Exporter {
           Exporter.#documentPlaceholders[newOp.insert.placeholder].block;
       } else {
         ops.push(newOp);
+        blockBefore = false;
       }
     });
     return ops;
   }
 
-  static #documentPlacegiver(
-    documentPlaceholderOps,
-    exportType,
-    statistics,
-    textsExport,
-    objectsExport,
-  ) {
-    let dimOps = [];
-    documentPlaceholderOps.forEach((op) => {
-      if (
-        op.insert &&
-        op.insert.placeholder &&
-        Object.keys(Exporter.#documentPlaceholders).includes(
-          op.insert.placeholder,
-        )
-      ) {
-        dimOps.push(
-          ...Exporter.#documentPlaceholders[op.insert.placeholder].function(
-            exportType,
-            statistics,
-            textsExport,
-            objectsExport,
-          ),
-        );
-      } else {
-        dimOps.push(JSON.parse(JSON.stringify(op)));
-      }
-    });
-    return dimOps;
-  }
-
   /**
    * substitute text placeholders with actual values
    *
-   * @param {String} exportType
    * @param {Object[]} textPlaceholderOps
    * @param {String} textID
    * @param {Object[]} textContents substituted text contents in dimOps
    * @returns {Object[]} dimOps
    */
   static #textPlacegiver(textPlaceholderOps, textID, textContents) {
-    console.log("textPlacegiver", { textPlaceholderOps }, { textContents });
     let ops = [];
     let blockBefore = false;
     textPlaceholderOps.forEach((op) => {
       let newOp = JSON.parse(JSON.stringify(op));
-      // after a block (textContent) insert, remove next "\n" to avoid an extra empty paragraph
+      // after a block insert, remove next "\n" to avoid an extra empty paragraph
       if (
         blockBefore &&
         typeof newOp.insert == "string" &&
@@ -2184,9 +1961,9 @@ class Exporter {
           Exporter.#textPlaceholders[newOp.insert.placeholder].block;
       } else {
         ops.push(newOp);
+        blockBefore = false;
       }
     });
-    console.log({ ops });
     return ops;
   }
 
@@ -2298,7 +2075,7 @@ class Exporter {
     let blockBefore = false;
     objectPlaceholderDelta.forEach((op) => {
       let newOp = JSON.parse(JSON.stringify(op));
-      // after a block (textContent) insert, remove next "\n" to avoid an extra empty paragraph
+      // after a block insert, remove next "\n" to avoid an extra empty paragraph
       if (
         blockBefore &&
         typeof newOp.insert == "string" &&
@@ -2327,6 +2104,7 @@ class Exporter {
           Exporter.#objectPlaceholders[newOp.insert.placeholder].block;
       } else {
         ops.push(newOp);
+        blockBefore = false;
       }
     });
     return ops;
@@ -2369,185 +2147,6 @@ class Exporter {
       }
     });
     return ops;
-  }
-
-  /**
-   * convert delta to rtf
-   *
-   * @param {Object[]} deltaOps
-   * @param {Boolean} doFormats
-   * @param {Boolean} doObjects
-   * @returns {String}
-   */
-  #deltaToRTF(deltaOps, doFormats = true, doObjects = true) {
-    let blocks = [];
-    let text = "";
-    let formatID = UUID0;
-    let hasFormat = false;
-    for (let i = 0; i < deltaOps.length; i++) {
-      let op = deltaOps[i];
-      if (op.isCooked && op.isBlock) {
-        blocks.push(...this.#textToRTF(text, formatID));
-        text = "";
-        formatID = UUID0;
-        blocks.push(op.insert);
-        if (
-          i < deltaOps.length - 1 &&
-          deltaOps[i + 1].insert.startsWith("\n")
-        ) {
-          // ignore "\n" of placeholder block
-          deltaOps[i + 1].insert = deltaOps[i + 1].insert.substring(1);
-        }
-      } else {
-        let objectIDs = [];
-        let exportString = "";
-        if (op.isCooked) {
-          exportString = op.insert;
-        } else if (typeof op.insert != "object") {
-          exportString = Exporter.#escapeRTF(op.insert);
-        } else {
-          exportString = `{\\*\\shppict{\\pict\\picw${parseInt(
-            op.attributes.width,
-          )}\\pich${parseInt(op.attributes.height)}\\picwgoal${Math.floor(
-            (parseInt(op.attributes.width) / 180) * 1440,
-          )}\\pichgoal${Math.floor(
-            (parseInt(op.attributes.height) / 180) * 1440,
-          )}\\pngblip ${Buffer.from(
-            op.insert.image.split(",")[1],
-            "base64",
-          ).toString("hex")}}}`;
-          // for block alignments put image in a paragraph
-          // @todo to reflect left/center/right alignment we could create a new block accordingly -- this is left for future enhancement
-          if (DIMImage.alignments.slice(3).includes(op.attributes.alignment)) {
-            exportString = `\n${exportString}\n`;
-          }
-        }
-        if ("attributes" in op) {
-          let rtfControls = "";
-          Object.keys(op.attributes).forEach((attr) => {
-            switch (attr) {
-              case "bold":
-                rtfControls += "\\b1";
-                break;
-              case "italic":
-                rtfControls += "\\i1";
-                break;
-              case "underline":
-                rtfControls += "\\ul1";
-                break;
-              case "strike":
-                rtfControls += "\\strike1";
-                break;
-              default:
-                if (attr.startsWith("format") && doFormats) {
-                  hasFormat = true;
-                  formatID = attr.substring("format".length);
-                } else if (attr.startsWith("object") && doObjects) {
-                  let objectID = attr.substring("object".length);
-                  objectIDs.push(objectID);
-                  let fac = theObjectTree
-                    .objectStyle(objectID)
-                    .fontsAndColors();
-                  fac.fonts.forEach((font) => {
-                    if (!this.#fontTable.includes(font)) {
-                      this.#fontTable.push(font);
-                    }
-                  });
-                  fac.colors.forEach((color) => {
-                    if (!this.#colorTable.includes(color)) {
-                      this.#colorTable.push(color);
-                    }
-                  });
-                  rtfControls += StylingControls.controls2RTF(
-                    theObjectTree.objectStyle(objectID).styleProperties.text,
-                    theFormats.formats[UUID0].formats_fontSize,
-                    this.#fontTable,
-                    this.#colorTable,
-                  );
-                }
-                break;
-            }
-          });
-          if (rtfControls) {
-            exportString = `{${rtfControls} ${exportString}}`;
-          }
-        }
-        if (formatID && !this.#styleTable.includes(formatID)) {
-          this.#styleTable.push(formatID);
-          this.#usedFormats[formatID] = theFormats.formats[formatID];
-          let [font, c1, c2] = Formats.fontAndColors(
-            theFormats.formats[formatID],
-          );
-          if (font && !this.#fontTable.includes(font)) {
-            this.#fontTable.push(font);
-          }
-          if (c1 && !this.#colorTable.includes(c1)) {
-            this.#colorTable.push(c1);
-          }
-          if (c2 && !this.#colorTable.includes(c2)) {
-            this.#colorTable.push(c2);
-          }
-        }
-        objectIDs.forEach((objectID) => {
-          if (!this.#styleTable.includes(objectID)) {
-            this.#styleTable.push(objectID);
-            this.#usedObjects[objectID] = new StyledObject();
-            this.#usedObjects[objectID].styleProperties =
-              theObjectTree.objectStyle(objectID).styleProperties;
-          }
-        });
-
-        text += exportString;
-        if (hasFormat) {
-          blocks.push(...this.#textToRTF(text, formatID));
-          text = "";
-          formatID = UUID0;
-          hasFormat = false;
-        }
-      }
-    }
-    blocks.push(...this.#textToRTF(text, formatID));
-    let rtf = blocks.join("");
-    return rtf;
-  }
-
-  /**
-   * convert text to rtf using given format
-   *
-   * @param {String} text
-   * @param {Object} format
-   * @returns {String[]}
-   */
-  #textToRTF(text, format) {
-    let blocks = [];
-    if (text) {
-      if (text.endsWith("\n")) {
-        text = text.substring(0, text.length - 1);
-      }
-      let paras = text.split("\n");
-      if (format) {
-        let lastPara = paras.pop();
-        blocks.unshift(
-          `\\pard\\plain${Formats.formatToRTF(
-            theFormats.effectiveFormat(format),
-            this.#fontTable,
-            this.#colorTable,
-            this.#styleTable.indexOf(format),
-          )} ${lastPara}\\par\n`,
-        );
-      }
-      for (let i = paras.length - 1; i >= 0; i--) {
-        blocks.unshift(
-          `\\pard\\plain${Formats.formatToRTF(
-            this.#usedFormats[UUID0],
-            this.#fontTable,
-            this.#colorTable,
-            this.#styleTable.indexOf(UUID0),
-          )} ${paras[i]}\\par\n`,
-        );
-      }
-    }
-    return blocks;
   }
 
   /**
@@ -2668,7 +2267,6 @@ class Exporter {
                   theSettings.effectiveSettings().exportTableLineLength - width,
                 wrapWord: true,
               });
-              console.log({ columns });
               text += table(objectTable, {
                 border: getBorderCharacters("norc"),
                 columns: columns,
@@ -2724,7 +2322,7 @@ class Exporter {
             case "table":
               let cellStyle =
                 "vertical-align:top; border:1px solid black; padding:4px";
-              para += `<table style="width:100%"><colgroup>`;
+              para += `</p><table style="width:100%"><colgroup>`;
               c.width.forEach(
                 (w) => (para += `<col span="1" style="width:${w}%"></col>`),
               );
@@ -2742,11 +2340,12 @@ class Exporter {
                 para += "<tr>";
                 for (let j = 0; j < c.content[i].length; j++) {
                   para += `<td ${c.content[i][j].colSpan ? `colspan=${c.content[i][j].colSpan}` : ""} style="${cellStyle}">${Exporter.#JSON2HTML(Exporter.#deltaToJSON([c.content[i][j].content])[0])}</td>`;
-                  if (c.content[i][j].colSpan) j += c.content[i][j].colSpan-1;
+                  if (c.content[i][j].colSpan) j += c.content[i][j].colSpan - 1;
                 }
                 para += "</tr>";
               }
-              para += "</table>";
+              para += "</table><p";
+              if (p.format != UUID0) para += ` class="format${p.format}-true">`;
               break;
           }
         });
@@ -2853,7 +2452,130 @@ class Exporter {
   }
 
   /**
+   * convert exporter JSON to RTF
+   * @param {Object[]} json
+   * @returns {String} rtf
+   */
+  #JSON2RTF(json) {
+    let rtf = "";
+
+    json.forEach((p) => {
+      if (p.type == "paragraph") {
+        let paraContent = "";
+        let stdFmt = Formats.formatToRTF(
+          theFormats.effectiveFormat(UUID0),
+          this.#fontTable,
+          this.#colorTable,
+          this.#styleTable.indexOf(UUID0),
+        );
+        let paraFmt = Formats.formatToRTF(
+          theFormats.effectiveFormat(p.format),
+          this.#fontTable,
+          this.#colorTable,
+          this.#styleTable.indexOf(p.format),
+        );
+        p.content.forEach((c) => {
+          switch (c.type) {
+            case "text":
+              let rtfControls = "";
+              if (c.bold) rtfControls += "\\b1";
+              if (c.italic) rtfControls += "\\i1";
+              if (c.underline) rtfControls += "\\ul1";
+              if (c.strike) rtfControls += "\\strike1";
+              if ("objects" in c)
+                c.objects.forEach((id) => {
+                  rtfControls += StylingControls.controls2RTF(
+                    theObjectTree.objectStyle(id).styleProperties.text,
+                    theFormats.formats[UUID0].formats_fontSize,
+                    this.#fontTable,
+                    this.#colorTable,
+                  );
+                });
+              if (rtfControls)
+                paraContent += `{${rtfControls} ${Exporter.#escapeRTF(c.content)}}`;
+              else paraContent += Exporter.#escapeRTF(c.content);
+              break;
+
+            case "image":
+              if (c.alignment)
+                switch (c.alignment) {
+                  case "image_alignmentCenter":
+                    paraFmt += `\\qc`;
+                    break;
+                  case "image_alignmentRight":
+                    paraFmt += `\\qr`;
+                    break;
+                }
+              paraContent += `{\\*\\shppict{\\pict\\picw${parseInt(
+                c.width,
+              )}\\pich${parseInt(c.height)}\\picwgoal${Math.floor(
+                (parseInt(c.width) / 180) * 1440,
+              )}\\pichgoal${Math.floor(
+                (parseInt(c.height) / 180) * 1440,
+              )}\\pngblip ${Buffer.from(
+                c.content.split(",")[1],
+                "base64",
+              ).toString("hex")}}}`;
+              break;
+
+            case "table":
+              paraContent += `\\plain${stdFmt}`;
+              c.content.forEach((row) => {
+                paraContent += `\\trowd\\trpaddb50\\trpaddt50\\trpaddl50\\trpaddr50\n`;
+                let percentWidth = 0;
+                let span = 0;
+                let doSpan = "";
+                for (let colNo = 0; colNo < row.length; colNo++) {
+                  percentWidth += c.width[colNo];
+                  if (row[colNo].colSpan) {
+                    span = row[colNo].colSpan - 1;
+                    doSpan = `\\clmgf`;
+                  }
+                  // cell width is relative in 50th percent by \clwWidth
+                  // and absolute in twips by \cellx, based on 9071 twips = 9071/20/72 inch = 6.3 inch = 16 cm total table width
+                  paraContent += `${doSpan}\\clbrdrt\\brdrs\\brdrw1\\brdrcf0\\clbrdrr\\brdrs\\brdrw1\\brdrcf0\\clbrdrl\\brdrs\\brdrw1\\brdrcf0\\clbrdrb\\brdrs\\brdrw1\\brdrcf0\\clftsWidth2\\clwWidth${c.width[colNo] * 50}\\cellx${Math.floor((percentWidth / 100) * 9071)}\n`;
+                  if (span) {
+                    doSpan = `\\clmrg`;
+                    span--;
+                  }
+                }
+                for (let colNo = 0; colNo < row.length; colNo++) {
+                  // chopping off the last \par\n
+                  paraContent += `\\pard\\intbl ${this.#JSON2RTF(
+                    Exporter.#deltaToJSON([row[colNo].content])[0],
+                  ).slice(0, -5)}\\cell\n`;
+                }
+                paraContent += `\\row\n`;
+              });
+              paraContent += `\\pard\\plain${paraFmt} `;
+              break;
+          }
+        });
+        rtf += `\\pard\\plain${paraFmt} ${paraContent}\\par\n`;
+      }
+    });
+
+    return rtf;
+  }
+
+  /**
    * convert delta/exporter JSON mix to exporter JSON
+   *
+   * this JSON format ist derived from deltaOps and inserted by ...placegiver functions
+   * the eventual export format (text | html | rtf | docx | ...) is built from this JSON format
+   *
+   * structure of exporter JSON intermediate format:
+   *    document = [ paragraph* ]
+   *    paragraph = { content: [ element* ], format: String }
+   *    element = text | image | table
+   *    text = { type: "text", content: String, bold: Boolean, ..., objects: [ String* ] }
+   *    image = { type: "image", content: String, alignment: String,
+   *              title: String, width: Int, height: Int }
+   *    table = { type: "table", rows: Int, cols: Int, header: Boolean,
+   *              width: [ Int* ], content: [ row* ]} -- width in percent
+   *    row = [ cell* ]
+   *    cell = { content: type | image | Object[], colSpan: Int } -- irrespective of colSpan the number if cell items in each row must be the same, so colSpan just skips following cell items
+   *
    * @param {Object[]} deltaJSON
    * @returns {Object[]}
    */
@@ -2964,12 +2686,11 @@ class Exporter {
         content: content,
         format: formatID,
       });
-    console.log({ paragraphs }, { formats }, { objects });
     return [paragraphs, formats, objects];
   }
 
   /**
-   * convert delta ops to html
+   * convert delta ops to html directly (needed by other classes)
    *
    * @param {Object[]} deltaOps
    * @returns {String} html
@@ -3143,6 +2864,8 @@ class Exporter {
    * @param {*} maxZoom
    * @param {*} markers
    * @returns
+   *
+   * @TODO should we honour window.devicePixelRatio? see https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio
    */
   static #rasterizeOne(
     rasterMap,

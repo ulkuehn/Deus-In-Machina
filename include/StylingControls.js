@@ -666,11 +666,12 @@ class StylingControls {
     }
 
     // line color and strength not supported in rtf
+    
     if (properties.formats_border && properties.formats_border[0]) {
-      let colorIndex = colorTable.indexOf(properties.formats_border[1]);
+      let colorIndex = colorTable.indexOf(properties.formats_border[0]);
       if (colorIndex >= 0) {
-        rtf += `\\chbrdr\\brdrcf${colorIndex}\\brdrw${properties.formats_border[3] * 10}`;
-        switch (properties.formats_border[2]) {
+        rtf += `\\chbrdr\\brdrcf${colorIndex}\\brdrw${properties.formats_border[2] * 10}`;
+        switch (properties.formats_border[1]) {
           case "solid":
             rtf += `\\brdrs`;
             break;

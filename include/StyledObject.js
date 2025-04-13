@@ -465,18 +465,13 @@ class StyledObject {
     let colors = {};
     Object.keys(StylingControls.controls).forEach((area) => {
       StylingControls.controls[area].forEach((control) => {
-        if (
-          control.type == "font" &&
-          this.#styleProperties[area][control.name]
-        ) {
+        if (control.type == "font" && this.#styleProperties[area][control.name])
           fonts[this.#styleProperties[area][control.name]] = true;
-        }
         if (
-          control.type == "color" &&
+          (control.type == "color" || control.type == "emptycolor") &&
           this.#styleProperties[area][control.name]
-        ) {
+        )
           colors[this.#styleProperties[area][control.name]] = true;
-        }
         if (
           control.type == "multi" &&
           this.#styleProperties[area][control.name]
@@ -484,16 +479,15 @@ class StyledObject {
           for (let i = 0; i < control.controls.length; i++) {
             if (
               control.controls[i].type == "font" &&
-              this.#styleProperties[area][control.name][i + 1]
-            ) {
-              fonts[this.#styleProperties[area][control.name][i + 1]] = true;
-            }
+              this.#styleProperties[area][control.name][i]
+            )
+              fonts[this.#styleProperties[area][control.name][i]] = true;
             if (
-              control.controls[i].type == "color" &&
-              this.#styleProperties[area][control.name][i + 1]
-            ) {
-              colors[this.#styleProperties[area][control.name][i + 1]] = true;
-            }
+              (control.controls[i].type == "color" ||
+                control.controls[i].type == "emptycolor") &&
+              this.#styleProperties[area][control.name][i]
+            )
+              colors[this.#styleProperties[area][control.name][i]] = true;
           }
         }
       });
@@ -751,7 +745,10 @@ class StyledObject {
                     )
                     .join("") +
                     Util.escapeHTML(
-                      citation.parts[index].content.substring(0, r.indices[0][0]),
+                      citation.parts[index].content.substring(
+                        0,
+                        r.indices[0][0],
+                      ),
                     ),
                   Util.escapeHTML(
                     citation.parts[index].content.substring(
@@ -765,7 +762,9 @@ class StyledObject {
                     citation.parts
                       .slice(index + 1)
                       .map((part) =>
-                        part.html ? part.content : Util.escapeHTML(part.content),
+                        part.html
+                          ? part.content
+                          : Util.escapeHTML(part.content),
                       )
                       .join(""),
                 ],

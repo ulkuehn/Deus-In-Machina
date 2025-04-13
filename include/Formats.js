@@ -518,22 +518,7 @@ class Formats {
   }
 
   /**
-   * return font and color info of a format
-   * @static
-   *
-   * @param {Object} format
-   * @returns {String[]}
-   */
-  static fontAndColors(format) {
-    return [
-      format.formats_fontFamily,
-      format.formats_textColor,
-      format.formats_backgroundColor,
-    ];
-  }
-
-  /**
-   * returns a rtf representaion of a format, taking font, color and style tables into account
+   * returns a rtf representation of a format, taking font, color and style tables into account
    * @static
    *
    * @param {Object} format
@@ -614,7 +599,7 @@ class Formats {
     }
 
     // word spacing not supported in rtf
-    console.log("formatToRTF", format, rtf);
+
     return rtf;
   }
 }
