@@ -259,7 +259,7 @@ ipcRenderer.on(
         .html(
           `<div><input type="text" spellcheck="false" id="searchText" style="border:none;background-color:#00000000; width:calc(100% - 25px)"><i class="fa-solid fa-magnifying-glass fa-fw" id="searchIcon" title="${_(
             "editorBars_searchModeTitle",
-          )}" style="padding-right:2px"></i></div><div style="display:none;"><input type="text" spellcheck="false" id="replaceText" style="border:none;background-color:#00000000; width:calc(100% - 25px)"><i class="fa-solid fa-retweet fa-fw" id="replaceIcon" title="${_(
+          )}" style="padding-right:2px"></i></div><div style="display:none;"><input type="text" spellcheck="false" id="replaceText" style="border:none;background-color:#00000000; width:calc(100% - 25px)"><i class="fa-solid fa-right-left fa-fw" id="replaceIcon" title="${_(
             "editorBars_replaceModeTitle",
           )}" style="padding-right:2px;"></i></div>`,
         ),
@@ -347,7 +347,7 @@ ipcRenderer.on(
         .html(
           `<button type="button" class="btn btn-outline-light btn-sm simple-btn" style="height:29px; padding:0; width:30px" id="replaceNext" title="${_(
             "editorBars_replaceNextTitle",
-          )}" disabled><i class="fa-solid fa-retweet fa-fw"></i></button>`,
+          )}" disabled><i class="fa-solid fa-right-left fa-fw"></i></button>`,
         ),
     );
     $menuBar.append(
@@ -359,7 +359,7 @@ ipcRenderer.on(
         .html(
           `<button type="button" class="btn btn-outline-light btn-sm simple-btn" style="height:29px; padding:0; width:30px" id="replaceAll" title="${_(
             "replaceAll",
-          )}" disabled><i class="fa-solid fa-ellipsis-vertical fa-fw"></i></button>`,
+          )}" disabled><i class="fa-solid fa-retweet fa-fw"></i></button>`,
         ),
     );
 

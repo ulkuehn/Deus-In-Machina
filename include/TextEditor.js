@@ -283,7 +283,7 @@ class TextEditor {
         .html(
           `<div><input type="text" spellcheck="false" id="searchText" style="border:none; background-color:#00000000; width:calc(100% - 25px)"><i class="fa-solid fa-magnifying-glass fa-fw" id="searchIcon" title="${_(
             "editorBars_searchModeTitle",
-          )}" style="margin-left:2px"></i></div><div style="display:none;"><input type="text" spellcheck="false" id="replaceText" style="border:none; background-color:#00000000; width:calc(100% - 25px)"><i class="fa-solid fa-retweet fa-fw" id="replaceIcon" title="${_(
+          )}" style="margin-left:2px"></i></div><div style="display:none;"><input type="text" spellcheck="false" id="replaceText" style="border:none; background-color:#00000000; width:calc(100% - 25px)"><i class="fa-solid fa-right-left fa-fw" id="replaceIcon" title="${_(
             "editorBars_replaceModeTitle",
           )}" style="margin-left:2px"></i></div>`,
         ),
@@ -371,7 +371,7 @@ class TextEditor {
         .html(
           `<button type="button" class="btn btn-outline-light btn-sm simple-btn" style="height:calc(100% - 8px); padding:0; width:30px" id="replaceNext" title="${_(
             "editorBars_replaceNextTitle",
-          )}" disabled><i class="fa-solid fa-retweet fa-fw"></i></button>`,
+          )}" disabled><i class="fa-solid fa-right-left"></i></button>`,
         ),
     );
     $menuBar.append(
@@ -383,7 +383,7 @@ class TextEditor {
         .html(
           `<button type="button" class="btn btn-outline-light btn-sm simple-btn" style="height:calc(100% - 8px); padding:0; width:30px" id="replaceAll" title="${_(
             "editorBars_replaceAllTitle",
-          )}" disabled><i class="fa-solid fa-ellipsis-vertical fa-fw"></i></button>`,
+          )}" disabled><i class="fa-solid fa-retweet fa-fw"></i></button>`,
         ),
     );
 

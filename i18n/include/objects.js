@@ -78,7 +78,7 @@ const translationObjects = {
     objects_menuInsertAfter: "New Object below",
     objects_branchMenu: "Branch",
     objects_menuExpand: "Open Branch completely",
-    objects_menuCollapse: "Close Brnach",
+    objects_menuCollapse: "Close Branch",
     objects_menuActivate: "Activate Branch",
     objects_menuDeactivate: "Deactivate Branch",
     objects_textMenu: "Connected Texts",
