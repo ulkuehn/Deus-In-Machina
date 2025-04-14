@@ -704,7 +704,6 @@ function infoTab(path) {
  * @returns {Object} jquery grid
  */
 function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
-  console.log("styleTab", inheritedStyle, effectiveStyle, standardFormat);
   let textSample = theSettings.objectsTextSample || _("sampleTexts_medium");
   textSample = `<img style="display:block; margin:0px auto" src="${DIMImage.sampleImage}">${textSample.replace(/\n/g, "<br>")}&nbsp;<img style="display:inline; vertical-align:baseline" src="${DIMImage.sampleImage}">`;
 
@@ -1200,16 +1199,16 @@ function makeOverview(nonSiblings, objects, current, files, depth) {
           .text(id == current.id ? current.name : objects[id]),
       ),
   );
-  // ipcRenderer.invoke(
-  //   "mainProcess_objectOverview",
-  //   id,
-  //   JSON.stringify(current.serialize()),
-  //   files,
-  // );
-  // // recursive walk
-  // Object.values(nonSiblings)[0].forEach((child) => {
-  //   makeOverview(child, objects, current, files, depth + 1);
-  // });
+  ipcRenderer.invoke(
+    "mainProcess_objectOverview",
+    id,
+    JSON.stringify(current.serialize()),
+    files,
+  );
+  // recursive walk
+  Object.values(nonSiblings)[0].forEach((child) => {
+    makeOverview(child, objects, current, files, depth + 1);
+  });
 }
 
 /**
@@ -1524,7 +1523,6 @@ function restyleSample() {
             }
             value.push($(`#${control.controls[i].name}Field`).val());
           }
-          console.log("multi", control.name, value);
           theStyledObject.setStyleProperty(area, control.name, value);
         } else {
           if (theInheritedStyle.getStyleProperty(area, control.name) != null) {

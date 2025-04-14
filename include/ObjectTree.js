@@ -589,10 +589,11 @@ class ObjectTree {
     let node = this.#treeDiv.jstree().get_node(id);
     let parents = [];
     // traverse the hierarchy upwards towards root
-    while (node.id != "#") {
-      parents.unshift(names ? this.#objects[node.id].name : node.id);
-      node = this.#treeDiv.jstree().get_node(node.parent);
-    }
+    if (node)
+      while (node.id != "#") {
+        parents.unshift(names ? this.#objects[node.id].name : node.id);
+        node = this.#treeDiv.jstree().get_node(node.parent);
+      }
     return parents;
   }
 
@@ -670,6 +671,32 @@ class ObjectTree {
     );
 
     // reverse relations -- we are doing this for each object anew which is not very smart
+    // Object.keys(this.#objects).forEach((oID) => {
+    //   result.push(
+    //     ...new Scheme(
+    //       theSettings.effectiveSettings(),
+    //       oID,
+    //       (oID == currentObject.id
+    //         ? currentObject
+    //         : this.#objects[oID]
+    //       ).properties,
+    //       this.getParents(oID, false)
+    //         .slice(0, -1)
+    //         .map((o) => ({
+    //           id: o,
+    //           name: (o == currentObject.id ? currentObject : this.#objects[o])
+    //             .name,
+    //           scheme: (o == currentObject.id ? currentObject : this.#objects[o])
+    //             .scheme,
+    //         }))
+    //         .reverseProperties(
+    //           id,
+    //           (oID == currentObject.id ? currentObject : this.#objects[oID])
+    //             .name,
+    //         ),
+    //     ),
+    //   );
+    // });
     Object.keys(this.#objects).forEach((oID) => {
       result.push(
         ...new Scheme(
@@ -695,7 +722,7 @@ class ObjectTree {
         ),
       );
     });
-
+    
     return result;
   }
 
