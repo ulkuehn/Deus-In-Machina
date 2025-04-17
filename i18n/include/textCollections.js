@@ -8,6 +8,7 @@
 const translationTextCollections = {
   // German
   de: {
+    textCollections_description: "Textlisten<br>- keine Textliste -",
     // text collection
     textCollections_newCollection: "Textliste %{count}",
     textCollections_newSearchCollection: "Such- und Filterliste %{count}",
@@ -34,6 +35,7 @@ const translationTextCollections = {
   },
   // English
   en: {
+    textCollections_description: "Collection area<br>- no collection -",
     // text collection
     textCollections_newCollection: "New Collection %{count}",
     textCollections_newSearchCollection:

@@ -259,7 +259,6 @@ class Filter {
   }
 
   get filters() {
-    console.log("getting filters");
     let i = 0;
     this.#theFilters.forEach((theFilter) => {
       theFilter.negate = $(`#negate_${i}`).prop("checked");

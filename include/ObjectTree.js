@@ -10,6 +10,7 @@
  */
 
 class ObjectTree {
+  #overlayDiv; // jQuery DOM to show when jsTree is empty
   #treeDiv; // jQuery DOM holding the jsTree
   #newCounter; // counter for naming new objects
   #objects; // key is id, value is styledObject
@@ -39,8 +40,14 @@ class ObjectTree {
     this.#activateSingle = false;
     this.#editMode = false;
 
+    this.#overlayDiv = $("<div>")
+      .attr({
+        class: "empty-tree",
+        style: `display:none`,
+      })
+      .html(_("objects_description"));
     this.#treeDiv = $("<div>");
-    $("#OT").empty().append(this.#treeDiv);
+    $("#OT").empty().append(this.#overlayDiv, this.#treeDiv);
     this.setupTree(data, true);
 
     this.#treeDiv.contextMenu({
@@ -48,6 +55,63 @@ class ObjectTree {
       autoHide: true,
       build: ($trigger, e) => {
         return this.#editMode ? false : this.#contextMenu($trigger[0].id, e);
+      },
+    });
+
+    $.contextMenu({
+      selector: "#OT",
+      autoHide: true,
+      build: ($trigger, e) => {
+        return this.#editMode
+          ? false
+          : {
+              items: {
+                new: {
+                  name: _("objectMenu_newObject"),
+                  icon: "fa-regular fa-star-of-life",
+                  callback: () => this.newObject(),
+                },
+                sep1: "x",
+                expand: {
+                  name: _("objectMenu_expandAll"),
+                  icon: "fa-regular fa-square-plus",
+                  callback: () => this.expandAll(),
+                },
+                collapse: {
+                  name: _("objectMenu_collapseAll"),
+                  callback: () => this.collapseAll(),
+                },
+                sep2: "x",
+                check: {
+                  name: _("objectMenu_checkAll"),
+                  icon: "fa-regular fa-check-double",
+                  callback: () => this.checkAll(),
+                },
+                uncheck: {
+                  name: _("objectMenu_uncheckAll"),
+                  callback: () => this.uncheckAll(),
+                },
+                sep3: "x",
+                search: {
+                  name: _("objectMenu_search"),
+                  icon: "fa-regular fa-magnifying-glass",
+                  callback: () => {
+                    ipcRenderer.invoke("mainProcess_openWindow", [
+                      "objectSearch",
+                      true,
+                      true,
+                      0,
+                      0,
+                      _("windowTitles_objectSearchWindow"),
+                      "./objectSearchWindow/objectSearchWindow.html",
+                      "objectSearchWindow_init",
+                      null,
+                      [theSettings.effectiveSettings()],
+                    ]);
+                  },
+                },
+              },
+            };
       },
     });
   }
@@ -173,8 +237,8 @@ class ObjectTree {
     this.#treeDiv.jstree({
       core: {
         check_callback: (operation, node, node_parent, node_position, more) => {
-          // avoid movements between trees
           if (more && more.dnd && more.is_multi) {
+            // avoid movements between trees
             return false;
           }
           return true;
@@ -228,44 +292,48 @@ class ObjectTree {
       }
     });
 
-    if (data && data.length == 0) {
-      this.#objects = {};
-      this.#newCounter = 1;
-      let id = uuid();
-      let styleProps = {};
-      if (settings.objectTreeNewObjectItalic) {
-        styleProps.formats_italic = true;
-      }
-      if (settings.objectTreeNewObjectUnderline) {
-        styleProps.formats_underline = true;
-      }
-      if (settings.objectTreeNewObjectColor) {
-        styleProps.formats_textColor = settings.objectTreeNewObjectColor;
-      }
-      this.#objects[id] = new StyledObject(
-        id,
-        _("objects_newObject", { count: this.#newCounter }),
-        {},
-        { text: styleProps, image: {} },
-      );
-      // we deliver the initial object undirty, as the unchanged initial tree should not be (auto)saved
-      this.#objects[id].undirty();
-      this.#newCounter++;
+    if (!data || !data.length) this.#overlayDiv.css("display", "flex");
 
-      this.#treeDiv.one("create_node.jstree", () => {
-        // wait some before setting the tree undirty to make creating complete
-        setTimeout(() => {
-          this.undirty();
-        }, 250);
-      });
-      this.#treeDiv.jstree().create_node(null, {
-        id: id,
-        text: this.#objects[id].decoratedName(),
-      });
-    }
+    //   this.#objects = {};
+    //   this.#newCounter = 1;
+    //   let id = uuid();
+    //   let styleProps = {};
+    //   if (settings.objectTreeNewObjectItalic) {
+    //     styleProps.formats_italic = true;
+    //   }
+    //   if (settings.objectTreeNewObjectUnderline) {
+    //     styleProps.formats_underline = true;
+    //   }
+    //   if (settings.objectTreeNewObjectColor) {
+    //     styleProps.formats_textColor = settings.objectTreeNewObjectColor;
+    //   }
+    //   this.#objects[id] = new StyledObject(
+    //     id,
+    //     _("objects_newObject", { count: this.#newCounter }),
+    //     {},
+    //     { text: styleProps, image: {} },
+    //   );
+    //   // we deliver the initial object undirty, as the unchanged initial tree should not be (auto)saved
+    //   this.#objects[id].undirty();
+    //   this.#newCounter++;
+
+    //   this.#treeDiv.one("create_node.jstree", () => {
+    //     // wait some before setting the tree undirty to make creating complete
+    //     setTimeout(() => {
+    //       this.undirty();
+    //     }, 250);
+    //   });
+    //   this.#treeDiv.jstree().create_node(null, {
+    //     id: id,
+    //     text: this.#objects[id].decoratedName(),
+    //   });
+    // }
 
     // creating nodes makes the tree dirty
     this.#treeDiv.on("create_node.jstree delete_node.jstree", () => {
+      if (this.#treeDiv.jstree().get_node("#").children.length)
+        this.#overlayDiv.css("display", "none");
+      else this.#overlayDiv.css("display", "flex");
       this.#dirty = true;
     });
 
@@ -722,7 +790,7 @@ class ObjectTree {
         ),
       );
     });
-    
+
     return result;
   }
 

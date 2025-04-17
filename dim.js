@@ -525,10 +525,10 @@ function menuList(left, right, bottom) {
     },
     // text tree menu
     {
-      label: _("mainProcess_menuTextTree"),
+      label: _("textMenu_menu"),
       submenu: [
         {
-          label: _("mainProcess_menuTextTreeNew"),
+          label: _("textMenu_newText"),
           accelerator: "alt+n",
           enabled: fullTextMenu,
           click(item, focusedWindow) {
@@ -536,14 +536,14 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuTextTreeDeleteText"),
+          label: _("textMenu_deleteText"),
           enabled: fullTextMenu,
           click(item, focusedWindow) {
             focusedWindow.webContents.send("rendererProcess_deleteText");
           },
         },
         {
-          label: _("mainProcess_menuTextTreeDeleteBranch"),
+          label: _("textMenu_deleteBranch"),
           enabled: fullTextMenu,
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -552,7 +552,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuTextTreeJoinTextsSep"),
+          label: _("textMenu_joinTextsSep"),
           enabled: fullTextMenu,
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -561,7 +561,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuTextTreeJoinTexts"),
+          label: _("textMenu_joinTexts"),
           enabled: fullTextMenu,
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -573,7 +573,7 @@ function menuList(left, right, bottom) {
           type: "separator",
         },
         {
-          label: _("mainProcess_menuTextTreeExpandAll"),
+          label: _("textMenu_expandAll"),
           accelerator: "alt+1",
           enabled: fullTextMenu,
           click(item, focusedWindow) {
@@ -581,7 +581,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuTextTreeCollapseAll"),
+          label: _("textMenu_collapseAll"),
           accelerator: "alt+2",
           enabled: fullTextMenu,
           click(item, focusedWindow) {
@@ -591,7 +591,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuTextTreeExpandBranch"),
+          label: _("textMenu_expandBranch"),
           accelerator: "alt+3",
           enabled: fullTextMenu,
           click(item, focusedWindow) {
@@ -601,7 +601,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuTextTreeCollapseBranch"),
+          label: _("textMenu_collapseBranch"),
           accelerator: "alt+4",
           enabled: fullTextMenu,
           click(item, focusedWindow) {
@@ -614,14 +614,14 @@ function menuList(left, right, bottom) {
           type: "separator",
         },
         {
-          label: _("mainProcess_menuTextTreeCheckAll"),
+          label: _("textMenu_checkAll"),
           accelerator: "alt+5",
           click(item, focusedWindow) {
             focusedWindow.webContents.send("rendererProcess_textTreeCheckAll");
           },
         },
         {
-          label: _("mainProcess_menuTextTreeUncheckAll"),
+          label: _("textMenu_uncheckAll"),
           accelerator: "alt+6",
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -630,7 +630,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuTextTreeCheckBranch"),
+          label: _("textMenu_checkBranch"),
           accelerator: "alt+7",
           enabled: fullTextMenu,
           click(item, focusedWindow) {
@@ -640,7 +640,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuTextTreeUncheckBranch"),
+          label: _("textMenu_uncheckBranch"),
           accelerator: "alt+8",
           enabled: fullTextMenu,
           click(item, focusedWindow) {
@@ -650,7 +650,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuTextTreeInvertCheck"),
+          label: _("textMenu_invertCheck"),
           accelerator: "alt+9",
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -662,7 +662,7 @@ function menuList(left, right, bottom) {
           type: "separator",
         },
         {
-          label: _("mainProcess_menuTextTreeCheckCheckedObjects"),
+          label: _("textMenu_checkCheckedObjects"),
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
               "rendererProcess_textTreeCheckCheckedObjects",
@@ -670,7 +670,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuTextTreeCheckHasObjects"),
+          label: _("textMenu_checkHasObjects"),
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
               "rendererProcess_textTreeCheckHavingObjects",
@@ -678,7 +678,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuTextTreeSearch"),
+          label: _("textMenu_search"),
           enabled: fullTextMenu,
           accelerator: "alt+f",
           click(item, focusedWindow) {
@@ -689,7 +689,7 @@ function menuList(left, right, bottom) {
           type: "separator",
         },
         {
-          label: _("mainProcess_menuTextCollectionNew"),
+          label: _("textMenu_newCollection"),
           accelerator: "alt+m",
           click(item, focusedWindow) {
             focusedWindow.webContents.send("rendererProcess_newTextCollection");
@@ -699,10 +699,10 @@ function menuList(left, right, bottom) {
     },
     // object tree menu
     {
-      label: _("mainProcess_menuObjectTree"),
+      label: _("objectMenu_menu"),
       submenu: [
         {
-          label: _("mainProcess_menuObjectTreeSingle"),
+          label: _("objectMenu_singleSelect"),
           type: "checkbox",
           id: "mainProcess_menuObjectTreeSingle",
           checked: false,
@@ -717,20 +717,20 @@ function menuList(left, right, bottom) {
           type: "separator",
         },
         {
-          label: _("mainProcess_menuObjectTreeNewObject"),
+          label: _("objectMenu_newObject"),
           accelerator: "alt+shift+n",
           click(item, focusedWindow) {
             focusedWindow.webContents.send("rendererProcess_newObject");
           },
         },
         {
-          label: _("mainProcess_menuObjectTreeDeleteObject"),
+          label: _("objectMenu_deleteObject"),
           click(item, focusedWindow) {
             focusedWindow.webContents.send("rendererProcess_deleteObject");
           },
         },
         {
-          label: _("mainProcess_menuObjectTreeDeleteBranch"),
+          label: _("objectMenu_deleteBranch"),
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
               "rendererProcess_objectTreeDeleteBranch",
@@ -741,7 +741,7 @@ function menuList(left, right, bottom) {
           type: "separator",
         },
         {
-          label: _("mainProcess_menuObjectTreeExpandAll"),
+          label: _("objectMenu_expandAll"),
           accelerator: "alt+shift+1",
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -750,7 +750,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuObjectTreeCollapseAll"),
+          label: _("objectMenu_collapseAll"),
           accelerator: "alt+shift+2",
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -759,7 +759,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuObjectTreeExpandBranch"),
+          label: _("objectMenu_expandBranch"),
           accelerator: "alt+shift+3",
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -768,7 +768,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuObjectTreeCollapseBranch"),
+          label: _("objectMenu_collapseBranch"),
           accelerator: "alt+shift+4",
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -780,7 +780,7 @@ function menuList(left, right, bottom) {
           type: "separator",
         },
         {
-          label: _("mainProcess_menuObjectTreeCheckAll"),
+          label: _("objectMenu_checkAll"),
           accelerator: "alt+shift+5",
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -789,7 +789,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuObjectTreeUncheckAll"),
+          label: _("objectMenu_uncheckAll"),
           accelerator: "alt+shift+6",
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -798,7 +798,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuObjectTreeCheckBranch"),
+          label: _("objectMenu_checkBranch"),
           accelerator: "alt+shift+7",
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -807,7 +807,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuObjectTreeUncheckBranch"),
+          label: _("objectMenu_uncheckBranch"),
           accelerator: "alt+shift+8",
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -816,7 +816,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuObjectTreeInvertCheck"),
+          label: _("objectMenu_invertCheck"),
           accelerator: "alt+shift+9",
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
@@ -828,7 +828,7 @@ function menuList(left, right, bottom) {
           type: "separator",
         },
         {
-          label: _("mainProcess_menuObjectTreeCheckHavingCheckedTexts"),
+          label: _("objectMenu_checkHavingCheckedTexts"),
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
               "rendererProcess_objectTreeCheckCheckedTexts",
@@ -836,7 +836,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuObjectTreeCheckHavingTexts"),
+          label: _("objectMenu_checkHavingTexts"),
           click(item, focusedWindow) {
             focusedWindow.webContents.send(
               "rendererProcess_objectTreeCheckHavingTexts",
@@ -844,7 +844,7 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("mainProcess_menuObjectTreeSearch"),
+          label: _("objectMenu_search"),
           accelerator: "alt+shift+f",
           click(item, focusedWindow) {
             focusedWindow.webContents.send("rendererProcess_openObjectSearch");

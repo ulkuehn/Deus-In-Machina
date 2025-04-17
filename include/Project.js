@@ -1127,7 +1127,7 @@ class Project {
     theObjectTree.setupTree([], true);
     theTextTree.setupTree([], true);
     theTextCollectionTree.setupTree([], true);
-    this.undirty();
+    setTimeout(()=>this.undirty(),500);
   }
 
   /**

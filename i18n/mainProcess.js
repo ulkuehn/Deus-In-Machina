@@ -9,6 +9,8 @@ const i18n = require("roddeh-i18n");
 const { translationGeneral } = require("./include/general.js");
 const { translationLanguages } = require("./include/languages.js");
 const { translationWindowTitles } = require("./include/windowTitles.js");
+const { translationObjectMenu } = require("./include/objectMenu.js");
+const { translationTextMenu } = require("./include/tm.js");
 
 const translationMainProcess = {
   // German
@@ -17,6 +19,8 @@ const translationMainProcess = {
       ...translationGeneral.de,
       ...translationLanguages.de,
       ...translationWindowTitles.de,
+      ...translationObjectMenu.de,
+      ...translationTextMenu.de,
 
       // splash
       mainProcess_version: "Version %{version} (%{scheme})",
@@ -43,27 +47,6 @@ const translationMainProcess = {
       mainProcess_menuFileSettings: "Einstellungen ...",
       mainProcess_menuFileExit: "Beenden",
 
-      // object tree menu
-      mainProcess_menuObjectTree: "Objekte",
-      mainProcess_menuObjectTreeSingle: "Einzelobjektauswahl",
-      mainProcess_menuObjectTreeNewObject: "Neues Objekt einfügen",
-      mainProcess_menuObjectTreeDeleteObject: "Objekt löschen",
-      mainProcess_menuObjectTreeDeleteBranch: "Zweig löschen",
-      mainProcess_menuObjectTreeExpandAll: "Alles aufklappen",
-      mainProcess_menuObjectTreeCollapseAll: "Alles einklappen",
-      mainProcess_menuObjectTreeExpandBranch: "Zweig(e) aufklappen",
-      mainProcess_menuObjectTreeCollapseBranch: "Zweig(e) einklappen",
-      mainProcess_menuObjectTreeCheckAll: "Alle Objekte aktivieren",
-      mainProcess_menuObjectTreeUncheckAll: "Alle Objekte deaktivieren",
-      mainProcess_menuObjectTreeCheckBranch: "Zweig(e) aktivieren",
-      mainProcess_menuObjectTreeUncheckBranch: "Zweig(e) deaktivieren",
-      mainProcess_menuObjectTreeInvertCheck: "Aktivierung invertieren",
-      mainProcess_menuObjectTreeCheckHavingCheckedTexts:
-        "Aktiviere alle Objekte mit Bezug zu den aktivierten Texten",
-      mainProcess_menuObjectTreeCheckHavingTexts:
-        "Aktiviere alle Objekte mit Bezug zu irgendeinem Text",
-      mainProcess_menuObjectTreeSearch: "Suchen ...",
-
       // view menu
       mainProcess_menuView: "Ansicht",
       mainProcess_menuViewToggleLeft: "Textbereich anzeigen",
@@ -73,29 +56,6 @@ const translationMainProcess = {
       mainProcess_menuViewEditorOnly: "nur den Editor anzeigen",
       mainProcess_menuViewFullScreen: "Vollbildansicht",
       mainProcess_menuViewDistractionFree: "Fokuseditor",
-
-      // text tree menu
-      mainProcess_menuTextTree: "Texte",
-      mainProcess_menuTextTreeNew: "Neuen Text einfügen",
-      mainProcess_menuTextTreeDeleteText: "Ausgewählten Text löschen",
-      mainProcess_menuTextTreeDeleteBranch: "Ausgewählten Zweig löschen",
-      mainProcess_menuTextTreeJoinTexts: "Ausgewählte Texte nahtlos verbinden",
-      mainProcess_menuTextTreeJoinTextsSep: "Ausgewählte Texte verbinden",
-      mainProcess_menuTextTreeExpandAll: "Alles aufklappen",
-      mainProcess_menuTextTreeCollapseAll: "Alles einklappen",
-      mainProcess_menuTextTreeExpandBranch: "Zweig(e) aufklappen",
-      mainProcess_menuTextTreeCollapseBranch: "Zweig(e) einklappen",
-      mainProcess_menuTextTreeCheckAll: "Alle Texte aktivieren",
-      mainProcess_menuTextTreeUncheckAll: "Alle Texte deaktivieren",
-      mainProcess_menuTextTreeCheckBranch: "Zweig(e) aktivieren",
-      mainProcess_menuTextTreeUncheckBranch: "Zweig(e) deaktivieren",
-      mainProcess_menuTextTreeInvertCheck: "Aktivierung invertieren",
-      mainProcess_menuTextTreeCheckCheckedObjects:
-        "Aktiviere alle Texte mit Bezug zu den aktivierten Objekten",
-      mainProcess_menuTextTreeCheckHasObjects:
-        "Aktiviere alle Texte mit Bezug zu irgendeinem Objekt",
-      mainProcess_menuTextTreeSearch: "Suchen und filtern ...",
-      mainProcess_menuTextCollectionNew: "Neue Textliste einfügen",
 
       // text editor menu
       mainProcess_menuEditor: "Editor",
@@ -164,6 +124,7 @@ const translationMainProcess = {
       ...translationGeneral.en,
       ...translationLanguages.en,
       ...translationWindowTitles.en,
+      ...translationObjectMenu.en,
 
       // splash
       mainProcess_version: "Version %{version} (%{scheme})",
@@ -190,29 +151,6 @@ const translationMainProcess = {
       mainProcess_menuFileSettings: "Settings ...",
       mainProcess_menuFileExit: "Exit",
 
-      // object tree menu
-      mainProcess_menuObjectTree: "Objects",
-      mainProcess_menuObjectTreeSingle: "Single select mode",
-      mainProcess_menuObjectTreeNewObject: "New Object",
-      mainProcess_menuObjectTreeDeleteObject: "Delete Object",
-      mainProcess_menuObjectTreeDeleteBranch: "Delete Branch",
-      mainProcess_menuObjectTreeExpandAll: "Expand all",
-      mainProcess_menuObjectTreeCollapseAll: "Collapse all",
-      mainProcess_menuObjectTreeExpandBranch: "Expand Branch(es)",
-      mainProcess_menuObjectTreeCollapseBranch: "Collapse Branch(es)",
-      mainProcess_menuObjectTreeCheckAll: "Activate all Objects",
-      mainProcess_menuObjectTreeUncheckAll: "Deactivate all Objects",
-      mainProcess_menuObjectTreeCheckBranch: "Activate Branch(es)",
-      mainProcess_menuObjectTreeUncheckBranch: "Dectivate Branch(es)",
-      mainProcess_menuObjectTreeInvertCheck: "Invert Activation",
-      mainProcess_menuObjectTreeCheckHavingCheckedTexts:
-        "Activate all Objects related to activated Texts",
-      mainProcess_menuObjectTreeCheckHavingTexts:
-        "Activate all Objects related to any Text",
-      mainProcess_menuTextTreeCheckHasObjects:
-        "Activate all Objects related to any Text",
-      mainProcess_menuObjectTreeSearch: "Search ...",
-
       // view menu
       mainProcess_menuView: "View",
       mainProcess_menuViewToggleLeft: "Show text area",
@@ -222,29 +160,6 @@ const translationMainProcess = {
       mainProcess_menuViewEditorOnly: "Show Editor only",
       mainProcess_menuViewFullScreen: "Full screen",
       mainProcess_menuViewDistractionFree: "Focus mode",
-
-      // text tree menu
-      mainProcess_menuTextTree: "Texts",
-      mainProcess_menuTextTreeNew: "New Text",
-      mainProcess_menuTextTreeDeleteText: "Delete Text",
-      mainProcess_menuTextTreeDeleteBranch: "Delete Branch",
-      mainProcess_menuTextTreeJoinTexts: "Join selected Texts seamlessly",
-      mainProcess_menuTextTreeJoinTextsSep: "Join selected Texts",
-      mainProcess_menuTextTreeExpandAll: "Expand all",
-      mainProcess_menuTextTreeCollapseAll: "Collapse all",
-      mainProcess_menuTextTreeExpandBranch: "Expand Branch(es)",
-      mainProcess_menuTextTreeCollapseBranch: "Collapse Branch(es)",
-      mainProcess_menuTextTreeCheckAll: "Activate all Texts",
-      mainProcess_menuTextTreeUncheckAll: "Dectivate all Texts",
-      mainProcess_menuTextTreeCheckBranch: "Activate Branch(es)",
-      mainProcess_menuTextTreeUncheckBranch: "Deactivate Branch(es)",
-      mainProcess_menuTextTreeInvertCheck: "Invert Activation",
-      mainProcess_menuTextTreeCheckCheckedObjects:
-        "Activate all Texts related to activated Objects",
-      mainProcess_menuTextTreeCheckHasObjects:
-        "Activate all Texts related to any Object",
-      mainProcess_menuTextTreeSearch: "Search and filter ...",
-      mainProcess_menuTextCollectionNew: "New Text Collection",
 
       // text editor menu
       mainProcess_menuEditor: "Editor",

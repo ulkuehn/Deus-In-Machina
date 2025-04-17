@@ -975,11 +975,6 @@ class Settings {
           default: "",
         },
         {
-          type: "check",
-          name: "textCollectionTreeNewCollectionEditor",
-          default: false,
-        },
-        {
           type: "separator",
           name: "settingsWindow_textCollectionTreeContextMenu",
         },

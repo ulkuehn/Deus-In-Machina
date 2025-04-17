@@ -9,6 +9,7 @@
  * @classdesc a TextTree holds information about texts that can be edited and moved around in the tree
  */
 class TextTree {
+  #overlayDiv; // jQuery DOM to show when jsTree is empty
   #treeDiv; // jQuery DOM holding the jsTree
   #texts; // key is id, value is styledText
   #newCounter; // current count for new texts
@@ -34,8 +35,14 @@ class TextTree {
     this.#ready = false;
     this.#editMode = false;
 
+    this.#overlayDiv = $("<div>")
+      .attr({
+        class: "empty-tree",
+        style: `display:none`,
+      })
+      .html(_("texts_description"));
     this.#treeDiv = $("<div>");
-    $("#TT").empty().append(this.#treeDiv);
+    $("#TT").empty().append(this.#overlayDiv, this.#treeDiv);
     this.setupTree(data, true);
 
     // context menu definition
@@ -44,6 +51,73 @@ class TextTree {
       autoHide: true,
       build: ($trigger, e) => {
         return this.#editMode ? false : this.#contextMenu($trigger[0].id);
+      },
+    });
+
+    $.contextMenu({
+      selector: "#TT",
+      autoHide: true,
+      build: ($trigger, e) => {
+        return this.#editMode || theTextCollection
+          ? false
+          : {
+              items: {
+                new: {
+                  name: _("textMenu_newText"),
+                  icon: "fa-regular fa-star-of-life",
+                  callback: () => this.newText(),
+                },
+                sep1: "x",
+                expand: {
+                  name: _("textMenu_expandAll"),
+                  icon: "fa-regular fa-square-plus",
+                  callback: () => this.expandAll(),
+                },
+                collapse: {
+                  name: _("textMenu_collapseAll"),
+                  callback: () => this.collapseAll(),
+                },
+                sep2: "x",
+                check: {
+                  name: _("textMenu_checkAll"),
+                  icon: "fa-regular fa-check-double",
+                  callback: () => this.checkAll(),
+                },
+                uncheck: {
+                  name: _("textMenu_uncheckAll"),
+                  callback: () => this.uncheckAll(),
+                },
+                sep3: "x",
+                search: {
+                  name: _("textMenu_search"),
+                  icon: "fa-regular fa-magnifying-glass",
+                  callback: () => {
+                      let settings = theSettings.effectiveSettings();
+                      ipcRenderer.invoke("mainProcess_openWindow", [
+                        "textSearch",
+                        settings.closingType,
+                        true,
+                        0,
+                        0,
+                        _("windowTitles_textSearchWindow"),
+                        "./textSearchWindow/textSearchWindow.html",
+                        "textSearchWindow_init",
+                        null,
+                        [
+                          settings,
+                          Object.entries(theObjectTree.objects)
+                            .sort((a, b) => a[1].name.localeCompare(b[1].name))
+                            .map(([id, o]) => ({
+                              id: id,
+                              name: o.name,
+                            })),
+                          ...theProperties.lists,
+                        ],
+                      ]);
+                  },
+                },
+              },
+            };
       },
     });
   }
@@ -190,32 +264,12 @@ class TextTree {
       plugins: plugins,
     });
 
-    if (data && data.length == 0) {
-      this.#texts = {};
-      this.#newCounter = 1;
-      let id = uuid();
-      this.#texts[id] = new StyledText(
-        id,
-        _("texts_newText", { count: this.#newCounter }),
-      );
-      this.#newCounter++;
-      // we deliver the text undirty, as the unchanged initial tree should not be (auto)saved
-      this.#texts[id].undirty();
-
-      this.#treeDiv.one("create_node.jstree", () => {
-        this.#treeDiv.jstree().check_node(id);
-        // wait some before setting undirty to make checking complete
-        setTimeout(() => {
-          this.undirty();
-        }, 250);
-      });
-      this.#treeDiv.jstree().create_node(null, {
-        id: id,
-        text: this.#texts[id].decoratedName(),
-      });
-    }
+    if (!data || !data.length) this.#overlayDiv.css("display", "flex");
 
     this.#treeDiv.on("create_node.jstree delete_node.jstree", () => {
+      if (this.#treeDiv.jstree().get_node("#").children.length)
+        this.#overlayDiv.css("display", "none");
+      else this.#overlayDiv.css("display", "flex");
       this.#dirty = true;
     });
 

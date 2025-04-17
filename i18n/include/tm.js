@@ -2,7 +2,7 @@
  * DIM - Deus In Machina
  *
  * @author Ulrich Kühn 2024, 2025
- * @file i18n translations for text menu entries
+ * @file i18n translations for text menu entries 
  */
 
 const translationTextMenu = {

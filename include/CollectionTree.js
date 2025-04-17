@@ -22,6 +22,7 @@ class CollectionTree {
     "#d677b8",
   ];
 
+  #overlayDiv; // jQuery DOM to show when jsTree is empty
   #$containerDiv; // div for the collection tree
   #treeDiv; // div for the jstree
   #$displayDiv; // div to display the collections of the tree
@@ -30,6 +31,7 @@ class CollectionTree {
   #deletedIDs; // array of collection ids that were deleted since last save
   #checkEvent = true; // if true check events are processed
   #dirty; // true if unsaved changes
+  #editMode;
 
   /**
    * class constructor
@@ -53,9 +55,17 @@ class CollectionTree {
     this.#collections = collections;
     this.#deletedIDs = [];
     this.#dirty = false;
+    this.#editMode = false;
+    
+    this.#overlayDiv = $("<div>")
+      .attr({
+        class: "empty-tree",
+        style: `display:none`,
+      })
+      .html(_("textCollections_description"));
     this.#treeDiv = $("<div>");
     $containerDiv.empty();
-    $containerDiv.append(this.#treeDiv);
+    $containerDiv.append(this.#overlayDiv, this.#treeDiv);
     this.setupTree(data, true);
   }
 
@@ -226,10 +236,7 @@ class CollectionTree {
       plugins: plugins,
     });
 
-    if (data && data.length == 0) {
-      this.#collections = {};
-      this.#newCounter = 0;
-    }
+    if (!data || !data.length) this.#overlayDiv.css("display", "flex");
 
     // prevent node selection, as only checking is needed
     this.#treeDiv.on("select_node.jstree", () => {
@@ -237,12 +244,16 @@ class CollectionTree {
     });
 
     this.#treeDiv.on("dblclick.jstree", (event) => {
+    if (!this.#editMode)
       this.#editProps(this.#treeDiv.jstree().get_node(event.target).id);
     });
 
     this.#treeDiv.on(
       "create_node.jstree delete_node.jstree move_node.jstree",
       () => {
+        if (this.#treeDiv.jstree().get_node("#").children.length)
+          this.#overlayDiv.css("display", "none");
+        else this.#overlayDiv.css("display", "flex");
         this.#dirty = true;
       },
     );
@@ -341,37 +352,47 @@ class CollectionTree {
    * create a new empty collection
    */
   newCollection() {
-    let settings = theSettings.effectiveSettings();
-    let id = uuid();
-    this.#collections[id] = new Collection(
-      id,
-      _("textCollections_newCollection", { count: this.#newCounter + 1 }),
-      [],
-      null,
-      {
-        icon: false,
-        color: settings.textCollectionTreeNewCollectionRandomColor
-          ? Util.mix_hexes(
+    if (!this.#editMode) {
+      this.#editMode = true;
+      let settings = theSettings.effectiveSettings();
+      let tree = this.#treeDiv.jstree();
+      let id = uuid();
+      this.#collections[id] = new Collection(
+        id,
+        _("textCollections_newCollection", { count: this.#newCounter + 1 }),
+        [],
+        null,
+        {
+          icon: false,
+          color: settings.textCollectionTreeNewCollectionRandomColor
+            ? Util.mix_hexes(
               CollectionTree.colors[
-                this.#newCounter % CollectionTree.colors.length
+              this.#newCounter % CollectionTree.colors.length
               ],
               CollectionTree.colors[
-                (this.#newCounter +
-                  Math.floor(this.#newCounter / CollectionTree.colors.length)) %
-                  CollectionTree.colors.length
+              (this.#newCounter +
+                Math.floor(this.#newCounter / CollectionTree.colors.length)) %
+              CollectionTree.colors.length
               ],
             )
-          : settings.textCollectionTreeNewCollectionColor,
-      },
-    );
-    this.#newCounter++;
-    this.#treeDiv.jstree().create_node(null, {
-      id: id,
-      text: this.#collections[id].decoratedName(),
-    });
-    this.#treeSheet(id);
-    if (settings.textCollectionTreeNewCollectionEditor) {
-      this.#editProps(id);
+            : settings.textCollectionTreeNewCollectionColor,
+        },
+      );
+      this.#newCounter++;
+      tree.create_node(null, {
+        id: id,
+        text: this.#collections[id].decoratedName(),
+      });
+      this.#treeSheet(id);
+
+      tree.edit(id, this.#collections[id].name, () => {
+        this.#editMode = false;
+        this.#collections[id].name = tree.get_text(id);
+        tree.rename_node(id, this.#collections[id].decoratedName());
+        tree.check_node(id);
+        tree.deselect_all();
+        tree.select_node(id);
+      });
     }
   }
 
@@ -842,6 +863,7 @@ class CollectionTree {
    * @param {String} id
    */
   #editName(id) {
+    this.#editMode = true;
     let treeNode = this.#treeDiv.jstree().get_node(id);
     this.#treeDiv
       .jstree()
@@ -849,6 +871,7 @@ class CollectionTree {
         treeNode,
         this.#collections[id].name,
         (node, status, cancel, text) => {
+        this.#editMode = false;
           this.#collections[id].name = text;
           this.#treeDiv
             .jstree()

@@ -15,6 +15,8 @@ const { translationSearch } = require("./include/search.js");
 const { translationSchemeValues } = require("./include/Scheme.js");
 const { translationSchemeTypes } = require("./include/SchemeTypes.js");
 const { translationDataTables } = require("./include/dataTables.js");
+const { translationTextMenu } = require("./include/tm.js");
+const { translationObjectMenu } = require("./include/objectMenu.js");
 const {
   translationEditorContextMenu,
 } = require("./include/editorContextMenu.js");
@@ -45,6 +47,8 @@ const translationMainWindow = {
       ...translationEditorBars.de,
       ...translationSearch.de,
       ...translationDataTables.de,
+      ...translationTextMenu.de,
+      ...translationObjectMenu.de,
       ...translationEditorContextMenu.de,
       ...translationWindowTitles.de,
       ...translationCategories.de,
@@ -84,6 +88,8 @@ const translationMainWindow = {
       ...translationEditorBars.en,
       ...translationSearch.en,
       ...translationDataTables.en,
+      ...translationTextMenu.en,
+      ...translationObjectMenu.en,
       ...translationEditorContextMenu.en,
       ...translationWindowTitles.en,
       ...translationCategories.en,

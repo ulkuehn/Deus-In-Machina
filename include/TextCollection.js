@@ -23,6 +23,7 @@ class TextCollection {
   constructor($containerDiv, ids, search) {
     this.#checkEvent = true;
     this.#ids = ids;
+
     this.#treeDiv = $("<div>");
     $containerDiv.append(this.#treeDiv);
     this.setupTree();

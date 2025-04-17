@@ -559,7 +559,6 @@ function statisticsTab(statistics) {
  * @returns {String} jquery grid
  */
 function infoTab(categories, path, collections, settings) {
-  console.log(categories);
   let $grid = $("<div>").attr({
     style: `display:grid; row-gap:20px; column-gap:10px; grid-template-columns:50px max-content 50px`,
   });

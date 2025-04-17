@@ -1661,7 +1661,7 @@ ipcRenderer.on("rendererProcess_openTextSearch", () => {
   ]);
   let settings = theSettings.effectiveSettings();
   ipcRenderer.invoke("mainProcess_openWindow", [
-    "mainProcess_textSearch",
+    "textSearch",
     settings.closingType,
     true,
     0,
@@ -1725,7 +1725,7 @@ ipcRenderer.on("rendererProcess_openObjectSearch", () => {
     "rendererProcess_openObjectSearch",
   ]);
   ipcRenderer.invoke("mainProcess_openWindow", [
-    "mainProcess_objectSearch",
+    "objectSearch",
     true,
     true,
     0,

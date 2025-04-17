@@ -8,6 +8,7 @@
 const translationObjects = {
   // German
   de: {
+    objects_description: "Objektbereich<br>- kein Objekt -",
     objects_empty: "ohne Textbezug",
     objects_newObject: "Objekt %{count}",
     objects_deleteTitle: "Objekt löschen",
@@ -48,6 +49,7 @@ const translationObjects = {
   },
   // English
   en: {
+    objects_description: "Objects area<br>- no objects -",
     objects_empty: "no Text Connection",
     objects_newObject: "Object %{count}",
     objects_deleteTitle: "Delete Object",

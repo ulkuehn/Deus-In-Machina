@@ -297,8 +297,6 @@ const translationSettingsWindow = {
         "zufällige Farbe",
       "settingsWindow_textCollectionTreeNewCollectionColor": `Standardfarbe <i class="fas fa-info-circle" title="nur wenn nicht zufällige Farbe gewählt"></i>`,
       "settingsWindow_textCollectionTreeNewSearchCollectionColor": `Farbe von Such- und Filterlisten <i class="fas fa-info-circle" title="nur wenn nicht zufällige Farbe gewählt"></i>`,
-      "settingsWindow_textCollectionTreeNewCollectionEditor":
-        "neue Liste öffnet Listeneigenschaften",
       "settingsWindow_textCollectionTreeContextMenu": "Kontextmenü",
       "settingsWindow_textCollectionCompactContextMenu": "verwende Untermenüs",
       "settingsWindow_textCollectionTreeContextMenuStats":
@@ -697,8 +695,6 @@ const translationSettingsWindow = {
         "Random Color",
       "settingsWindow_textCollectionTreeNewCollectionColor": `Default Color <i class="fas fa-info-circle" title="only applid when random color not set"></i>`,
       "settingsWindow_textCollectionTreeNewSearchCollectionColor": `Default Color for Search Collections  <i class="fas fa-info-circle" title="only applid when random color not set"></i>`,
-      "settingsWindow_textCollectionTreeNewCollectionEditor":
-        "New Collection opens Properties Window",
       "settingsWindow_textCollectionTreeContextMenu": "Context Menu",
       "settingsWindow_textCollectionCompactContextMenu": "use Submenus",
       "settingsWindow_textCollectionTreeContextMenuStats": "Show Statistics",
