@@ -551,7 +551,7 @@ ipcRenderer.on("rendererProcess_importFromProject", (event, path) => {
     "rendererProcess_importFromProject",
     { path },
   ]);
-  if (path && path != theProject.path) {
+  if (path) {
     theProject
       .importProjectFile(path)
       .then((db) => {
@@ -584,15 +584,10 @@ ipcRenderer.on("rendererProcess_importFromProject", (event, path) => {
       })
       .catch((err) => {
         ipcRenderer.invoke("mainProcess_loggingError", [
-          "menuFileTransferProject: error",
+          "theProject.importProjectFile: error",
           err,
         ]);
       });
-  } else {
-    ipcRenderer.invoke("mainProcess_errorMessage", [
-      _("transferError"),
-      _("sameProjectError"),
-    ]);
   }
 });
 
@@ -1168,11 +1163,11 @@ ipcRenderer.on("rendererProcess_mergeTextsWithParagraph", () => {
 /**
  * create a new text collection
  */
-ipcRenderer.on("rendererProcess_newTextCollection", () => {
+ipcRenderer.on("rendererProcess_newTextCollection", (event, populate) => {
   ipcRenderer.invoke("mainProcess_loggingVerbose", [
     "rendererProcess_newTextCollection",
   ]);
-  theTextCollectionTree.newCollection();
+  theTextCollectionTree.newCollection(populate);
 });
 
 // object tree related functions

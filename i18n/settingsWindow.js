@@ -253,7 +253,8 @@ const translationSettingsWindow = {
       "settingsWindow_textTreeContextMenuTime":
         "Zeitpunkte anzeigen (erzeugt, verändert)",
       "settingsWindow_textTreeNameWords":
-        "Anzahl von Wörtern für die Namenserzeugung",
+        "Anzahl von Wörtern für die automatische Benennung",
+      "textTreeAppendName": "erzeugten Namen ergänzen",
       "settingsWindow_textTreeDecorationStatus": "Textstatus",
       "settingsWindow_textTreeShowStatus": "Icon anzeigen",
       "settingsWindow_textTreeShowNoStatus":
@@ -655,6 +656,7 @@ const translationSettingsWindow = {
       "settingsWindow_textTreeContextMenuTime":
         "Show Timestamps (created, last changed)",
       "settingsWindow_textTreeNameWords": "Number of Words for Name Generation",
+      "textTreeAppendName": "append to generated name",
       "settingsWindow_textTreeDecorationStatus": "Text Status",
       "settingsWindow_textTreeShowStatus": "Show Icon",
       "settingsWindow_textTreeShowNoStatus": "Show Icon also for unset Status",

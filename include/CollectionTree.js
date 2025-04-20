@@ -22,7 +22,8 @@ class CollectionTree {
     "#d677b8",
   ];
 
-  #overlayDiv; // jQuery DOM to show when jsTree is empty
+  #emptyTreeOverlay; // jQuery DOM to show when jsTree is empty
+  #treeCMOverlay; // jQuery DOM to show when CM on tree
   #$containerDiv; // div for the collection tree
   #treeDiv; // div for the jstree
   #$displayDiv; // div to display the collections of the tree
@@ -56,16 +57,28 @@ class CollectionTree {
     this.#deletedIDs = [];
     this.#dirty = false;
     this.#editMode = false;
-    
-    this.#overlayDiv = $("<div>")
+
+    this.#emptyTreeOverlay = $("<div>")
       .attr({
         class: "empty-tree",
-        style: `display:none`,
+        style: "display:none",
       })
-      .html(_("textCollections_description"));
+      .append(
+        $("<span>")
+          .attr({ class: "empty-text" })
+          .html(_("textCollections_treeDescription")),
+      );
+    this.#treeCMOverlay = $("<div>").attr({
+      class: "tree-cm",
+      style: "display:none",
+    });
     this.#treeDiv = $("<div>");
     $containerDiv.empty();
-    $containerDiv.append(this.#overlayDiv, this.#treeDiv);
+    $containerDiv.append(
+      this.#treeDiv,
+      this.#emptyTreeOverlay,
+      this.#treeCMOverlay,
+    );
     this.setupTree(data, true);
   }
 
@@ -73,6 +86,10 @@ class CollectionTree {
 
   get newCounter() {
     return this.#newCounter;
+  }
+
+  set newCounter(v) {
+    this.#newCounter = v;  
   }
 
   get deletedIDs() {
@@ -236,7 +253,10 @@ class CollectionTree {
       plugins: plugins,
     });
 
-    if (!data || !data.length) this.#overlayDiv.css("display", "flex");
+    this.#emptyTreeOverlay.css(
+      "display",
+      !data || !data.length ? "flex" : "none",
+    );
 
     // prevent node selection, as only checking is needed
     this.#treeDiv.on("select_node.jstree", () => {
@@ -244,16 +264,16 @@ class CollectionTree {
     });
 
     this.#treeDiv.on("dblclick.jstree", (event) => {
-    if (!this.#editMode)
-      this.#editProps(this.#treeDiv.jstree().get_node(event.target).id);
+      if (!this.#editMode)
+        this.#editProps(this.#treeDiv.jstree().get_node(event.target).id);
     });
 
     this.#treeDiv.on(
       "create_node.jstree delete_node.jstree move_node.jstree",
       () => {
         if (this.#treeDiv.jstree().get_node("#").children.length)
-          this.#overlayDiv.css("display", "none");
-        else this.#overlayDiv.css("display", "flex");
+          this.#emptyTreeOverlay.css("display", "none");
+        else this.#emptyTreeOverlay.css("display", "flex");
         this.#dirty = true;
       },
     );
@@ -303,12 +323,25 @@ class CollectionTree {
       },
     );
 
-    // context menu definition
+    // context menu definitions for tree and items
+    $.contextMenu({
+      selector: "#TCL",
+      autoHide: true,
+      zIndex: 10,
+      build: ($trigger, e) => {
+        return this.#editMode ? false : this.#treeContextMenu();
+      },
+      events: {
+        show: () => this.#treeCMOverlay.css("display", "block"),
+        hide: () => this.#treeCMOverlay.css("display", "none"),
+      },
+    });
     this.#treeDiv.contextMenu({
       selector: ".jstree-node",
       autoHide: true,
+      zIndex: 10,
       build: ($trigger, e) => {
-        return this.#contextMenu($trigger[0].id);
+        return this.#itemContextMenu($trigger[0].id);
       },
     });
 
@@ -350,8 +383,9 @@ class CollectionTree {
 
   /**
    * create a new empty collection
+   * @param {Boolean} populate if true fill collection with currently activated texts
    */
-  newCollection() {
+  newCollection(populate = false) {
     if (!this.#editMode) {
       this.#editMode = true;
       let settings = theSettings.effectiveSettings();
@@ -360,21 +394,23 @@ class CollectionTree {
       this.#collections[id] = new Collection(
         id,
         _("textCollections_newCollection", { count: this.#newCounter + 1 }),
-        [],
+        populate ? theTextTree.getChecked() : [],
         null,
         {
           icon: false,
           color: settings.textCollectionTreeNewCollectionRandomColor
             ? Util.mix_hexes(
-              CollectionTree.colors[
-              this.#newCounter % CollectionTree.colors.length
-              ],
-              CollectionTree.colors[
-              (this.#newCounter +
-                Math.floor(this.#newCounter / CollectionTree.colors.length)) %
-              CollectionTree.colors.length
-              ],
-            )
+                CollectionTree.colors[
+                  this.#newCounter % CollectionTree.colors.length
+                ],
+                CollectionTree.colors[
+                  (this.#newCounter +
+                    Math.floor(
+                      this.#newCounter / CollectionTree.colors.length,
+                    )) %
+                    CollectionTree.colors.length
+                ],
+              )
             : settings.textCollectionTreeNewCollectionColor,
         },
       );
@@ -577,6 +613,9 @@ class CollectionTree {
       theTextEditor.showTextsInEditor([]);
     }
     let checked = this.#treeDiv.jstree().get_checked();
+    let bgColor =
+      theSettings.effectiveSettings().TTBackgroundColor ||
+      theSettings.effectiveSettings().generalBackgroundColor;
     if (checked.length) {
       // show texts in collection
       theTextTree.tree.css("display", "none");
@@ -594,6 +633,10 @@ class CollectionTree {
         displayIDs,
         this.#collections[checked[0]].search,
       );
+      this.#$displayDiv.css(
+        "background",
+        `linear-gradient(90deg, transparent 5px, ${this.#collections[checked[0]].decoration.color} 5px 10px, ${bgColor} 30px)`,
+      );
     } else {
       // show whole text tree
       theTextCollection = null;
@@ -602,9 +645,29 @@ class CollectionTree {
       }
       theTextTree.tree.css("display", "block");
       theTextEditor.setSearch();
+      this.#$displayDiv.css("background", bgColor);
     }
 
     ipcRenderer.invoke("mainProcess_setTextMenu", !checked.length);
+  }
+
+  /**
+   * define the collection tree's context menu
+   */
+  #treeContextMenu() {
+    let items = {
+      new: {
+        name: _("textMenu_newCollection"),
+        icon: "fa-regular fa-star-of-life",
+        callback: () => this.newCollection(),
+      },
+    };
+    if (theTextTree.getChecked().length)
+      items.populated = {
+        name: _("textMenu_collectionFromTexts"),
+        callback: () => this.newCollection(true),
+      };
+    return { items: items };
   }
 
   /**
@@ -613,7 +676,7 @@ class CollectionTree {
    * @param {String} nodeID
    * @returns {Object} context menu definition
    */
-  #contextMenu(nodeID) {
+  #itemContextMenu(nodeID) {
     // we don't do a search/filter on opening the CM as this should/would also change the collection which is not what the user might expect -- the collection only changes on (re)activation of the list
     // this.#searchAndFilter(nodeID);
 
@@ -871,7 +934,7 @@ class CollectionTree {
         treeNode,
         this.#collections[id].name,
         (node, status, cancel, text) => {
-        this.#editMode = false;
+          this.#editMode = false;
           this.#collections[id].name = text;
           this.#treeDiv
             .jstree()

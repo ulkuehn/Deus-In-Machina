@@ -1168,6 +1168,7 @@ class TextEditor {
           $(`#edi${textID}`).contextMenu({
             selector: ".ql-editor",
             autoHide: true,
+            zIndex: 10,
             build: ($trigger, e) => {
               return this.#hasContextMenu ||
                 !theTextTree.getText(textID).editable

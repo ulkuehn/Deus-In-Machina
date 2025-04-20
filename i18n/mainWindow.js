@@ -15,7 +15,7 @@ const { translationSearch } = require("./include/search.js");
 const { translationSchemeValues } = require("./include/Scheme.js");
 const { translationSchemeTypes } = require("./include/SchemeTypes.js");
 const { translationDataTables } = require("./include/dataTables.js");
-const { translationTextMenu } = require("./include/tm.js");
+const { translationTextMenu } = require("./include/textMenu.js");
 const { translationObjectMenu } = require("./include/objectMenu.js");
 const {
   translationEditorContextMenu,

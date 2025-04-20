@@ -33,6 +33,7 @@ class TextCollection {
     this.#treeDiv.contextMenu({
       selector: ".jstree-node",
       autoHide: true,
+      zIndex: 10,
       build: ($trigger, e) => {
         return this.#contextMenu($trigger[0].id);
       },
@@ -256,11 +257,12 @@ class TextCollection {
         // use at most one para
         let name = theTextTree.getText(node.id).text.split("\n")[0];
         // use at most number of words of resp. setting value
-        name = name
-          .split(/\s+/)
-          .filter((x) => x.length)
-          .slice(0, settings.textTreeNameWords)
-          .join(" ");
+        name =
+          name
+            .split(/\s+/)
+            .filter((x) => x.length)
+            .slice(0, settings.textTreeNameWords)
+            .join(" ") + settings.textTreeAppendName;
         theTextTree.getText(node.id).name = name;
         this.#treeDiv
           .jstree()

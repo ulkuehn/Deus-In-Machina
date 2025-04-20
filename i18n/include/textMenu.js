@@ -28,7 +28,8 @@ const translationTextMenu = {
     textMenu_checkHasObjects:
       "Aktiviere alle Texte mit Bezug zu irgendeinem Objekt",
     textMenu_search: "Suchen und filtern ...",
-    textMenu_newCollection: "Neue Textliste einfügen",
+    textMenu_newCollection: "Neue leere Textliste",
+    textMenu_collectionFromTexts: "Erzeuge Textliste aus den aktivierten Texten",
   },
   // English
   en: {
@@ -51,7 +52,8 @@ const translationTextMenu = {
       "Activate all Texts related to activated Objects",
     textMenu_checkHasObjects: "Activate all Texts related to any Object",
     textMenu_search: "Search and filter ...",
-    textMenu_newCollection: "New Text Collection",
+    textMenu_newCollection: "New empty Text Collection",
+    textMenu_collectionFromTexts: "Create Text Collection from activated Texts",
   },
 };
 

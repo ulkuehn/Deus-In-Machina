@@ -1275,6 +1275,7 @@ ipcRenderer.on(
       $(`#edi${text.id}`).contextMenu({
         selector: ".ql-editor",
         autoHide: true,
+        zIndex: 10,
         build: ($trigger, e) => {
           return !text.editable ? false : doContextMenu(text.id, e);
         },

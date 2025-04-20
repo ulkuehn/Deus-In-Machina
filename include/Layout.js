@@ -47,8 +47,18 @@ class Layout {
     {
       id: "TT_TCL",
       areas: [
-        { id: "TT", class: "dim-split", style: "overflow-x:hidden", size: 60 },
-        { id: "TCL", class: "dim-split", style: "overflow-x:hidden", size: 40 },
+        {
+          id: "TT",
+          class: "dim-split",
+          style: "overflow-x:hidden; position:relative",
+          size: 60,
+        },
+        {
+          id: "TCL",
+          class: "dim-split",
+          style: "overflow-x:hidden; position:relative",
+          size: 40,
+        },
       ],
       size: 15,
       minsize: 100,

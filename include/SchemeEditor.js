@@ -369,6 +369,7 @@ class SchemeEditor {
     $mainDiv.contextMenu({
       selector: ".ql-editor",
       autoHide: true,
+      zIndex: 10,
       build: ($trigger, event) => {
         let items = {};
         let infoPre = `<span class="preWrap" style="font-style:italic">`;

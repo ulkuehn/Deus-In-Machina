@@ -63,11 +63,26 @@ body,
   background-color: var(--background-color);
 }
 
+/* overlay when context menu is open in trees */
+.tree-cm {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 5;
+  height: 100%;
+  width: 100%;
+  background-color: #ffffff40;
+  backdrop-filter: blur(1px);
+}
+
 /* overlay for empty trees */
 .empty-tree {
-  position: static;
-  height: calc(100% + 10px);
-  margin: -5px;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 5;
+  height: 100%;
+  width: 100%;
   flex-wrap: wrap;
   justify-content: center;
   align-content: center;
@@ -76,9 +91,14 @@ body,
     -45deg,
     transparent,
     transparent 10px,
-    #00000008 10px,
-    #00000008 20px
+    #00000004 10px,
+    #00000004 20px
   );
+}
+/* text in empty tree overlay */
+.empty-text {
+  margin: 5px;
+  opacity: 50%;
 }
 
 /* TE has another div within where overflow is handled */
@@ -204,6 +224,7 @@ div.dt-container select.dt-input {
 /* restyle range sliders, see https://css-tricks.com/styling-cross-browser-compatible-range-inputs-css/ */
 input[type="range"] {
   -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   background: transparent;
 }

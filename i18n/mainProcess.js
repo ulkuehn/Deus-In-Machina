@@ -10,7 +10,7 @@ const { translationGeneral } = require("./include/general.js");
 const { translationLanguages } = require("./include/languages.js");
 const { translationWindowTitles } = require("./include/windowTitles.js");
 const { translationObjectMenu } = require("./include/objectMenu.js");
-const { translationTextMenu } = require("./include/tm.js");
+const { translationTextMenu } = require("./include/textMenu.js");
 
 const translationMainProcess = {
   // German

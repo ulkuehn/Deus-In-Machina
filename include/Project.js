@@ -1127,7 +1127,7 @@ class Project {
     theObjectTree.setupTree([], true);
     theTextTree.setupTree([], true);
     theTextCollectionTree.setupTree([], true);
-    setTimeout(()=>this.undirty(),500);
+    setTimeout(() => this.undirty(), 500);
   }
 
   /**
@@ -1495,9 +1495,9 @@ class Project {
     ipcRenderer.invoke("mainProcess_clearTmpDir");
     theFormats = new Formats();
     theProperties = new Properties(theSettings.categories());
-    theTextTree = new TextTree();
-    theObjectTree = new ObjectTree();
-    theTextCollectionTree = new CollectionTree($("#TCL"), $("#TT"));
+    theTextTree.setupTree([], true);
+    theObjectTree.setupTree([], true);
+    theTextCollectionTree.setupTree([], true);
     theTextEditor = new TextEditor();
     theObjectReference = new ObjectReference();
     theSpellChecker = new Spellchecker(theLanguage);
@@ -2044,11 +2044,8 @@ class Project {
       }
       // objects (load before texts!)
       statement = db.prepare("select data from trees where name=?");
-      let objectCounter = parseInt(statement.get("objectCounter").data);
-      theObjectTree = new ObjectTree(
-        JSON.parse(statement.get("object").data),
-        objectCounter,
-      );
+      theObjectTree.setupTree(JSON.parse(statement.get("object").data), true);
+      theObjectTree.newCounter = parseInt(statement.get("objectCounter").data);
       statement = db.prepare(
         "select id,name,decoration,created,changed,styleproperties,scheme,properties,texts from styledobjects",
       );
@@ -2072,13 +2069,11 @@ class Project {
       }
       // collections
       statement = db.prepare("select data from trees where name=?");
-      let collectionCounter = parseInt(statement.get("collectionCounter").data);
-      theTextCollectionTree = new CollectionTree(
-        $("#TCL"),
-        $("#TT"),
+      theTextCollectionTree.setupTree(
         JSON.parse(statement.get("collection").data),
-        collectionCounter,
+        true,
       );
+      theTextCollectionTree.newCounter=parseInt(statement.get("collectionCounter").data)
       statement = db.prepare(
         "select id,name,items,search,decoration,created,changed from collections",
       );
@@ -2100,11 +2095,8 @@ class Project {
       }
       // texts
       statement = db.prepare("select data from trees where name=?");
-      let textCounter = parseInt(statement.get("textCounter").data);
-      theTextTree = new TextTree(
-        JSON.parse(statement.get("text").data),
-        textCounter,
-      );
+      theTextTree.setupTree(JSON.parse(statement.get("text").data), true);
+      theTextTree.newCounter = parseInt(statement.get("textCounter").data);
       statement = db.prepare(
         "select id,editable,name,decoration,created,changed,status,type,uservalue,delta,characters,words,objects from styledtexts",
       );

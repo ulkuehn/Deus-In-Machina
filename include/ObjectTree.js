@@ -10,7 +10,8 @@
  */
 
 class ObjectTree {
-  #overlayDiv; // jQuery DOM to show when jsTree is empty
+  #emptyTreeOverlay; // jQuery DOM to show when jsTree is empty
+  #treeCMOverlay; // jQuery DOM to show when CM on tree
   #treeDiv; // jQuery DOM holding the jsTree
   #newCounter; // counter for naming new objects
   #objects; // key is id, value is styledObject
@@ -40,78 +41,47 @@ class ObjectTree {
     this.#activateSingle = false;
     this.#editMode = false;
 
-    this.#overlayDiv = $("<div>")
+    this.#emptyTreeOverlay = $("<div>")
       .attr({
         class: "empty-tree",
         style: `display:none`,
       })
-      .html(_("objects_description"));
+      .append(
+        $("<span>")
+          .attr({ class: "empty-text" })
+          .html(_("objects_treeDescription")),
+      );
+    this.#treeCMOverlay = $("<div>").attr({
+      class: "tree-cm",
+      style: "display:none",
+    });
     this.#treeDiv = $("<div>");
-    $("#OT").empty().append(this.#overlayDiv, this.#treeDiv);
+    $("#OT")
+      .empty()
+      .append(this.#treeDiv, this.#emptyTreeOverlay, this.#treeCMOverlay);
     this.setupTree(data, true);
 
-    this.#treeDiv.contextMenu({
-      selector: ".jstree-node",
-      autoHide: true,
-      build: ($trigger, e) => {
-        return this.#editMode ? false : this.#contextMenu($trigger[0].id, e);
-      },
-    });
-
+    // define the tree's and items' context menu
     $.contextMenu({
       selector: "#OT",
       autoHide: true,
+      zIndex: 10,
+      events: {
+        show: () => this.#treeCMOverlay.css("display", "block"),
+        hide: () => this.#treeCMOverlay.css("display", "none"),
+      },
+      build: ($trigger, e) => {
+        return this.#editMode ? false : this.#treeContextMenu();
+      },
+    });
+    this.#treeDiv.contextMenu({
+      selector: ".jstree-node",
+      autoHide: true,
+      zIndex: 10,
       build: ($trigger, e) => {
         return this.#editMode
           ? false
-          : {
-              items: {
-                new: {
-                  name: _("objectMenu_newObject"),
-                  icon: "fa-regular fa-star-of-life",
-                  callback: () => this.newObject(),
-                },
-                sep1: "x",
-                expand: {
-                  name: _("objectMenu_expandAll"),
-                  icon: "fa-regular fa-square-plus",
-                  callback: () => this.expandAll(),
-                },
-                collapse: {
-                  name: _("objectMenu_collapseAll"),
-                  callback: () => this.collapseAll(),
-                },
-                sep2: "x",
-                check: {
-                  name: _("objectMenu_checkAll"),
-                  icon: "fa-regular fa-check-double",
-                  callback: () => this.checkAll(),
-                },
-                uncheck: {
-                  name: _("objectMenu_uncheckAll"),
-                  callback: () => this.uncheckAll(),
-                },
-                sep3: "x",
-                search: {
-                  name: _("objectMenu_search"),
-                  icon: "fa-regular fa-magnifying-glass",
-                  callback: () => {
-                    ipcRenderer.invoke("mainProcess_openWindow", [
-                      "objectSearch",
-                      true,
-                      true,
-                      0,
-                      0,
-                      _("windowTitles_objectSearchWindow"),
-                      "./objectSearchWindow/objectSearchWindow.html",
-                      "objectSearchWindow_init",
-                      null,
-                      [theSettings.effectiveSettings()],
-                    ]);
-                  },
-                },
-              },
-            };
+          : this.#itemContextMenu($trigger[0].id, e);
       },
     });
   }
@@ -292,48 +262,16 @@ class ObjectTree {
       }
     });
 
-    if (!data || !data.length) this.#overlayDiv.css("display", "flex");
-
-    //   this.#objects = {};
-    //   this.#newCounter = 1;
-    //   let id = uuid();
-    //   let styleProps = {};
-    //   if (settings.objectTreeNewObjectItalic) {
-    //     styleProps.formats_italic = true;
-    //   }
-    //   if (settings.objectTreeNewObjectUnderline) {
-    //     styleProps.formats_underline = true;
-    //   }
-    //   if (settings.objectTreeNewObjectColor) {
-    //     styleProps.formats_textColor = settings.objectTreeNewObjectColor;
-    //   }
-    //   this.#objects[id] = new StyledObject(
-    //     id,
-    //     _("objects_newObject", { count: this.#newCounter }),
-    //     {},
-    //     { text: styleProps, image: {} },
-    //   );
-    //   // we deliver the initial object undirty, as the unchanged initial tree should not be (auto)saved
-    //   this.#objects[id].undirty();
-    //   this.#newCounter++;
-
-    //   this.#treeDiv.one("create_node.jstree", () => {
-    //     // wait some before setting the tree undirty to make creating complete
-    //     setTimeout(() => {
-    //       this.undirty();
-    //     }, 250);
-    //   });
-    //   this.#treeDiv.jstree().create_node(null, {
-    //     id: id,
-    //     text: this.#objects[id].decoratedName(),
-    //   });
-    // }
+    this.#emptyTreeOverlay.css(
+      "display",
+      !data || !data.length ? "flex" : "none",
+    );
 
     // creating nodes makes the tree dirty
     this.#treeDiv.on("create_node.jstree delete_node.jstree", () => {
       if (this.#treeDiv.jstree().get_node("#").children.length)
-        this.#overlayDiv.css("display", "none");
-      else this.#overlayDiv.css("display", "flex");
+        this.#emptyTreeOverlay.css("display", "none");
+      else this.#emptyTreeOverlay.css("display", "flex");
       this.#dirty = true;
     });
 
@@ -1091,6 +1029,24 @@ class ObjectTree {
   }
 
   /**
+   * check if there are items and branches in the tree
+   */
+  #treeHasItems() {
+    let items = false;
+    let branches = false;
+    if (this.#treeDiv && this.#treeDiv.jstree()) {
+      let root = this.#treeDiv.jstree().get_node("#");
+      if (root)
+        for (let i = 0; i < root.children.length; i++) {
+          items = true;
+          if (this.#treeDiv.jstree().get_node(root.children[i]).children.length)
+            branches = true;
+        }
+    }
+    return [items, branches];
+  }
+
+  /**
    * open selected tree branches recursively
    */
   expandBranch() {
@@ -1511,13 +1467,72 @@ class ObjectTree {
   }
 
   /**
+   * define the tree's context menu
+   */
+  #treeContextMenu() {
+    let items = {
+      new: {
+        name: _("objectMenu_newObject"),
+        icon: "fa-regular fa-star-of-life",
+        callback: () => this.newObject(),
+      },
+    };
+    let [hasItems, hasBranches] = this.#treeHasItems();
+    if (hasBranches) {
+      items.sep1 = "x";
+      items.expand = {
+        name: _("objectMenu_expandAll"),
+        icon: "fa-regular fa-square-plus",
+        callback: () => this.expandAll(),
+      };
+      items.collapse = {
+        name: _("objectMenu_collapseAll"),
+        callback: () => this.collapseAll(),
+      };
+    }
+    if (hasItems) {
+      items.sep2 = "x";
+      (items.check = {
+        name: _("objectMenu_checkAll"),
+        icon: "fa-regular fa-check-double",
+        callback: () => this.checkAll(),
+      }),
+        (items.uncheck = {
+          name: _("objectMenu_uncheckAll"),
+          callback: () => this.uncheckAll(),
+        }),
+        (items.sep3 = "x"),
+        (items.search = {
+          name: _("objectMenu_search"),
+          icon: "fa-regular fa-magnifying-glass",
+          callback: () => {
+            ipcRenderer.invoke("mainProcess_openWindow", [
+              "objectSearch",
+              true,
+              true,
+              0,
+              0,
+              _("windowTitles_objectSearchWindow"),
+              "./objectSearchWindow/objectSearchWindow.html",
+              "objectSearchWindow_init",
+              null,
+              [theSettings.effectiveSettings()],
+            ]);
+          },
+        });
+    }
+
+    return { items: items };
+  }
+
+  /**
    * define a node's context menu
    *
    * @param {String} nodeID
    * @param {Event} event
    * @returns {Object}
    */
-  #contextMenu(nodeID, event) {
+  #itemContextMenu(nodeID, event) {
     let node = this.#treeDiv.jstree().get_node(nodeID);
     let menuItems = {};
     let settings = theSettings.effectiveSettings();

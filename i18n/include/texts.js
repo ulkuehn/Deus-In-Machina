@@ -9,7 +9,8 @@ const translationTexts = {
   // German
   de: {
     // text tree
-    texts_description: "Textbereich<br>- kein Text -",
+    texts_treeDescription:
+      "Bereich für Texte<br><br>in diesem Projekt sind noch keine Texte vorhanden",
     texts_newText: "Text %{count}",
     texts_textCopy: 'Kopie von "%{name}"',
     texts_emptyText: "leerer Text",
@@ -69,7 +70,7 @@ const translationTexts = {
   // English
   en: {
     // text tree
-    texts_description: "Text area<br>- no texts -",
+    texts_treeDescription: "Text area<br><br>there are no texts in this project yet",
     texts_newText: "Text %{count}",
     texts_textCopy: 'Copy of "%{name}"',
     texts_emptyText: "empty Text",

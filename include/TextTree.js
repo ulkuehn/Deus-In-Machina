@@ -9,7 +9,8 @@
  * @classdesc a TextTree holds information about texts that can be edited and moved around in the tree
  */
 class TextTree {
-  #overlayDiv; // jQuery DOM to show when jsTree is empty
+  #emptyTreeOverlay; // jQuery DOM to show when jsTree is empty
+  #treeCMOverlay; // jQuery DOM to show when CM on tree
   #treeDiv; // jQuery DOM holding the jsTree
   #texts; // key is id, value is styledText
   #newCounter; // current count for new texts
@@ -35,89 +36,47 @@ class TextTree {
     this.#ready = false;
     this.#editMode = false;
 
-    this.#overlayDiv = $("<div>")
+    this.#emptyTreeOverlay = $("<div>")
       .attr({
         class: "empty-tree",
         style: `display:none`,
       })
-      .html(_("texts_description"));
+      .append(
+        $("<span>")
+          .attr({ class: "empty-text" })
+          .html(_("texts_treeDescription")),
+      );
+    this.#treeCMOverlay = $("<div>").attr({
+      class: "tree-cm",
+      style: "display:none",
+    });
     this.#treeDiv = $("<div>");
-    $("#TT").empty().append(this.#overlayDiv, this.#treeDiv);
+    $("#TT")
+      .empty()
+      .append(this.#treeDiv, this.#emptyTreeOverlay, this.#treeCMOverlay);
     this.setupTree(data, true);
 
     // context menu definition
-    this.#treeDiv.contextMenu({
-      selector: ".jstree-node",
-      autoHide: true,
-      build: ($trigger, e) => {
-        return this.#editMode ? false : this.#contextMenu($trigger[0].id);
-      },
-    });
-
     $.contextMenu({
       selector: "#TT",
       autoHide: true,
+      zIndex: 10,
       build: ($trigger, e) => {
         return this.#editMode || theTextCollection
           ? false
-          : {
-              items: {
-                new: {
-                  name: _("textMenu_newText"),
-                  icon: "fa-regular fa-star-of-life",
-                  callback: () => this.newText(),
-                },
-                sep1: "x",
-                expand: {
-                  name: _("textMenu_expandAll"),
-                  icon: "fa-regular fa-square-plus",
-                  callback: () => this.expandAll(),
-                },
-                collapse: {
-                  name: _("textMenu_collapseAll"),
-                  callback: () => this.collapseAll(),
-                },
-                sep2: "x",
-                check: {
-                  name: _("textMenu_checkAll"),
-                  icon: "fa-regular fa-check-double",
-                  callback: () => this.checkAll(),
-                },
-                uncheck: {
-                  name: _("textMenu_uncheckAll"),
-                  callback: () => this.uncheckAll(),
-                },
-                sep3: "x",
-                search: {
-                  name: _("textMenu_search"),
-                  icon: "fa-regular fa-magnifying-glass",
-                  callback: () => {
-                      let settings = theSettings.effectiveSettings();
-                      ipcRenderer.invoke("mainProcess_openWindow", [
-                        "textSearch",
-                        settings.closingType,
-                        true,
-                        0,
-                        0,
-                        _("windowTitles_textSearchWindow"),
-                        "./textSearchWindow/textSearchWindow.html",
-                        "textSearchWindow_init",
-                        null,
-                        [
-                          settings,
-                          Object.entries(theObjectTree.objects)
-                            .sort((a, b) => a[1].name.localeCompare(b[1].name))
-                            .map(([id, o]) => ({
-                              id: id,
-                              name: o.name,
-                            })),
-                          ...theProperties.lists,
-                        ],
-                      ]);
-                  },
-                },
-              },
-            };
+          : this.#treeContextMenu();
+      },
+      events: {
+        show: () => this.#treeCMOverlay.css("display", "block"),
+        hide: () => this.#treeCMOverlay.css("display", "none"),
+      },
+    });
+    this.#treeDiv.contextMenu({
+      selector: ".jstree-node",
+      autoHide: true,
+      zIndex: 10,
+      build: ($trigger, e) => {
+        return this.#editMode ? false : this.#itemContextMenu($trigger[0].id);
       },
     });
   }
@@ -264,12 +223,15 @@ class TextTree {
       plugins: plugins,
     });
 
-    if (!data || !data.length) this.#overlayDiv.css("display", "flex");
+    this.#emptyTreeOverlay.css(
+      "display",
+      !data || !data.length ? "flex" : "none",
+    );
 
     this.#treeDiv.on("create_node.jstree delete_node.jstree", () => {
       if (this.#treeDiv.jstree().get_node("#").children.length)
-        this.#overlayDiv.css("display", "none");
-      else this.#overlayDiv.css("display", "flex");
+        this.#emptyTreeOverlay.css("display", "none");
+      else this.#emptyTreeOverlay.css("display", "flex");
       this.#dirty = true;
     });
 
@@ -975,6 +937,24 @@ class TextTree {
   }
 
   /**
+   * check if there are items and branches in the tree
+   */
+  #treeHasItems() {
+    let items = false;
+    let branches = false;
+    if (this.#treeDiv && this.#treeDiv.jstree()) {
+      let root = this.#treeDiv.jstree().get_node("#");
+      if (root)
+        for (let i = 0; i < root.children.length; i++) {
+          items = true;
+          if (this.#treeDiv.jstree().get_node(root.children[i]).children.length)
+            branches = true;
+        }
+    }
+    return [items, branches];
+  }
+
+  /**
    * open all tree branches recursively
    */
   expandAll() {
@@ -1214,6 +1194,11 @@ class TextTree {
           if (this.#texts[node.id].inDB) {
             this.#deletedIDs.push(node.id);
           }
+          if (this.#texts[node.id].objects)
+            Object.keys(this.#texts[node.id].objects).forEach((objectID) => {
+              delete theObjectTree.getObject(objectID).texts[node.id]
+              theObjectTree.updateName(objectID,null)
+            });
           delete this.#texts[node.id];
 
           let children = [...node.children];
@@ -1324,13 +1309,78 @@ class TextTree {
     $(".jstree-rename-input").first()[0].setSelectionRange(0, 0);
   }
 
+  #treeContextMenu() {
+    let items = {
+      new: {
+        name: _("textMenu_newText"),
+        icon: "fa-regular fa-star-of-life",
+        callback: () => this.newText(),
+      },
+    };
+    let [hasItems, hasBranches] = this.#treeHasItems();
+    if (hasBranches) {
+      items.sep1 = "x";
+      items.expand = {
+        name: _("textMenu_expandAll"),
+        icon: "fa-regular fa-square-plus",
+        callback: () => this.expandAll(),
+      };
+      items.collapse = {
+        name: _("textMenu_collapseAll"),
+        callback: () => this.collapseAll(),
+      };
+    }
+    if (hasItems) {
+      items.sep2 = "x";
+      items.check = {
+        name: _("textMenu_checkAll"),
+        icon: "fa-regular fa-check-double",
+        callback: () => this.checkAll(),
+      };
+      items.uncheck = {
+        name: _("textMenu_uncheckAll"),
+        callback: () => this.uncheckAll(),
+      };
+      items.sep3 = "x";
+      items.search = {
+        name: _("textMenu_search"),
+        icon: "fa-regular fa-magnifying-glass",
+        callback: () => {
+          let settings = theSettings.effectiveSettings();
+          ipcRenderer.invoke("mainProcess_openWindow", [
+            "textSearch",
+            settings.closingType,
+            true,
+            0,
+            0,
+            _("windowTitles_textSearchWindow"),
+            "./textSearchWindow/textSearchWindow.html",
+            "textSearchWindow_init",
+            null,
+            [
+              settings,
+              Object.entries(theObjectTree.objects)
+                .sort((a, b) => a[1].name.localeCompare(b[1].name))
+                .map(([id, o]) => ({
+                  id: id,
+                  name: o.name,
+                })),
+              ...theProperties.lists,
+            ],
+          ]);
+        },
+      };
+    }
+    return { items: items };
+  }
+
   /**
    * define a node's context menu
    *
    * @param {String} nodeID
    * @returns {Object}
    */
-  #contextMenu(nodeID) {
+  #itemContextMenu(nodeID) {
     let node = this.#treeDiv.jstree().get_node(nodeID);
     let menuItems = {};
     let settings = theSettings.effectiveSettings();
@@ -1474,11 +1524,12 @@ class TextTree {
         // use at most one para
         let name = this.#texts[node.id].text.split("\n")[0];
         // use at most number of words of resp. setting value
-        name = name
-          .split(/\s+/)
-          .filter((x) => x.length)
-          .slice(0, settings.textTreeNameWords)
-          .join(" ");
+        name =
+          name
+            .split(/\s+/)
+            .filter((x) => x.length)
+            .slice(0, settings.textTreeNameWords)
+            .join(" ") + settings.textTreeAppendName;
         this.#texts[node.id].name = name;
         this.#treeDiv
           .jstree()

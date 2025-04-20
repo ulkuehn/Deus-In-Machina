@@ -821,6 +821,12 @@ class Settings {
           default: 3,
         },
         {
+          type: "select",
+          name: "textTreeAppendName",
+          values: ["", " ...", " . . .", " ---", " - - -", " ***", " * * *"],
+          default: " . . .",
+        },
+        {
           type: "separator",
           name: "settingsWindow_textTreeDecorationStatus",
         },

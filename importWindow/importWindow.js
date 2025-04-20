@@ -6,6 +6,24 @@
  */
 
 /**
+ * there are various dependencies between texts, objects, collections and so on:
+ *    collections --> texts
+ *    texts --> objects
+ *    texts --> formats
+ *    objects --> formats
+ *    export profiles --> formats
+ *
+ * the textStates, objectStates, formatStates therefore store two Bools per id:
+ *    - the first is to indicate explicitely user checks
+ *    - the second is to indicate automatic checks caused by dependencies
+ * this model results in these represntations:
+ *    - false,false   unchecked, enabled
+ *    - true,false    checked, enabled
+ *    - false,true    checked, disabled (to avoid that user unchecks)
+ *    - true,true     checked, enabled
+ */
+
+/**
  * i18n related stuff
  */
 const { __ } = require("../i18n/importWindow.js");
@@ -32,7 +50,7 @@ let formatsInTexts = {}; // textID --> [formatID1,formatID2,...]
 let formatsInObjects = {}; // objectID --> [formatID1,formatID2,...]
 let formatsInExportProfiles = {}; // profileID --> [formatID1,formatID2,...]
 
-let textStates = {};
+let textStates = {}; // textID --> [userSet,autoSet] Bool values for user checked and automatically checked state; false,false=unchecked; true,false=checked,enabled; false,true=checked,disabled; true,true=checked,enabled
 let objectStates = {};
 let formatStates = {};
 
@@ -112,7 +130,7 @@ ipcRenderer.on(
       () => {
         if (theTexts && Object.keys(theTexts).length) {
           let $tabContent = $("<p>").html(_("importWindow_autoTexts"));
-          $tabContent.append(itemControls("text", true));
+          $tabContent.append(itemControls("text"));
 
           $tabContent.append(
             itemList(
@@ -143,7 +161,6 @@ ipcRenderer.on(
         if (theCollections && Object.keys(theCollections).length) {
           let $tabContent = itemControls(
             "collection",
-            false,
             "clearcollections",
             _("importWindow_clearCollections"),
           );
@@ -153,7 +170,7 @@ ipcRenderer.on(
           Object.keys(theCollections).forEach((id) => {
             $ul.append(
               $("<li>").html(
-                `<input class="form-check-input" type="checkbox" id="collection${id}" onclick="showElements()"></input> <span title="${_(
+                `<input class="form-check-input" type="checkbox" id="collection${id}" onclick="interdependencies()"></input> <span title="${_(
                   "importWindow_created",
                   {
                     time: new Timestamp(theCollections[id][5]).toLocalString(
@@ -189,7 +206,7 @@ ipcRenderer.on(
       () => {
         if (theObjects && Object.keys(theObjects).length) {
           let $tabContent = $("<p>").html(_("importWindow_autoObjects"));
-          $tabContent.append(itemControls("object", true));
+          $tabContent.append(itemControls("object"));
           $tabContent.append(
             itemList(
               $("<ul>").attr({
@@ -221,7 +238,6 @@ ipcRenderer.on(
           $tabContent.append(
             itemControls(
               "format",
-              false,
               "clearformats",
               _("importWindow_clearFormats"),
             ),
@@ -255,7 +271,6 @@ ipcRenderer.on(
         if (theWords && theWords.length) {
           let $tabContent = itemControls(
             "word",
-            false,
             "clearwords",
             _("importWindow_clearWords"),
           );
@@ -292,7 +307,6 @@ ipcRenderer.on(
       () => {
         let $tabContent = itemControls(
           "export",
-          false,
           "clearexports",
           _("importWindow_clearExports"),
         );
@@ -302,7 +316,7 @@ ipcRenderer.on(
         Object.keys(theExportProfiles).forEach((id) => {
           $ul.append(
             $("<li>").html(
-              `<input class="form-check-input" type="checkbox" id="export${id}" onclick="showElements()"></input> <span title="${_(
+              `<input class="form-check-input" type="checkbox" id="export${id}" onclick="interdependencies()"></input> <span title="${_(
                 "importWindow_created",
                 {
                   time: new Timestamp(
@@ -333,7 +347,6 @@ ipcRenderer.on(
       () => {
         let $tabContent = itemControls(
           "setting",
-          false,
           "clearsettings",
           _("importWindow_clearSettings"),
         );
@@ -401,7 +414,15 @@ ipcRenderer.on(
 
     Util.initTabs();
 
-    showElements();
+    // texts
+    $("#texts").empty();
+    showTextTree($("#texts"), theTextTree, 0);
+    // objects
+    $("#objects").empty();
+    showObjectTree($("#objects"), theObjectTree, 0);
+    // formats
+    $("#formats").empty();
+    showFormats();
   },
 );
 
@@ -439,111 +460,6 @@ function itemList(elem) {
 }
 
 /**
- * show texts, objects, formats with their respective user and auto selections
- */
-function showElements() {
-  // reset states
-  Object.keys(theTexts).forEach((textID) => {
-    textStates[textID] = [$(`#text${textID}`).prop("checked"), false];
-    if ($(`#text${textID}`).prop("checked")) {
-      activateText(textID);
-    }
-  });
-  Object.keys(theObjects).forEach((objectID) => {
-    objectStates[objectID] = [$(`#object${objectID}`).prop("checked"), false];
-    if ($(`#object${objectID}`).prop("checked")) {
-      activateObject(objectID);
-    }
-  });
-  Object.keys(theFormats).forEach((formatID) => {
-    formatStates[formatID] = [$(`#format${formatID}`).prop("checked"), false];
-  });
-
-  // texts
-  Object.keys(theCollections).forEach((collectionID) => {
-    if ($(`#collection${collectionID}`).prop("checked")) {
-      theCollections[collectionID][2].forEach((textID) => {
-        textStates[textID][1] = true;
-        activateText(textID);
-      });
-    }
-  });
-
-  // objects
-  Object.keys(theTexts).forEach((textID) => {
-    if (textStates[textID][0] || textStates[textID][1]) {
-      objectsInTexts[textID].forEach((objectID) => {
-        objectStates[objectID][1] = true;
-        activateObject(objectID);
-      });
-    }
-  });
-
-  // formats
-  Object.keys(theTexts).forEach((textID) => {
-    if (textStates[textID][0] || textStates[textID][1]) {
-      formatsInTexts[textID].forEach((formatID) => {
-        formatStates[formatID][1] = true;
-      });
-    }
-  });
-  Object.keys(theObjects).forEach((objectID) => {
-    if (objectStates[objectID][0] || objectStates[objectID][1]) {
-      formatsInObjects[objectID].forEach((formatID) => {
-        formatStates[formatID][1] = true;
-      });
-    }
-  });
-  $("li input[id^='export']:checked").each(function (index, element) {
-    let id = element.id.substring("export".length);
-    if (!formatsInExportProfiles[id]) {
-      let formats = {};
-      Exporter.settings.forEach((tab) => {
-        tab.settings.forEach((setting) => {
-          if (setting.type == "editor") {
-            theExportProfiles[id][setting.name].ops.forEach((op) => {
-              if (op.insert && op.attributes) {
-                Object.keys(op.attributes).forEach((att) => {
-                  if (att.startsWith("format")) {
-                    formats[att.substring("format".length)] = true;
-                  }
-                });
-              }
-            });
-          }
-        });
-      });
-      formatsInExportProfiles[id] = Object.keys(formats);
-    }
-    formatsInExportProfiles[id].forEach((formatID) => {
-      formatStates[formatID][1] = true;
-    });
-  });
-
-  // texts
-  $("#texts").empty();
-  showTextTree($("#texts"), theTextTree, 0);
-  // objects
-  $("#objects").empty();
-  showObjectTree($("#objects"), theObjectTree, 0);
-  // formats
-  $("#formats").empty();
-  Object.keys(theFormats).forEach((id) => {
-    $("#formats").append(
-      $("<li>").append(
-        $("<input>").attr({
-          class: "form-check-input",
-          type: "checkbox",
-          checked: formatStates[id][0] || formatStates[id][1],
-          disabled: formatStates[id][1],
-        }),
-        ` ${theFormats[id].formats_name}`,
-      ),
-    );
-  });
-}
-
-/**
  * recursively build text tree
  *
  * @param {Object} elem jquery element to append (sub)tree to
@@ -552,6 +468,7 @@ function showElements() {
  */
 function showTextTree(elem, tree, level) {
   tree.forEach((node) => {
+    if (!(node.id in textStates)) textStates[node.id] = [false, false];
     elem.append(
       $("<li>").append(
         $("<input>").attr({
@@ -561,7 +478,7 @@ function showTextTree(elem, tree, level) {
           disabled: textStates[node.id][1],
           id: `text${node.id}`,
           style: `margin-left:${level * 20}px`,
-          onchange: "showElements()",
+          onchange: `textStates["${node.id}"][0]=$(this).prop("checked"); interdependencies()`,
         }),
         $("<span>")
           .attr(
@@ -594,6 +511,7 @@ function showTextTree(elem, tree, level) {
  */
 function showObjectTree(elem, tree, level) {
   tree.forEach((node) => {
+    if (!(node.id in objectStates)) objectStates[node.id] = [false, false];
     elem.append(
       $("<li>").append(
         $("<input>").attr({
@@ -603,7 +521,7 @@ function showObjectTree(elem, tree, level) {
           disabled: objectStates[node.id][1],
           id: `object${node.id}`,
           style: `margin-left:${level * 20}px`,
-          onchange: "showElements()",
+          onchange: `objectStates["${node.id}"][0]=$(this).prop("checked"); interdependencies()`,
         }),
         $("<span>")
           .attr(
@@ -627,67 +545,138 @@ function showObjectTree(elem, tree, level) {
   });
 }
 
+function showFormats() {
+  Object.keys(theFormats).forEach((id) => {
+    if (!(id in formatStates)) formatStates[id] = [false, false];
+    $("#formats").append(
+      $("<li>").append(
+        $("<input>").attr({
+          class: "form-check-input",
+          type: "checkbox",
+          checked: formatStates[id][0] || formatStates[id][1],
+          disabled: formatStates[id][1],
+          onchange: `formatStates["${id}"][0]=$(this).prop("checked");`,
+        }),
+        ` ${theFormats[id].formats_name}`,
+      ),
+    );
+  });
+}
+
 /**
- * upon object activation collect ids of all formats the object uses
- *
- * @param {String} objectID id of the activated object
+ * collections --> texts --> objects --> formats
  */
-function activateObject(objectID) {
-  if (!formatsInObjects[objectID]) {
-    let formats = {};
-    if (objectID in theObjects[objectID][5]) {
-      Object.values(theObjects[objectID][5][objectID]).forEach((prop) => {
-        if ("ops" in prop) {
-          prop.ops.forEach((op) => {
-            if (op.insert && op.attributes) {
-              Object.keys(op.attributes).forEach((att) => {
-                if (att.startsWith("format")) {
-                  formats[att.substring("format".length)] = true;
+function interdependencies() {
+  // reset auto states
+  for (state of Object.values(textStates)) state[1] = false;
+  for (state of Object.values(objectStates)) state[1] = false;
+  for (state of Object.values(formatStates)) state[1] = false;
+
+  // find texts in collections
+  $("li input[id^='collection']:checked").each(function (index, element) {
+    theCollections[element.id.substring("collection".length)][2].forEach(
+      (textID) => (textStates[textID][1] = true),
+    );
+  });
+
+  // find objects and formats in texts
+  Object.keys(textStates).forEach((textID) => {
+    if (textStates[textID][0] || textStates[textID][1]) {
+      if (!(textID in objectsInTexts) || !(textID in formatsInTexts)) {
+        let objects = {};
+        let formats = {};
+        theTexts[textID][2].forEach((op) => {
+          if (op.insert && op.attributes) {
+            Object.keys(op.attributes).forEach((att) => {
+              if (att.startsWith("object"))
+                objects[att.substring("object".length)] = true;
+              if (att.startsWith("format"))
+                formats[att.substring("format".length)] = true;
+            });
+          }
+        });
+        objectsInTexts[textID] = Object.keys(objects);
+        formatsInTexts[textID] = Object.keys(formats);
+      }
+      objectsInTexts[textID].forEach(
+        (objectID) => (objectStates[objectID][1] = true),
+      );
+      formatsInTexts[textID].forEach(
+        (formatID) => (formatStates[formatID][1] = true),
+      );
+    }
+  });
+
+  // find formats in objects (scheme properties)
+  Object.keys(objectStates).forEach((objectID) => {
+    if (objectStates[objectID][0] || objectStates[objectID][1]) {
+      if (!(objectID in formatsInObjects)) {
+        let formats = {};
+        if (objectID in theObjects[objectID][5]) {
+          Object.values(theObjects[objectID][5][objectID]).forEach((prop) => {
+            if ("ops" in prop) {
+              prop.ops.forEach((op) => {
+                if (op.insert && op.attributes) {
+                  Object.keys(op.attributes).forEach((att) => {
+                    if (att.startsWith("format")) {
+                      formats[att.substring("format".length)] = true;
+                    }
+                  });
                 }
               });
             }
           });
         }
-      });
+        formatsInObjects[objectID] = Object.keys(formats);
+      }
+      formatsInObjects[objectID].forEach(
+        (formatID) => (formatStates[formatID][1] = true),
+      );
     }
-    formatsInObjects[objectID] = Object.keys(formats);
-  }
-}
+  });
 
-/**
- * upon text activation collect ids of all objects and formats the text is connected with
- *
- * @param {String} textID id of activated text
- */
-function activateText(textID) {
-  // autoselect objects
-  if (!objectsInTexts[textID]) {
-    let objects = {};
-    theTexts[textID][2].forEach((op) => {
-      if (op.insert && op.attributes) {
-        Object.keys(op.attributes).forEach((att) => {
-          if (att.startsWith("object")) {
-            objects[att.substring("object".length)] = true;
+  // find formats in export profiles
+  $("li input[id^='export']:checked").each(function (index, element) {
+    let id = element.id.substring("export".length);
+    if (!formatsInExportProfiles[id]) {
+      let formats = {};
+      Exporter.settings.forEach((tab) => {
+        tab.settings.forEach((setting) => {
+          if (
+            setting.type == "editor" &&
+            theExportProfiles[id][setting.name]
+          ) {
+            theExportProfiles[id][setting.name].ops.forEach((op) => {
+              if (op.insert && op.attributes) {
+                Object.keys(op.attributes).forEach((att) => {
+                  if (att.startsWith("format")) {
+                    formats[att.substring("format".length)] = true;
+                  }
+                });
+              }
+            });
           }
         });
-      }
-    });
-    objectsInTexts[textID] = Object.keys(objects);
-  }
-  // autoselect formats
-  if (!formatsInTexts[textID]) {
-    let formats = {};
-    theTexts[textID][2].forEach((op) => {
-      if (op.insert && op.attributes) {
-        Object.keys(op.attributes).forEach((att) => {
-          if (att.startsWith("format")) {
-            formats[att.substring("format".length)] = true;
-          }
-        });
-      }
-    });
-    formatsInTexts[textID] = Object.keys(formats);
-  }
+      });
+      formatsInExportProfiles[id] = Object.keys(formats);
+    }
+    formatsInExportProfiles[id].forEach(
+      (formatID) => (formatStates[formatID][1] = true),
+    );
+  });
+
+  // upconnect objects
+  upConnect("object", false);
+
+  // show texts
+  $("#texts").empty();
+  showTextTree($("#texts"), theTextTree, 0);
+  // show objects
+  $("#objects").empty();
+  showObjectTree($("#objects"), theObjectTree, 0);
+  // show formats
+  $("#formats").empty();
+  showFormats();
 }
 
 /**
@@ -708,13 +697,12 @@ function emptyTab(info) {
  * controls for items (de)selection
  *
  * @param {String} prefix name of item group
- * @param {Boolean} connect add controls to upconnect tree items
  * @param {String} clearID id of checkbox to clear existing elements - none if falsy value
  * @param {String} clearText info text for element clearing
  *
  * @returns {Object} jquery div containing controls
  */
-function itemControls(prefix, connect = false, clearID = null, clearText = "") {
+function itemControls(prefix, clearID = null, clearText = "") {
   return $("<div>")
     .attr({ style: "margin:10px 0 20px 0;" })
     .append(
@@ -723,13 +711,6 @@ function itemControls(prefix, connect = false, clearID = null, clearText = "") {
       )}"><i class="fa-solid fa-check-double"></i> <i class="fa-solid fa-plus"></i></button> <button type="button" class="btn btn-outline-danger btn-sm" onclick="changeAll('${prefix}',false)" title="${_(
         "importWindow_unselectAll",
       )}"><i class="fa-solid fa-check-double"></i> <i class="fa-solid fa-minus"></i></button>
-            ${
-              connect
-                ? `<button type="button" class="btn btn-outline-dark btn-sm" onclick="upConnect('${prefix}')" title="${_(
-                    "importWindow_upConnect",
-                  )}"><i class="fa-solid fa-ellipsis fa-rotate-by" style="--fa-rotate-angle: 45deg;"></i></button>`
-                : ""
-            }
             ${
               clearID
                 ? `<input class="form-check-input" type="checkbox" id="${clearID}" style="margin:7px 0 0 20px"></input> ${clearText}`
@@ -745,10 +726,13 @@ function itemControls(prefix, connect = false, clearID = null, clearText = "") {
  * @param {Boolean} on select (true) or deselect (false)
  */
 function changeAll(prefix, on) {
-  $(`li input[id^="${prefix}"]`).each(function () {
+  $(`li input[id^="${prefix}"]`).each(function (index, element) {
     $(this).prop("checked", on);
-  });
-  showElements();
+    if (prefix == "text")
+      textStates[element.id.substring(prefix.length)][0] = on;
+    if (prefix == "object")
+      objectStates[element.id.substring(prefix.length)][0] = on;  });
+  interdependencies();
 }
 
 /**
@@ -763,13 +747,18 @@ function closeWindow() {
  *
  * @param {String} prefix name of item group
  */
-function upConnect(prefix) {
+function upConnect(prefix, user = true) {
   treeConnect(
+    user,
     prefix,
     prefix == "text" ? theTextTree : theObjectTree,
-    $(`li input[id^='${prefix}']:checked`)
-      .toArray()
-      .map((i) => i.id.substring(prefix.length)),
+    prefix == "text"
+      ? Object.keys(textStates).filter(
+          (x) => textStates[x][0] || textStates[x][1],
+        )
+      : Object.keys(objectStates).filter(
+          (x) => objectStates[x][0] || objectStates[x][1],
+        ),
     [],
   );
 }
@@ -782,25 +771,26 @@ function upConnect(prefix) {
  * @param {*} checked
  * @param {*} path
  */
-function treeConnect(prefix, tree, checked, path) {
+function treeConnect(user, prefix, tree, checked, path) {
   tree.forEach((node) => {
     if (checked.includes(node.id)) {
       path.forEach((id) => {
-        $(`#${prefix}${id}`).prop("checked", true);
+        if (prefix == "text") textStates[id][user ? 0 : 1] = true;
+        else objectStates[id][user ? 0 : 1] = true;
       });
     }
     if (node.children.length) {
-      treeConnect(prefix, node.children, checked, [...path, node.id]);
+      treeConnect(user, prefix, node.children, checked, [...path, node.id]);
     }
   });
 }
 
 /**
  * returns nested list reflecting the tree structure plus a flat mapping of old ids to new ones
-
-* @param {Object[]} tree
+ *
+ * @param {Object[]} tree
  * @param {Object} mapping
- * @returns {[Object[],Object]} 
+ * @returns {[Object[],Object]}
  */
 function collectTexts(tree, mapping) {
   let result = [];

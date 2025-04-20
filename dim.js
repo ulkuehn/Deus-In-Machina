@@ -695,6 +695,12 @@ function menuList(left, right, bottom) {
             focusedWindow.webContents.send("rendererProcess_newTextCollection");
           },
         },
+        {
+          label: _("textMenu_collectionFromTexts"),
+          click(item, focusedWindow) {
+            focusedWindow.webContents.send("rendererProcess_newTextCollection",true);
+          },
+        },
       ],
     },
     // object tree menu
