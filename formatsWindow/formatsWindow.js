@@ -148,7 +148,7 @@ ipcRenderer.on("formatsWindow_init", (event, [settings, formats, fonts]) => {
           .attr({
             style: "grid-column:1/span 1; justify-self:end; align-self:center;",
           })
-          .html(_(setting.name)),
+          .html(`<label for="${setting.name}_active">${_(setting.name)}</label>`),
       );
       // optional?
       if (!setting.mandatory) {

@@ -1124,9 +1124,9 @@ class Project {
    * create an empty project
    */
   emptyProject() {
-    theObjectTree.setupTree([], true);
-    theTextTree.setupTree([], true);
-    theTextCollectionTree.setupTree([], true);
+    theObjectTree.reset();
+    theTextTree.reset();
+    theTextCollectionTree.reset();
     setTimeout(() => this.undirty(), 500);
   }
 
@@ -1495,9 +1495,9 @@ class Project {
     ipcRenderer.invoke("mainProcess_clearTmpDir");
     theFormats = new Formats();
     theProperties = new Properties(theSettings.categories());
-    theTextTree.setupTree([], true);
-    theObjectTree.setupTree([], true);
-    theTextCollectionTree.setupTree([], true);
+    theTextTree.reset();
+    theObjectTree.reset();
+    theTextCollectionTree.reset();
     theTextEditor = new TextEditor();
     theObjectReference = new ObjectReference();
     theSpellChecker = new Spellchecker(theLanguage);
@@ -2044,8 +2044,10 @@ class Project {
       }
       // objects (load before texts!)
       statement = db.prepare("select data from trees where name=?");
-      theObjectTree.setupTree(JSON.parse(statement.get("object").data), true);
-      theObjectTree.newCounter = parseInt(statement.get("objectCounter").data);
+      theObjectTree.reset(
+        JSON.parse(statement.get("object").data),
+        parseInt(statement.get("objectCounter").data),
+      );
       statement = db.prepare(
         "select id,name,decoration,created,changed,styleproperties,scheme,properties,texts from styledobjects",
       );
@@ -2069,11 +2071,10 @@ class Project {
       }
       // collections
       statement = db.prepare("select data from trees where name=?");
-      theTextCollectionTree.setupTree(
+      theTextCollectionTree.reset(
         JSON.parse(statement.get("collection").data),
-        true,
+        parseInt(statement.get("collectionCounter").data),
       );
-      theTextCollectionTree.newCounter=parseInt(statement.get("collectionCounter").data)
       statement = db.prepare(
         "select id,name,items,search,decoration,created,changed from collections",
       );
@@ -2095,8 +2096,10 @@ class Project {
       }
       // texts
       statement = db.prepare("select data from trees where name=?");
-      theTextTree.setupTree(JSON.parse(statement.get("text").data), true);
-      theTextTree.newCounter = parseInt(statement.get("textCounter").data);
+      theTextTree.reset(
+        JSON.parse(statement.get("text").data),
+        parseInt(statement.get("textCounter").data),
+      );
       statement = db.prepare(
         "select id,editable,name,decoration,created,changed,status,type,uservalue,delta,characters,words,objects from styledtexts",
       );

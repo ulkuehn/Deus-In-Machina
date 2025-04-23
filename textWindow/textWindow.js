@@ -614,9 +614,9 @@ function infoTab(categories, path, collections, settings) {
   );
   let html = "";
   for (let [mod, tags] of Object.entries(TreeDecoration.modTags)) {
-    html += `<span style="margin-right:20px;"><input id="${mod}" class="form-check-input" type="checkbox"${
+    html += `<span style="margin-right:20px;"><label><input id="${mod}" class="form-check-input" type="checkbox"${
       theStyledText.decoration[mod] ? " checked" : ""
-    }> ${tags[0]}${_(mod)}${tags[1]}</span>`;
+    }> ${tags[0]}${_(mod)}${tags[1]}</label></span>`;
   }
   $grid.append(
     $("<div>")

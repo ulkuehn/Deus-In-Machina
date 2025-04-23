@@ -239,7 +239,7 @@ function searchTab() {
       .attr({
         style: "grid-column:3",
       })
-      .html(_("search_withCase")),
+      .html(`<label for="searchCase">${_("search_withCase")}</label>`),
   );
   $searchGrid.append(
     $("<div>")
@@ -253,7 +253,7 @@ function searchTab() {
       .attr({
         style: "grid-column:5",
       })
-      .html(_("search_wholeWord")),
+      .html(`<label for="searchWord">${_("search_wholeWord")}</label>`),
   );
   $searchGrid.append(
     $("<div>")
@@ -269,7 +269,7 @@ function searchTab() {
       .attr({
         style: "grid-column:7",
       })
-      .html(_("search_withRegex")),
+      .html(`<label for="searchRegex">${_("search_withRegex")}</label>`),
   );
 
   // search covering
@@ -296,7 +296,9 @@ function searchTab() {
       .attr({
         style: "grid-column:3/span 5",
       })
-      .html(_("objectSearchWindow_objectNames")),
+      .html(
+        `<label for="searchObjectNames">${_("objectSearchWindow_objectNames")}</label>`,
+      ),
   );
   $searchGrid.append(
     $("<div>")
@@ -312,7 +314,7 @@ function searchTab() {
       .attr({
         style: "grid-column:3/span 5",
       })
-      .html(_("objectSearchWindow_propertyNames")),
+      .html(`<label for="searchPropertyNames">${_("objectSearchWindow_propertyNames")}</label>`),
   );
   $searchGrid.append(
     $("<div>")
@@ -329,9 +331,9 @@ function searchTab() {
         style: "grid-column:3/span 5",
       })
       .html(
-        `${_("objectSearchWindow_values")} (${_("schemeTypes_text")}, ${_(
+        `<label for="searchValues">${_("objectSearchWindow_values")} (${_("schemeTypes_text")}, ${_(
           "schemeTypes_editor",
-        )}, ${_("schemeTypes_map")})`,
+        )}, ${_("schemeTypes_map")})</label>`,
       ),
   );
   $searchGrid.append(
@@ -348,7 +350,7 @@ function searchTab() {
       .attr({
         style: "grid-column:3/span 5",
       })
-      .html(_("objectSearchWindow_texts")),
+      .html(`<label for="searchTexts">${_("objectSearchWindow_texts")}</label>`),
   );
 
   return $searchGrid;

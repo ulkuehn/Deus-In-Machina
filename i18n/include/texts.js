@@ -54,6 +54,7 @@ const translationTexts = {
     texts_contextMenuInsertMenu: "Neuer Text",
     texts_contextMenuInsertBefore: "Neuer Text davor",
     texts_contextMenuInsertAfter: "Neuer Text danach",
+    texts_contextMenuInsertChild: "Neuer Text unterhalb",
     //
     texts_contextMenuDeleteMenu: "Löschen",
     texts_contextMenuDeleteText: "Text löschen",
@@ -70,7 +71,8 @@ const translationTexts = {
   // English
   en: {
     // text tree
-    texts_treeDescription: "Text area<br><br>there are no texts in this project yet",
+    texts_treeDescription:
+      "Text area<br><br>there are no texts in this project yet",
     texts_newText: "Text %{count}",
     texts_textCopy: 'Copy of "%{name}"',
     texts_emptyText: "empty Text",
@@ -113,8 +115,9 @@ const translationTexts = {
       "Activate just the Objects connected to Text",
     //
     texts_contextMenuInsertMenu: "New Text",
-    texts_contextMenuInsertBefore: "New Text above",
-    texts_contextMenuInsertAfter: "New Text below",
+    texts_contextMenuInsertBefore: "New Text Before",
+    texts_contextMenuInsertAfter: "New Text after",
+    texts_contextMenuInsertChild: "New Text below",
     //
     texts_contextMenuDeleteMenu: "Delete",
     texts_contextMenuDeleteText: "Delete Text",

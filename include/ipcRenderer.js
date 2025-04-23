@@ -1841,10 +1841,10 @@ ipcRenderer.on("rendererProcess_saveFormats", (event, [formats, merge]) => {
   ]);
   if (merge) {
     Object.keys(theFormats.formats).forEach((id) => {
-      if (!(id in formats)) {
-        formats[id] = theFormats.formats[id];
-      }
+      if (!(id in formats)) formats[id] = theFormats.formats[id];
     });
+  } else {
+    if (!(UUID0 in formats)) formats[UUID0] = theFormats.formats[UUID0];
   }
   // compare new formats to old ones -- the deleted formats must be removed from all texts
   let oldIDs = Object.keys(theFormats.formats);

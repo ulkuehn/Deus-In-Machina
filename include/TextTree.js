@@ -22,20 +22,8 @@ class TextTree {
 
   /**
    * class constructor
-   *
-   * @param {JSON} data
-   * @param {Number} counter
-   * @param {*} texts
    */
-  constructor(data = [], counter = 1, texts = {}) {
-    this.#newCounter = counter;
-    this.#texts = texts;
-    this.#deletedIDs = [];
-    this.#checkEvent = true;
-    this.#dirty = false;
-    this.#ready = false;
-    this.#editMode = false;
-
+  constructor() {
     this.#emptyTreeOverlay = $("<div>")
       .attr({
         class: "empty-tree",
@@ -54,7 +42,6 @@ class TextTree {
     $("#TT")
       .empty()
       .append(this.#treeDiv, this.#emptyTreeOverlay, this.#treeCMOverlay);
-    this.setupTree(data, true);
 
     // context menu definition
     $.contextMenu({
@@ -79,6 +66,8 @@ class TextTree {
         return this.#editMode ? false : this.#itemContextMenu($trigger[0].id);
       },
     });
+
+    this.reset();
   }
 
   // getters and setters
@@ -153,6 +142,22 @@ class TextTree {
         this.#treeDiv.jstree().rename_node(id, this.#texts[id].decoratedName());
       });
     }
+  }
+
+  /**
+   * reset the tree
+   * @param {*} data
+   * @param {*} counter
+   */
+  reset(data = [], counter = 1) {
+    this.#newCounter = counter;
+    this.#texts = {};
+    this.#deletedIDs = [];
+    this.#checkEvent = true;
+    this.#dirty = false;
+    this.#ready = false;
+    this.#editMode = false;
+    this.setupTree(data, true);
   }
 
   /**
@@ -646,7 +651,7 @@ class TextTree {
    * @param {*} node
    * @returns {DOMNode[]} flat list of created nodes
    */
-  transferTexts(texts, node = this.singleSelected()) {
+  transferTexts(texts, node = this.#treeDiv.jstree().get_node("#")) {
     let startNode = node;
     let nodes = [];
     texts.forEach((entry) => {
@@ -1177,6 +1182,22 @@ class TextTree {
   }
 
   /**
+   * delete a text and update objects
+   */
+  #textDelete(id) {
+    if (this.#texts[id].inDB) {
+      this.#deletedIDs.push(id);
+    }
+    if (this.#texts[id].objects)
+      Object.keys(this.#texts[id].objects).forEach((objectID) => {
+        delete theObjectTree.getObject(objectID).texts[id];
+        if (!Object.keys(theObjectTree.getObject(objectID).texts).length)
+          theObjectTree.updateName(objectID, null);
+      });
+    delete this.#texts[id];
+  }
+
+  /**
    * delete selected node
    *
    * @param {DOMNode} selected
@@ -1191,16 +1212,8 @@ class TextTree {
       .then((result) => {
         if (result == 1) {
           this.#checkEvent = false;
-          if (this.#texts[node.id].inDB) {
-            this.#deletedIDs.push(node.id);
-          }
-          if (this.#texts[node.id].objects)
-            Object.keys(this.#texts[node.id].objects).forEach((objectID) => {
-              delete theObjectTree.getObject(objectID).texts[node.id]
-              theObjectTree.updateName(objectID,null)
-            });
-          delete this.#texts[node.id];
 
+          this.#textDelete(node.id);
           let children = [...node.children];
           children.forEach((c) => {
             let child = this.#treeDiv.jstree().get_node(c);
@@ -1232,16 +1245,9 @@ class TextTree {
         .then((result) => {
           if (result == 1) {
             this.#checkEvent = false;
-            if (this.#texts[node.id].inDB) {
-              this.#deletedIDs.push(node.id);
-            }
-            delete this.#texts[node.id];
-            node.children_d.forEach((id) => {
-              if (this.#texts[id].inDB) {
-                this.#deletedIDs.push(id);
-              }
-              delete this.#texts[id];
-            });
+
+            this.#textDelete(node.id);
+            node.children_d.forEach((id) => this.#textDelete(id));
             theTextCollectionTree.deleteTexts([node.id, ...node.children_d]);
             this.#treeDiv.jstree().delete_node(node);
             theTextEditor.showTextsInEditor(this.getChecked());
@@ -1732,7 +1738,7 @@ class TextTree {
     if (compact) {
       menuItems.insertMenu = {
         name: _("texts_contextMenuInsertMenu"),
-        icon: "fa-regular fa-file-lines",
+        icon: "fa-regular fa-star-of-life",
         items: {},
       };
       items = menuItems.insertMenu.items;
@@ -1746,12 +1752,18 @@ class TextTree {
       },
     };
     if (!compact) {
-      items.insertBefore.icon = "fa-regular fa-file-lines";
+      items.insertBefore.icon = "fa-regular fa-star-of-life";
     }
     items.insertAfter = {
       name: _("texts_contextMenuInsertAfter"),
       callback: () => {
         this.#textInsert(node, true);
+      },
+    };
+    items.insertChild = {
+      name: _("texts_contextMenuInsertChild"),
+      callback: () => {
+        this.#childInsert(node);
       },
     };
 
@@ -1881,6 +1893,39 @@ class TextTree {
         text: this.#texts[id].decoratedName(),
       },
       nodePosition,
+    );
+    tree.edit(id, this.#texts[id].name, (node, status, cancelled) => {
+      this.#editMode = false;
+      this.#texts[id].name = tree.get_text(id);
+      tree.rename_node(id, this.#texts[id].decoratedName());
+      tree.check_node(id);
+      tree.deselect_all();
+      tree.select_node(id);
+      setTimeout(() => theTextEditor.blinkText(id), 250);
+    });
+  }
+
+  /**
+   * insert a new text as child of a node
+   *
+   * @param {DOMNode} node
+   */
+  #childInsert(node) {
+    let tree = this.#treeDiv.jstree();
+    this.#editMode = true;
+    let id = uuid();
+    this.#texts[id] = new StyledText(
+      id,
+      _("texts_newText", { count: this.#newCounter }),
+    );
+    this.#newCounter += 1;
+    tree.create_node(
+      node,
+      {
+        id: id,
+        text: this.#texts[id].decoratedName(),
+      },
+      0,
     );
     tree.edit(id, this.#texts[id].name, (node, status, cancelled) => {
       this.#editMode = false;

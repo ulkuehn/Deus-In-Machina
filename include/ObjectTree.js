@@ -26,21 +26,8 @@ class ObjectTree {
 
   /**
    * class constructor
-   *
-   * @param {JSON} data
-   * @param {Number} counter
-   * @param {*} objects
    */
-  constructor(data = [], counter = 1, objects = {}) {
-    this.#newCounter = counter;
-    this.#objects = objects;
-    this.#deletedIDs = [];
-    this.#dirty = false;
-    this.#ready = false;
-    this.#checkEvent = true;
-    this.#activateSingle = false;
-    this.#editMode = false;
-
+  constructor() {
     this.#emptyTreeOverlay = $("<div>")
       .attr({
         class: "empty-tree",
@@ -59,7 +46,6 @@ class ObjectTree {
     $("#OT")
       .empty()
       .append(this.#treeDiv, this.#emptyTreeOverlay, this.#treeCMOverlay);
-    this.setupTree(data, true);
 
     // define the tree's and items' context menu
     $.contextMenu({
@@ -84,6 +70,8 @@ class ObjectTree {
           : this.#itemContextMenu($trigger[0].id, e);
       },
     });
+
+    this.reset();
   }
 
   // getters and setters
@@ -165,6 +153,22 @@ class ObjectTree {
         theFiles,
       ],
     ]);
+  }
+
+  /**
+   * reset the tree
+   * @param {*} data
+   * @param {*} counter
+   */
+  reset(data = [], counter = 1) {
+    this.#newCounter = counter;
+    this.#objects = {};
+    this.#deletedIDs = [];
+    this.#checkEvent = true;
+    this.#dirty = false;
+    this.#ready = false;
+    this.#editMode = false;
+    this.setupTree(data, true);
   }
 
   /**
@@ -803,7 +807,7 @@ class ObjectTree {
    * @param {DOMNode} node
    * @returns {DOMNode[]} list of created nodes
    */
-  transferObjects(objects, node = this.singleSelected()) {
+  transferObjects(objects, node = this.#treeDiv.jstree().get_node("#")) {
     let startNode = node;
     let nodes = [];
     objects.forEach((entry) => {
@@ -1726,7 +1730,7 @@ class ObjectTree {
     if (compact) {
       menuItems.insertMenu = {
         name: _("objects_insertMenu"),
-        icon: "far fa-file-lines",
+        icon: "fa-regular fa-star-of-life",
         items: {},
       };
       items = menuItems.insertMenu.items;
@@ -1740,12 +1744,18 @@ class ObjectTree {
       },
     };
     if (!compact) {
-      items.insertBefore.icon = "far fa-file-lines";
+      items.insertBefore.icon = "fa-regular fa-star-of-life";
     }
     items.insertAfter = {
       name: _("objects_menuInsertAfter"),
       callback: () => {
         this.#objectInsert(node, true);
+      },
+    };
+    items.insertChild = {
+      name: _("objects_menuInsertChild"),
+      callback: () => {
+        this.#childInsert(node);
       },
     };
 
@@ -1783,7 +1793,7 @@ class ObjectTree {
       if (compact) {
         menuItems.branchMenu = {
           name: _("objects_branchMenu"),
-          icon: "far fa-square-plus",
+          icon: "fa-regular fa-square-plus",
           items: {},
         };
         items = menuItems.branchMenu.items;
@@ -1797,7 +1807,7 @@ class ObjectTree {
         },
       };
       if (!compact) {
-        items.expand.icon = "far fa-square-plus";
+        items.expand.icon = "fa-regular fa-square-plus";
       }
       items.collapse = {
         name: _("objects_menuCollapse"),
@@ -1835,29 +1845,61 @@ class ObjectTree {
   }
 
   /**
-   * insert a new object relative to a node
+   * insert a new object before or after a node
    *
    * @param {DOMNode} node
    * @param {Boolean} below if true insert below given node, else above
    */
   #objectInsert(node, below) {
-    this.#editMode = true;
-    let parentNode = this.#treeDiv.jstree().get_node(node.parent);
-    let nodePosition = parentNode.children.indexOf(node.id) + (below ? 1 : 0);
     let tree = this.#treeDiv.jstree();
+    this.#editMode = true;
+    let parentNode = tree.get_node(node.parent);
+    let nodePosition = parentNode.children.indexOf(node.id) + (below ? 1 : 0);
     let id = uuid();
     this.#objects[id] = new StyledObject(
       id,
       _("objects_newObject", { count: this.#newCounter }),
     );
     this.#newCounter++;
-    this.#treeDiv.jstree().create_node(
+    tree.create_node(
       parentNode,
       {
         id: id,
         text: this.#objects[id].decoratedName(),
       },
       nodePosition,
+    );
+    tree.edit(id, this.#objects[id].name, () => {
+      this.#editMode = false;
+      this.#objects[id].name = tree.get_text(id);
+      tree.rename_node(id, this.#objects[id].decoratedName());
+      tree.check_node(id);
+      tree.deselect_all();
+      tree.select_node(id);
+    });
+  }
+
+  /**
+   * insert a new object as child of a node
+   *
+   * @param {DOMNode} node
+   */
+  #childInsert(node) {
+    let tree = this.#treeDiv.jstree();
+    this.#editMode = true;
+    let id = uuid();
+    this.#objects[id] = new StyledObject(
+      id,
+      _("objects_newObject", { count: this.#newCounter }),
+    );
+    this.#newCounter++;
+    tree.create_node(
+      node,
+      {
+        id: id,
+        text: this.#objects[id].decoratedName(),
+      },
+      0,
     );
     tree.edit(id, this.#objects[id].name, () => {
       this.#editMode = false;

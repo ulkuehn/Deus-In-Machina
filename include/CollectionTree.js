@@ -39,24 +39,10 @@ class CollectionTree {
    *
    * @param {jQuery} $containerDiv nesessary
    * @param {jQuery} $displayDiv nesessary
-   * @param {Object[]} data jstree data to populate the tree
-   * @param {Number} counter
-   * @param {Object} collections
    */
-  constructor(
-    $containerDiv,
-    $displayDiv,
-    data = [],
-    counter = 0,
-    collections = {},
-  ) {
+  constructor($containerDiv, $displayDiv) {
     this.#$containerDiv = $containerDiv;
     this.#$displayDiv = $displayDiv;
-    this.#newCounter = counter;
-    this.#collections = collections;
-    this.#deletedIDs = [];
-    this.#dirty = false;
-    this.#editMode = false;
 
     this.#emptyTreeOverlay = $("<div>")
       .attr({
@@ -79,7 +65,8 @@ class CollectionTree {
       this.#emptyTreeOverlay,
       this.#treeCMOverlay,
     );
-    this.setupTree(data, true);
+
+    this.reset()
   }
 
   // getters and setters
@@ -89,7 +76,7 @@ class CollectionTree {
   }
 
   set newCounter(v) {
-    this.#newCounter = v;  
+    this.#newCounter = v;
   }
 
   get deletedIDs() {
@@ -189,6 +176,20 @@ class CollectionTree {
     return JSON.stringify(
       this.#treeDiv.jstree().get_json(null, { no_state: !state }),
     );
+  }
+
+  /**
+   * reset the tree
+   * @param {*} data
+   * @param {*} counter
+   */
+  reset(data = [], counter = 1) {
+    this.#newCounter = counter;
+    this.#collections = {};
+    this.#deletedIDs = [];
+    this.#dirty = false;
+    this.#editMode = false;
+    this.setupTree(data, true);
   }
 
   /**

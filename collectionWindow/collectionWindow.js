@@ -416,9 +416,9 @@ function infoTab(textPaths, settings) {
   );
   let html = "";
   for (let [mod, tags] of Object.entries(TreeDecoration.modTags)) {
-    html += `<span style="margin-right:20px;"><input id="${mod}" class="form-check-input" type="checkbox"${
+    html += `<span style="margin-right:20px;"><label><input id="${mod}" class="form-check-input" type="checkbox"${
       theCollection.decoration[mod] ? " checked" : ""
-    }> ${tags[0]}${_(mod)}${tags[1]}</span>`;
+    }> ${tags[0]}${_(mod)}${tags[1]}</label></span>`;
   }
   $grid.append(
     $("<div>")
@@ -702,7 +702,7 @@ function searchTab(settings, $filterDiv) {
       .attr({
         style: "grid-column:3",
       })
-      .html(_("search_withCase")),
+      .html(`<label for="searchCase">${_("search_withCase")}</label>`),
   );
   $searchGrid.append(
     $("<div>")
@@ -720,7 +720,7 @@ function searchTab(settings, $filterDiv) {
       .attr({
         style: "grid-column:5",
       })
-      .html(_("search_wholeWord")),
+      .html(`<label for="searchWord">${_("search_wholeWord")}</label>`),
   );
   $searchGrid.append(
     $("<div>")
@@ -738,7 +738,7 @@ function searchTab(settings, $filterDiv) {
       .attr({
         style: "grid-column:7",
       })
-      .html(_("search_withRegex")),
+      .html(`<label for="searchWord">${_("search_withRegex")}</label>`),
   );
 
   // buttons

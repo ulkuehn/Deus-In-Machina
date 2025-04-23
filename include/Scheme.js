@@ -382,7 +382,7 @@ class Scheme {
               .attr({
                 style: `grid-column:1/span 1; justify-self:end; align-self:start`,
               })
-              .html(info),
+              .html(`<label for="active_${idScheme.id}_${item.id}">${info}</label>`),
           );
           // activation switch
           $propertiesGrid.append(

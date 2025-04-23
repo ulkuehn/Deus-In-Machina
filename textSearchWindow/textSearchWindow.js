@@ -81,7 +81,7 @@ ipcRenderer.on(
         .attr({
           style: "grid-column:3",
         })
-        .html(_("search_withCase")),
+        .html(`<label for="searchCase">${_("search_withCase")}</label>`),
     );
     $searchGrid.append(
       $("<div>")
@@ -97,7 +97,7 @@ ipcRenderer.on(
         .attr({
           style: "grid-column:5",
         })
-        .html(_("search_wholeWord")),
+        .html(`<label for="searchWord">${_("search_wholeWord")}</label>`),
     );
     $searchGrid.append(
       $("<div>")
@@ -113,7 +113,7 @@ ipcRenderer.on(
         .attr({
           style: "grid-column:7",
         })
-        .html(_("search_withRegex")),
+        .html(`<label for="searchRegex">${_("search_withRegex")}</label>`),
     );
 
     // buttons

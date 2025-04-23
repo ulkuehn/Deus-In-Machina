@@ -478,9 +478,9 @@ function infoTab(path) {
   );
   let html = "";
   for (let [mod, tags] of Object.entries(TreeDecoration.modTags)) {
-    html += `<span style="margin-right:20px;"><input id="${mod}" class="form-check-input" type="checkbox"${
+    html += `<span style="margin-right:20px;"><label><input id="${mod}" class="form-check-input" type="checkbox"${
       theStyledObject.decoration[mod] ? " checked" : ""
-    }> ${tags[0]}${_(mod)}${tags[1]}</span>`;
+    }> ${tags[0]}${_(mod)}${tags[1]}</label></span>`;
   }
   $grid.append(
     $("<div>")
@@ -802,7 +802,9 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
             .attr({
               style: "grid-column:2/span 1; place-self:center start;",
             })
-            .html(_(control.name)),
+            .html(
+              `<label for="${control.name}Switch">${_(control.name)}</label>`,
+            ),
         );
         control.controls.forEach((ctrl) => {
           // selects
@@ -908,7 +910,9 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
             .attr({
               style: "grid-column:2/span 1; place-self:center start;",
             })
-            .html(_(control.name)),
+            .html(
+              `<label for="${control.name}Switch">${_(control.name)}</label>`,
+            ),
         );
         $grid.append(
           $("<div>")
@@ -936,7 +940,7 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
             .attr({
               style: "grid-column:2/span 1; place-self:center start;",
             })
-            .html(_(control.name)),
+            .html(`<label for="${control.name}Switch">${_(control.name)}</label>`),
         );
         html = `<select class="form-select form-select-sm" id="${control.name}Field" onchange="restyleSample();">`;
         control.values.forEach((value) => {
@@ -967,7 +971,7 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
             .attr({
               style: "grid-column:2/span 1; place-self:center start;",
             })
-            .html(_(control.name)),
+            .html(`<label for="${control.name}Switch">${_(control.name)}</label>`),
         );
         html = `<select class="form-select form-select-sm" id="${
           control.name
@@ -1009,7 +1013,7 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
             .attr({
               style: "grid-column:2/span 1; place-self:center start;",
             })
-            .html(_(control.name)),
+            .html(`<label for="${control.name}Switch">${_(control.name)}</label>`),
         );
         $grid.append(
           $("<div>")
@@ -1039,7 +1043,7 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
             .attr({
               style: "grid-column:2/span 1; place-self:center start;",
             })
-            .html(_(control.name)),
+            .html(`<label for="${control.name}Switch">${_(control.name)}</label>`),
         );
         $grid.append(
           $("<div>")
@@ -1103,7 +1107,7 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
  */
 function fillOverview(nonSiblings, objects, files) {
   let $headerButton = $(
-    `<div class="form-check form-switch"><input class="form-check-input" id="overviewHeader" type="checkbox"> ${_("objectWindow_showHeader")}</div>`,
+    `<div class="form-check form-switch"><label><input class="form-check-input" id="overviewHeader" type="checkbox"> ${_("objectWindow_showHeader")}</label></div>`,
   );
   $headerButton.on("change", () =>
     $(".section-header").css(
@@ -1112,7 +1116,7 @@ function fillOverview(nonSiblings, objects, files) {
     ),
   );
   let $emptyButton = $(
-    `<div class="form-check form-switch"><input class="form-check-input" id="overviewEmpty" type="checkbox"> ${_("objectWindow_showEmpty")}</div>`,
+    `<div class="form-check form-switch"><label><input class="form-check-input" id="overviewEmpty" type="checkbox"> ${_("objectWindow_showEmpty")}</label></div>`,
   );
   $emptyButton.on("change", () =>
     $(".overview-empty").css(
@@ -1121,7 +1125,7 @@ function fillOverview(nonSiblings, objects, files) {
     ),
   );
   let $parentsButton = $(
-    `<div class="form-check form-switch"><input class="form-check-input" id="overviewParents" type="checkbox"> ${_("objectWindow_showParents")}</div>`,
+    `<div class="form-check form-switch"><label><input class="form-check-input" id="overviewParents" type="checkbox"> ${_("objectWindow_showParents")}</label></div>`,
   );
   $parentsButton.on("change", () => {
     $(`#overview_${theStyledObject.id}`)
@@ -1129,7 +1133,7 @@ function fillOverview(nonSiblings, objects, files) {
       .css("display", $("#overviewParents").prop("checked") ? "grid" : "none");
   });
   let $childrenButton = $(
-    `<div class="form-check form-switch"><input class="form-check-input" id="overviewChildren" type="checkbox"> ${_("objectWindow_showChildren")}</div>`,
+    `<div class="form-check form-switch"><label><input class="form-check-input" id="overviewChildren" type="checkbox"> ${_("objectWindow_showChildren")}</label></div>`,
   );
   $childrenButton.on("change", () => {
     $(`#overview_${theStyledObject.id}`)

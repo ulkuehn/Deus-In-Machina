@@ -170,7 +170,7 @@ ipcRenderer.on(
           Object.keys(theCollections).forEach((id) => {
             $ul.append(
               $("<li>").html(
-                `<input class="form-check-input" type="checkbox" id="collection${id}" onclick="interdependencies()"></input> <span title="${_(
+                `<label><input class="form-check-input" type="checkbox" id="collection${id}" onclick="interdependencies()"></input> <span title="${_(
                   "importWindow_created",
                   {
                     time: new Timestamp(theCollections[id][5]).toLocalString(
@@ -181,7 +181,7 @@ ipcRenderer.on(
                   time: new Timestamp(theCollections[id][6]).toLocalString(
                     theSettings.dateTimeFormatLong,
                   ),
-                })}">${theCollections[id][3] ? '<i class="fas fa-magnifying-glass"></i> ' : ""}${theCollections[id][1]}</span>`,
+                })}">${theCollections[id][3] ? '<i class="fas fa-magnifying-glass"></i> ' : ""}${theCollections[id][1]}</span></label>`,
               ),
             );
           });
@@ -281,7 +281,7 @@ ipcRenderer.on(
           theWords.forEach((word) => {
             $ul.append(
               $("<li>").html(
-                `<input class="form-check-input" type="checkbox" id="word${i}"></input> ${word}`,
+                `<label><input class="form-check-input" type="checkbox" id="word${i}"></input> ${word}</label>`,
               ),
             );
             i += 1;
@@ -316,7 +316,7 @@ ipcRenderer.on(
         Object.keys(theExportProfiles).forEach((id) => {
           $ul.append(
             $("<li>").html(
-              `<input class="form-check-input" type="checkbox" id="export${id}" onclick="interdependencies()"></input> <span title="${_(
+              `<label><input class="form-check-input" type="checkbox" id="export${id}" onclick="interdependencies()"></input> <span title="${_(
                 "importWindow_created",
                 {
                   time: new Timestamp(
@@ -327,7 +327,7 @@ ipcRenderer.on(
                 time: new Timestamp(
                   theExportProfiles[id].profileChanges,
                 ).toLocalString(theSettings.dateTimeFormatLong),
-              })}">${theExportProfiles[id].profileName}</span>`,
+              })}">${theExportProfiles[id].profileName}</span></label>`,
             ),
           );
         });
@@ -368,9 +368,9 @@ ipcRenderer.on(
               }
               $ul.append(
                 $("<li>").html(
-                  `<input class="form-check-input" type="checkbox" id="setting${i}"></input> ${_(
+                  `<label><input class="form-check-input" type="checkbox" id="setting${i}"></input> ${_(
                     tab.tab,
-                  )}`,
+                  )}</label>`,
                 ),
               );
             }
@@ -470,7 +470,7 @@ function showTextTree(elem, tree, level) {
   tree.forEach((node) => {
     if (!(node.id in textStates)) textStates[node.id] = [false, false];
     elem.append(
-      $("<li>").append(
+      $("<li>").append($("<label>").append(
         $("<input>").attr({
           class: "form-check-input",
           type: "checkbox",
@@ -494,7 +494,7 @@ function showTextTree(elem, tree, level) {
             })}`,
           )
           .text(" " + theTexts[node.id][1]),
-      ),
+      )),
     );
     if (node.children.length) {
       showTextTree(elem, node.children, level + 1);
@@ -513,7 +513,7 @@ function showObjectTree(elem, tree, level) {
   tree.forEach((node) => {
     if (!(node.id in objectStates)) objectStates[node.id] = [false, false];
     elem.append(
-      $("<li>").append(
+      $("<li>").append($("<label>").append(
         $("<input>").attr({
           class: "form-check-input",
           type: "checkbox",
@@ -537,7 +537,7 @@ function showObjectTree(elem, tree, level) {
             })}`,
           )
           .text(" " + theObjects[node.id][1]),
-      ),
+      )),
     );
     if (node.children.length) {
       showObjectTree(elem, node.children, level + 1);
@@ -553,6 +553,7 @@ function showFormats() {
         $("<input>").attr({
           class: "form-check-input",
           type: "checkbox",
+          id: `format${id}`,
           checked: formatStates[id][0] || formatStates[id][1],
           disabled: formatStates[id][1],
           onchange: `formatStates["${id}"][0]=$(this).prop("checked");`,
@@ -642,10 +643,7 @@ function interdependencies() {
       let formats = {};
       Exporter.settings.forEach((tab) => {
         tab.settings.forEach((setting) => {
-          if (
-            setting.type == "editor" &&
-            theExportProfiles[id][setting.name]
-          ) {
+          if (setting.type == "editor" && theExportProfiles[id][setting.name]) {
             theExportProfiles[id][setting.name].ops.forEach((op) => {
               if (op.insert && op.attributes) {
                 Object.keys(op.attributes).forEach((att) => {
@@ -713,7 +711,7 @@ function itemControls(prefix, clearID = null, clearText = "") {
       )}"><i class="fa-solid fa-check-double"></i> <i class="fa-solid fa-minus"></i></button>
             ${
               clearID
-                ? `<input class="form-check-input" type="checkbox" id="${clearID}" style="margin:7px 0 0 20px"></input> ${clearText}`
+                ? `<label><input class="form-check-input" type="checkbox" id="${clearID}" style="margin:7px 0 0 20px"></input> ${clearText}</label>`
                 : ``
             }`,
     );
@@ -723,15 +721,18 @@ function itemControls(prefix, clearID = null, clearText = "") {
  * select or deselect all items in a named group
  *
  * @param {String} prefix name of item group
- * @param {Boolean} on select (true) or deselect (false)
+ * @param {Boolean} onOff select (true) or deselect (false)
  */
-function changeAll(prefix, on) {
+function changeAll(prefix, onOff) {
   $(`li input[id^="${prefix}"]`).each(function (index, element) {
-    $(this).prop("checked", on);
+    $(element).prop("checked", onOff);
     if (prefix == "text")
-      textStates[element.id.substring(prefix.length)][0] = on;
+      textStates[element.id.substring(prefix.length)][0] = onOff;
     if (prefix == "object")
-      objectStates[element.id.substring(prefix.length)][0] = on;  });
+      objectStates[element.id.substring(prefix.length)][0] = onOff;
+    if (prefix == "format")
+      formatStates[element.id.substring(prefix.length)][0] = onOff;
+  });
   interdependencies();
 }
 
@@ -894,6 +895,16 @@ function doTransfer() {
       }
     });
   });
+  // in texts adjust refs to exported objects and remove refs to objects that are not exported
+  texts.flat(Infinity).forEach((text) => {
+    let refs = text.text[5];
+    Object.keys(refs).forEach((id) => {
+      if (id in mapObjectsIDs) {
+        refs[mapObjectsIDs[id]] = refs[id];
+      }
+      delete refs[id];
+    });
+  });
   // transfer texts
   if (Object.keys(texts).length) {
     ipcRenderer.invoke("mainProcess_transferTexts", texts);
@@ -922,6 +933,7 @@ function doTransfer() {
   }
 
   // collect formats - format ids are not changed to keep them unique - no need to import the same format twice
+  // standard format is never automatically checked, but when checked manually it will substitute the current standard format
   let formats = {};
   Object.keys(formatStates).forEach((formatID) => {
     if (formatStates[formatID][0] || formatStates[formatID][1]) {
