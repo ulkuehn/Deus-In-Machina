@@ -98,7 +98,6 @@ issue and works properly.
 ## Future Enhancements
 
 There is a lot on my to-do and wish list, including:
-- Exporting to DOCX format
 - Support for tables in text processor
 - Support for notes/comments in text processor
 - Writing goals and statistics
