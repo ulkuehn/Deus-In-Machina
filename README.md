@@ -35,7 +35,7 @@ See DIM's webpage linked above.
 Make sure you have git (install from github.com), node (install from node.js) and python 3.10 (from python.org - do not use a higher version than 3.10). You also need Visual Studio (from visualstudio.microsoft.com, Community edition will do fine), having the "Desktop development with C++" workload (include Windows 10 or 11 SDK, MSVC, and C++ CMake Tools). Next, clone the repo, install the dependencies and run:
 
 ```
-git clone https://github.com/ulkuehn/DeusInMachina.git
+git clone https://github.com/ulkuehn/Deus-In-Machina.git
 npm install
 npm run dim       <-- run directly from repo
 npm run windows   <-- create an installable exe file in dist folder
@@ -48,7 +48,7 @@ Make sure you have git and node. You also need node-gyp and a supported python v
 Clone the repo, install the dependencies and run:
 
 ```
-git clone https://github.com/ulkuehn/DeusInMachina.git
+git clone https://github.com/ulkuehn/Deus-In-Machina.git
 npm install
 npm run dim     <-- run directly from repo
 npm run linux   <-- create AppImage and deb packages in dist folder
