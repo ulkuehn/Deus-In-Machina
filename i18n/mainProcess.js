@@ -125,6 +125,7 @@ const translationMainProcess = {
       ...translationLanguages.en,
       ...translationWindowTitles.en,
       ...translationObjectMenu.en,
+      ...translationTextMenu.en,
 
       // splash
       mainProcess_version: "Version %{version} (%{scheme})",

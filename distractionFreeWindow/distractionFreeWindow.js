@@ -124,7 +124,8 @@ ipcRenderer.on(
       $("#dfw-outer").css("height", "100%");
       if (settings.focusEditorAnimation) {
         $("#dfw-outer").css("animation-name", "dfw-on");
-      }
+        $("#dfw-outer").on("animationend", () => showcaseBars());
+      } else showcaseBars();
     });
 
     let $inner = $("<div>").attr({
@@ -1004,9 +1005,8 @@ ipcRenderer.on(
         adjustSearch();
       }
     });
-    $("#searchText").on("keydown", (e) =>{
-      if (e.code == "Enter")
-        setTimeout(() => search(), 250);
+    $("#searchText").on("keydown", (e) => {
+      if (e.code == "Enter") setTimeout(() => search(), 250);
     });
     $("#searchNext").on("click", () => {
       search();
@@ -1292,6 +1292,31 @@ ipcRenderer.on(
     });
   },
 );
+
+/**
+ * display dockable bars for a short time upon window open
+ */
+function showcaseBars() {
+  setTimeout(() => {
+    $("#MB").show();
+    $("#MB").css("display", "grid");
+    $("#MBOverlay").hide();
+    $("#SB").show();
+    $("#SB").css("display", "grid");
+    $("#SBOverlay").hide();
+    $("#SNDB").show();
+    $("#SNDB").css("display", "grid");
+    $("#SNDBOverlay").hide();
+    setTimeout(() => {
+      $("#MB").hide();
+      $("#MBOverlay").show();
+      $("#SB").hide();
+      $("#SBOverlay").show();
+      $("#SNDB").hide();
+      $("#SNDBOverlay").show();
+    }, 2500);
+  }, 500);
+}
 
 /**
  * (un)set bold
