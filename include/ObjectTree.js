@@ -874,13 +874,15 @@ class ObjectTree {
   /**
    * delete single object, moving children one level up
    */
-  deleteObject() {
-    if (
-      this.#treeDiv.jstree().get_selected() != null &&
-      this.#treeDiv.jstree().get_selected().length == 1
-    ) {
-      this.#nodeDelete(this.#treeDiv.jstree().get_selected(true)[0]);
-    }
+  deleteObjects() {
+    let ids = this.#allNodesDepthFirst("#").filter((id) =>
+      this.#treeDiv.jstree().is_selected(id),
+    );
+    this.#deleteConfirm(ids).then(() =>
+      ids.forEach((id) =>
+        this.#nodeDelete(this.#treeDiv.jstree().get_node(id)),
+      ),
+    );
   }
 
   /**
@@ -1264,39 +1266,50 @@ class ObjectTree {
   }
 
   /**
-   * delete selected node
+   * user dialog to confirm object deletion
    *
-   * @param {DOMNode} selected
+   * @param {String[]} ids
+   * @returns Promise
    */
-  #nodeDelete(selected) {
-    ipcRenderer
-      .invoke("mainProcess_yesNoDialog", [
-        _("objects_deleteTitle"),
-        _("objects_deleteMessage", {
-          name: this.#objects[selected.id].name,
-        }) +
-          (selected.children.length && this.#objects[selected.id].scheme.length
-            ? _("objects_deleteWarning")
-            : ""),
-        false,
-      ])
-      .then((result) => {
-        if (result == 1) {
-          if (this.#objects[selected.id].inDB) {
-            this.#deletedIDs.push(selected.id);
-          }
-          theTextTree.removeAttributes([selected.id], false);
-          delete this.#objects[selected.id];
-          this.#removeID(selected.id);
-
-          let children = [...selected.children];
-          children.forEach((c) => {
-            let child = this.#treeDiv.jstree().get_node(c);
-            this.#treeDiv.jstree().move_node(child, selected, "before");
+  #deleteConfirm(ids) {
+    return new Promise((resolve) => {
+      if (ids.length)
+        ipcRenderer
+          .invoke("mainProcess_yesNoDialog", [
+            _("objects_deleteTitle"),
+            _("objects_deleteMessage", ids.length, {
+              name1: this.#objects[ids[0]].name,
+              name2: ids.length > 1 ? this.#objects[ids[1]].name : "",
+              name3: ids.length > 2 ? this.#objects[ids[2]].name : "",
+              objects: ids.length - 2,
+            }),
+            false,
+          ])
+          .then((result) => {
+            if (result == 1) resolve();
           });
-          this.#treeDiv.jstree().delete_node(selected);
-        }
-      });
+    });
+  }
+
+  /**
+   * delete a node
+   *
+   * @param {DOMNode} node
+   */
+  #nodeDelete(node) {
+    if (this.#objects[node.id].inDB) {
+      this.#deletedIDs.push(node.id);
+    }
+    theTextTree.removeAttributes([node.id], false);
+    delete this.#objects[node.id];
+    this.#removeID(node.id);
+
+    let children = [...node.children];
+    children.forEach((c) => {
+      let child = this.#treeDiv.jstree().get_node(c);
+      this.#treeDiv.jstree().move_node(child, node, "before");
+    });
+    this.#treeDiv.jstree().delete_node(node);
   }
 
   /**
@@ -1773,7 +1786,9 @@ class ObjectTree {
     items.delete = {
       name: _("objects_menuDelete"),
       callback: () => {
-        this.#nodeDelete(node);
+        this.#deleteConfirm([node.id]).then(() => {
+          this.#nodeDelete(node);
+        });
       },
     };
     if (!compact) {

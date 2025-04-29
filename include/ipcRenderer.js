@@ -1121,23 +1121,13 @@ ipcRenderer.on("rendererProcess_textTreeCheckHavingObjects", () => {
 });
 
 /**
- * delete selected text
+ * delete selected texts
  */
-ipcRenderer.on("rendererProcess_deleteText", () => {
+ipcRenderer.on("rendererProcess_deleteTexts", () => {
   ipcRenderer.invoke("mainProcess_loggingVerbose", [
-    "rendererProcess_deleteText",
+    "rendererProcess_deleteTexts",
   ]);
-  theTextTree.deleteText();
-});
-
-/**
- * delete selected branch
- */
-ipcRenderer.on("rendererProcess_textTreeDeleteBranch", () => {
-  ipcRenderer.invoke("mainProcess_loggingVerbose", [
-    "rendererProcess_textTreeDeleteBranch",
-  ]);
-  theTextTree.deleteBranch();
+  theTextTree.deleteTexts();
 });
 
 /**
@@ -1185,21 +1175,11 @@ ipcRenderer.on("rendererProcess_newObject", () => {
 /**
  * delete selected object
  */
-ipcRenderer.on("rendererProcess_deleteObject", () => {
+ipcRenderer.on("rendererProcess_deleteObjects", () => {
   ipcRenderer.invoke("mainProcess_loggingVerbose", [
-    "rendererProcess_deleteObject",
+    "rendererProcess_deleteObjects",
   ]);
-  theObjectTree.deleteObject();
-});
-
-/**
- * delete selected object branch
- */
-ipcRenderer.on("rendererProcess_objectTreeDeleteBranch", () => {
-  ipcRenderer.invoke("mainProcess_loggingVerbose", [
-    "rendererProcess_objectTreeDeleteBranch",
-  ]);
-  theObjectTree.deleteBranch();
+  theObjectTree.deleteObjects();
 });
 
 /**

@@ -720,27 +720,18 @@ class TextTree {
   }
 
   /**
-   * delete (single) selected text
+   * delete selected texts
    */
-  deleteText() {
-    if (
-      this.#treeDiv.jstree().get_selected() != null &&
-      this.#treeDiv.jstree().get_selected().length == 1
-    ) {
-      this.#nodeDelete(this.#treeDiv.jstree().get_selected(true)[0]);
-    }
-  }
-
-  /**
-   * delete (single) selected branch
-   */
-  deleteBranch() {
-    if (
-      this.#treeDiv.jstree().get_selected() != null &&
-      this.#treeDiv.jstree().get_selected().length == 1
-    ) {
-      this.#branchDelete(this.#treeDiv.jstree().get_selected(true)[0]);
-    }
+  deleteTexts() {
+    let ids = this.#allNodesDepthFirst("#").filter((id) =>
+      this.#treeDiv.jstree().is_selected(id),
+    );
+    this.#deleteConfirm(ids).then((e) =>
+      ids.forEach((id) => {
+        this.#treeDiv.jstree().uncheck_node(id);
+        this.#nodeDelete(this.#treeDiv.jstree().get_node(id));
+      }),
+    );
   }
 
   /**
@@ -1198,33 +1189,48 @@ class TextTree {
   }
 
   /**
-   * delete selected node
+   * user dialog to confirm text deletion
    *
-   * @param {DOMNode} selected
+   * @param {String[]} ids
+   * @returns Promise
+   */
+  #deleteConfirm(ids) {
+    return new Promise((resolve) => {
+      if (ids.length)
+        ipcRenderer
+          .invoke("mainProcess_yesNoDialog", [
+            _("texts_deleteTitle"),
+            _("texts_deleteMessage", ids.length, {
+              name1: this.#texts[ids[0]].name,
+              name2: ids.length > 1 ? this.#texts[ids[1]].name : "",
+              name3: ids.length > 2 ? this.#texts[ids[2]].name : "",
+              texts: ids.length - 2,
+            }),
+            false,
+          ])
+          .then((result) => {
+            if (result == 1) resolve();
+          });
+    });
+  }
+
+  /**
+   * delete a node
+   *
+   * @param {DOMNode} node
    */
   #nodeDelete(node) {
-    ipcRenderer
-      .invoke("mainProcess_yesNoDialog", [
-        _("texts_deleteTitle"),
-        _("texts_deleteMessage", { name: this.#texts[node.id].name }),
-        false,
-      ])
-      .then((result) => {
-        if (result == 1) {
-          this.#checkEvent = false;
-
-          this.#textDelete(node.id);
-          let children = [...node.children];
-          children.forEach((c) => {
-            let child = this.#treeDiv.jstree().get_node(c);
-            this.#treeDiv.jstree().move_node(child, node, "before");
-          });
-          this.#treeDiv.jstree().delete_node(node);
-          theTextCollectionTree.deleteTexts(node.id);
-          theTextEditor.showTextsInEditor(this.getChecked());
-          this.#checkEvent = true;
-        }
-      });
+    this.#checkEvent = false;
+    this.#textDelete(node.id);
+    let children = [...node.children];
+    children.forEach((c) => {
+      let child = this.#treeDiv.jstree().get_node(c);
+      this.#treeDiv.jstree().move_node(child, node, "before");
+    });
+    this.#treeDiv.jstree().delete_node(node);
+    theTextCollectionTree.deleteTexts(node.id);
+    theTextEditor.showTextsInEditor(this.getChecked());
+    this.#checkEvent = true;
   }
 
   /**
@@ -1233,9 +1239,7 @@ class TextTree {
    * @param {DOMNode} node
    */
   #branchDelete(node) {
-    if (node.children.length == 0) {
-      this.#nodeDelete(node);
-    } else {
+    if (node.children.length) {
       ipcRenderer
         .invoke("mainProcess_yesNoDialog", [
           _("texts_deleteBranchTitle"),
@@ -1781,7 +1785,9 @@ class TextTree {
     items.delete = {
       name: _("texts_contextMenuDeleteText"),
       callback: () => {
-        this.#nodeDelete(node);
+        this.#deleteConfirm([node.id]).then(() => {
+          this.#nodeDelete(node);
+        });
       },
     };
     if (!compact) {

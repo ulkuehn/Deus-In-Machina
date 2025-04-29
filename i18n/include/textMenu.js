@@ -10,8 +10,7 @@ const translationTextMenu = {
   de: {
     textMenu_menu: "Texte",
     textMenu_newText: "Neuen Text einfügen",
-    textMenu_deleteText: "Ausgewählten Text löschen",
-    textMenu_deleteBranch: "Ausgewählten Zweig löschen",
+    textMenu_deleteTexts: "Ausgewählte Texte löschen",
     textMenu_joinTexts: "Ausgewählte Texte nahtlos verbinden",
     textMenu_joinTextsSep: "Ausgewählte Texte verbinden",
     textMenu_expandAll: "Alles aufklappen",
@@ -35,8 +34,7 @@ const translationTextMenu = {
   en: {
     textMenu_menu: "Texts",
     textMenu_newText: "New Text",
-    textMenu_deleteText: "Delete Text",
-    textMenu_deleteBranch: "Delete Branch",
+    textMenu_deleteTexts: "Delete selected Texts",
     textMenu_joinTexts: "Join selected Texts seamlessly",
     textMenu_joinTextsSep: "Join selected Texts",
     textMenu_expandAll: "Expand all",

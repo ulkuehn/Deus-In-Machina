@@ -18,8 +18,13 @@ const translationTexts = {
     texts_status: "Status: %{text}",
     texts_type: "Typ: %{text}",
     texts_user: "%{text}",
-    texts_deleteTitle: "Text löschen",
-    texts_deleteMessage: '"%{name}" wirklich löschen?',
+    texts_deleteTitle: "Text(e) löschen",
+    texts_deleteMessage: [
+      [1, 1, '"%{name1}" wirklich löschen?'],
+      [2, 2, '"%{name1}" und "%{name2}" wirklich löschen?'],
+      [3, 3, '"%{name1}", "%{name2}" und "%{name3}" wirklich löschen?'],
+      [4, null, '"%{name1}", "%{name2}" und %{texts} weitere Texte wirklich löschen?'],
+    ],
     texts_deleteBranchTitle: "Zweig löschen",
     texts_deleteBranchMessage:
       '"%{name}" und alle untergeordneten Texte wirklich löschen?',
@@ -80,7 +85,7 @@ const translationTexts = {
     texts_status: "Status: %{text}",
     texts_type: "Type: %{text}",
     texts_user: "%{text}",
-    texts_deleteTitle: "Delete Text ",
+    texts_deleteTitle: "Delete Text(s)",
     texts_deleteMessage: 'Really delete "%{name}"?',
     texts_deleteBranchTitle: "Delete Branch",
     texts_deleteBranchMessage:

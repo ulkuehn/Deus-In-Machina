@@ -1298,23 +1298,19 @@ ipcRenderer.on(
  */
 function showcaseBars() {
   setTimeout(() => {
-    $("#MB").show();
-    $("#MB").css("display", "grid");
-    $("#MBOverlay").hide();
-    $("#SB").show();
-    $("#SB").css("display", "grid");
-    $("#SBOverlay").hide();
-    $("#SNDB").show();
-    $("#SNDB").css("display", "grid");
-    $("#SNDBOverlay").hide();
-    setTimeout(() => {
-      $("#MB").hide();
-      $("#MBOverlay").show();
-      $("#SB").hide();
-      $("#SBOverlay").show();
-      $("#SNDB").hide();
-      $("#SNDBOverlay").show();
-    }, 2500);
+    ["MB", "SB", "SNDB"].forEach((n) => {
+      $(`#${n}`).show();
+      $(`#${n}`).css("display", "grid");
+      $(`#${n}Overlay`).hide();
+    });
+    setTimeout(
+      () =>
+        ["MB", "SB", "SNDB"].forEach((n) => {
+          $(`#${n}`).hide();
+          $(`#${n}Overlay`).show();
+        }),
+      2000,
+    );
   }, 500);
 }
 

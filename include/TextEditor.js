@@ -1389,7 +1389,7 @@ class TextEditor {
   setStatusBar(textID) {
     let settings = theSettings.effectiveSettings();
 
-    if (textID) {
+    if (textID && theTextTree.getText(textID)) {
       $(".SBseparator").css("visibility", "visible");
       $("#SBtext").html(
         `<span style="padding-left:7px;">${_("editorBars_textPath", {

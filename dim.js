@@ -536,19 +536,10 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("textMenu_deleteText"),
+          label: _("textMenu_deleteTexts"),
           enabled: fullTextMenu,
           click(item, focusedWindow) {
-            focusedWindow.webContents.send("rendererProcess_deleteText");
-          },
-        },
-        {
-          label: _("textMenu_deleteBranch"),
-          enabled: fullTextMenu,
-          click(item, focusedWindow) {
-            focusedWindow.webContents.send(
-              "rendererProcess_textTreeDeleteBranch",
-            );
+            focusedWindow.webContents.send("rendererProcess_deleteTexts");
           },
         },
         {
@@ -730,17 +721,9 @@ function menuList(left, right, bottom) {
           },
         },
         {
-          label: _("objectMenu_deleteObject"),
+          label: _("objectMenu_deleteObjects"),
           click(item, focusedWindow) {
-            focusedWindow.webContents.send("rendererProcess_deleteObject");
-          },
-        },
-        {
-          label: _("objectMenu_deleteBranch"),
-          click(item, focusedWindow) {
-            focusedWindow.webContents.send(
-              "rendererProcess_objectTreeDeleteBranch",
-            );
+            focusedWindow.webContents.send("rendererProcess_deleteObjects");
           },
         },
         {

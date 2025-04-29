@@ -12,8 +12,14 @@ const translationObjects = {
       "Bereich für Objekte<br><br>in diesem Projekt sind noch keine Objekte vorhanden",
     objects_empty: "ohne Textbezug",
     objects_newObject: "Objekt %{count}",
-    objects_deleteTitle: "Objekt löschen",
-    objects_deleteMessage: '"%{name}" wirklich löschen?',
+    objects_deleteTitle: "Objekt(e) löschen",
+    objects_deleteMessage:
+      [
+      [1, 1, '"%{name1}" wirklich löschen?'],
+      [2, 2, '"%{name1}" und "%{name2}" wirklich löschen?'],
+      [3, 3, '"%{name1}", "%{name2}" und "%{name3}" wirklich löschen?'],
+      [4, null, '"%{name1}", "%{name2}" und %{objects} weitere Objekte wirklich löschen?'],
+    ],
     objects_deleteWarning:
       "\n\nACHTUNG: Die Objekte in diesem Zweig verlieren alle Eigenschaften, die auf dem Schema dieses Objekts beruhen!",
     objects_deleteBranchTitle: "Zweig löschen",
