@@ -74,6 +74,7 @@ const translationMainProcess = {
       // help menu
       mainProcess_menuHelp: "Hilfe",
       mainProcess_menuHelpGuide: "Rundgang",
+      mainProcess_menuHelpWeb: "%{name}-Website",
       mainProcess_menuHelpAbout: "Über %{name}",
 
       // debug and test menu
@@ -179,6 +180,7 @@ const translationMainProcess = {
       // help menu
       mainProcess_menuHelp: "Help",
       mainProcess_menuHelpGuide: "Guided Tour",
+      mainProcess_menuHelpWeb: "%{name} Website",
       mainProcess_menuHelpAbout: "About %{name}",
 
       // debug and test menu

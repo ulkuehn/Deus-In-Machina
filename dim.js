@@ -689,7 +689,10 @@ function menuList(left, right, bottom) {
         {
           label: _("textMenu_collectionFromTexts"),
           click(item, focusedWindow) {
-            focusedWindow.webContents.send("rendererProcess_newTextCollection",true);
+            focusedWindow.webContents.send(
+              "rendererProcess_newTextCollection",
+              true,
+            );
           },
         },
       ],
@@ -955,6 +958,14 @@ function menuList(left, right, bottom) {
             // shut down app menu to inhibit user interference while in tour -- this must be done async to avoid cutting the branch we are sitting on, i.e. this very function
             setTimeout(() => Menu.setApplicationMenu(null), 0);
             focusedWindow.webContents.send("rendererProcess_startGuidedTour");
+          },
+        },
+        {
+          label: _("mainProcess_menuHelpWeb", {
+            name: theProgramShortName,
+          }),
+          click() {
+            shell.openExternal("https://ulkuehn.github.io/dim");
           },
         },
         {
