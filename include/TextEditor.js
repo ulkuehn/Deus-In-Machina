@@ -1121,6 +1121,19 @@ class TextEditor {
   }
 
   /**
+   * remove focus from editor provided focus is on a text with given id
+   * 
+   * @param {String} textID 
+   */
+  unfocus(textID) {
+    if (this.#selectedEditor == textID) this.#selectedEditor = null;
+    if (this.#selectionChangeTimers[textID]) {
+      clearTimeout(this.#selectionChangeTimers[textID]);
+    }
+    this.unsetStatusBar();
+  }
+
+  /**
    * show texts with given ids in TextEditor; this includes
    * - keeping ids that are already in editor
    * - deleting ids no longer needed

@@ -726,12 +726,15 @@ class TextTree {
     let ids = this.#allNodesDepthFirst("#").filter((id) =>
       this.#treeDiv.jstree().is_selected(id),
     );
-    this.#deleteConfirm(ids).then((e) =>
+    this.#deleteConfirm(ids).then(() => {
+      this.#checkEvent=false
       ids.forEach((id) => {
         this.#treeDiv.jstree().uncheck_node(id);
         this.#nodeDelete(this.#treeDiv.jstree().get_node(id));
-      }),
-    );
+      });
+      this.#checkEvent = true;
+      theTextEditor.showTextsInEditor(this.getChecked());
+    });
   }
 
   /**
@@ -818,8 +821,10 @@ class TextTree {
     }
     // scrollIntoViewIfNeeded non standard, but perfect here and better than scrollIntoView
     // see https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoViewIfNeeded
-    $(`#TT #${scrollTo}_anchor`)[0].scrollIntoViewIfNeeded(true);
-    $("#TT").scrollLeft(0);
+    if ($(`#TT #${scrollTo}_anchor`)[0]) {
+      $(`#TT #${scrollTo}_anchor`)[0].scrollIntoViewIfNeeded(true);
+      $("#TT").scrollLeft(0);
+    }
   }
 
   /**
@@ -1176,6 +1181,7 @@ class TextTree {
    * delete a text and update objects
    */
   #textDelete(id) {
+    theTextEditor.unfocus(id);
     if (this.#texts[id].inDB) {
       this.#deletedIDs.push(id);
     }
@@ -1229,7 +1235,6 @@ class TextTree {
     });
     this.#treeDiv.jstree().delete_node(node);
     theTextCollectionTree.deleteTexts(node.id);
-    theTextEditor.showTextsInEditor(this.getChecked());
     this.#checkEvent = true;
   }
 
@@ -1787,6 +1792,7 @@ class TextTree {
       callback: () => {
         this.#deleteConfirm([node.id]).then(() => {
           this.#nodeDelete(node);
+          theTextEditor.showTextsInEditor(this.getChecked());
         });
       },
     };
