@@ -172,7 +172,7 @@ app.whenReady().then(() => {
   // load state info
   getGlobalState();
   // set the app's default ui language (may be orverriden by global state)
-  theLanguage = app.getLocale().toLowerCase().split("-")[0];
+  theLanguage = app.getSystemLocale().toLowerCase().split("-")[0];
   if (!Languages.languages.includes(theLanguage)) {
     theLanguage = Languages.languages[0]; // system default
   }
