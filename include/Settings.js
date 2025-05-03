@@ -687,7 +687,12 @@ class Settings {
           name: "focusEditorWallpaper",
           height: "200px",
           default:
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2NoaGj4DwAFhAKAEgUrPQAAAABJRU5ErkJggg==", // 1x1 pixel gray
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2NoaGj4DwAFhAKAEgUrPQAAAABJRU5ErkJggg==", // 1x1 pixel dark gray
+        },
+        {
+          type: "check",
+          name: "focusEditorWallpaperCover",
+          default: true,
         },
         {
           type: "range",
@@ -705,7 +710,12 @@ class Settings {
           name: "focusEditorBackground",
           height: "200px",
           default:
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2O4efPofwAIfQN3mgQNkgAAAABJRU5ErkJggg==", // 1x1 pixel yellowish
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAA1JREFUCNdj+P//3X8ACdkD7NjYFjkAAAAASUVORK5CYII=", // 1x1 pixel yellowish
+        },
+        {
+          type: "check",
+          name: "focusEditorBackgroundCover",
+          default: true,
         },
         {
           type: "range",

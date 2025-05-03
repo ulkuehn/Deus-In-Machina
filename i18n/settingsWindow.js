@@ -223,10 +223,14 @@ const translationSettingsWindow = {
         "Hintergrundfarbe der Menü- und der Statusleiste",
       "settingsWindow_focusEditorWallpaperColor": `Hintergrundfarbe des Fensters <i class="fas fa-info-circle" title="leere Farbe auswählen, um ein Hintergrundbild anzuzeigen"></i>`,
       "settingsWindow_focusEditorWallpaper": `Hintergrundbild des Fensters <i class="fas fa-info-circle" title="wird nur angezeigt, wenn keine Hintergrundfarbe ausgewählt ist"></i>`,
+      "settingsWindow_focusEditorWallpaperCover":
+        "Hintergrundbild auf Bildschirmbreite skalieren",
       "settingsWindow_focusEditorWallpaperOpacity":
         "Deckkraft des Fensterhintergrundbilds",
       "settingsWindow_focusEditorBackgroundColor": `Hintergrundfarbe des Editors <i class="fas fa-info-circle" title="leere Farbe auswählen, um ein Hintergrundbild anzuzeigen"></i>`,
       "settingsWindow_focusEditorBackground": `Hintergrundbild des Editors <i class="fas fa-info-circle" title="wird nur angezeigt, wenn keine Hintergrundfarbe ausgewählt ist"></i>`,
+      "settingsWindow_focusEditorBackgroundCover":
+        "Hintergrundbild auf Editorbreite skalieren",
       "settingsWindow_focusEditorBackgroundOpacity":
         "Deckkraft des Editorhintergrundbilds",
       "settingsWindow_focusEditorSounds": "Hintergrundgeräusche",
@@ -626,10 +630,14 @@ const translationSettingsWindow = {
         "Background Color of Menu and Status Bar",
       "settingsWindow_focusEditorWallpaperColor": `Background Color of Window <i class="fas fa-info-circle" title="choose empty color to enable background image"></i>`,
       "settingsWindow_focusEditorWallpaper": `Background Image of Window <i class="fas fa-info-circle" title="displayed if no background color is chosen"></i>`,
+      "settingsWindow_focusEditorWallpaperCover":
+        "Scale background image to screen width",
       "settingsWindow_focusEditorWallpaperOpacity":
         "Opacity of Window Background Image",
       "settingsWindow_focusEditorBackgroundColor": `Background Color of Editor Pane <i class="fas fa-info-circle" title="choose empty color to enable background image"></i>`,
       "settingsWindow_focusEditorBackground": `Background Image of Editor Pane <i class="fas fa-info-circle" title="displayed if no background color is chosen"></i>`,
+      "settingsWindow_focusEditorBackgroundCover":
+        "Scale background image to editor width",
       "settingsWindow_focusEditorBackgroundOpacity":
         "Opacity of Editor Background Image",
       "settingsWindow_focusEditorSounds": "Background Sounds",

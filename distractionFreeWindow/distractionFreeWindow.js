@@ -90,7 +90,9 @@ ipcRenderer.on(
                   (100 - settings.focusEditorWallpaperOpacity) / 100
                 }) 100%), url(${settings.focusEditorWallpaper})`,
               );
-              $("#dfw-inner").css("background-size", "cover");
+              $("#dfw-inner").css("background-repeat", "repeat");
+              if (settings.focusEditorWallpaperCover)
+                $("#dfw-inner").css("background-size", "100%");
               resolve();
             });
         } else {
@@ -111,8 +113,10 @@ ipcRenderer.on(
                   (100 - settings.focusEditorBackgroundOpacity) / 100
                 }) 100%), url(${settings.focusEditorBackground})`,
               );
-              $("#editor").css("background-size", "cover");
               $("#editor").css("background-attachment", "local");
+              $("#editor").css("background-repeat", "repeat");
+              if (settings.focusEditorBackgroundCover)
+                $("#editor").css("background-size", "100%");
               resolve();
             });
         } else {
