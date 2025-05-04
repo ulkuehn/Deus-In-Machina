@@ -911,7 +911,7 @@ class Project {
   /**
    * start a new autosave period
    *
-   * @param {Number} seconds no autosave if zero
+   * @param {Number} seconds -- no autosave if zero
    */
   autoSave(seconds) {
     if (this.#autoSaveTimer) {
@@ -1128,6 +1128,22 @@ class Project {
     theTextTree.reset();
     theTextCollectionTree.reset();
     setTimeout(() => this.undirty(), 500);
+  }
+
+  /**
+   * create a new simple project (one text, no object)
+   */
+  new() {
+    this.#doAutoSave = false;
+    this.#closeProject()
+      .then(() => {
+        this.#reset();
+        setTimeout(() => theTextTree.newText(false), 500);
+      })
+      .catch(() => {})
+      .finally(() => {
+        this.#doAutoSave = true;
+      });
   }
 
   /**

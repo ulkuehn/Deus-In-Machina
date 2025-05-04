@@ -27,6 +27,7 @@ const translationMainProcess = {
 
       // file menu
       mainProcess_menuFile: "Datei",
+      mainProcess_menuFileNew: "Neues Projekt",
       mainProcess_menuFileOpen: "Projekt öffnen ...",
       mainProcess_menuFileSave: "Projekt speichern",
       mainProcess_menuFileSaveAs: "Projekt speichern unter ...",
@@ -133,6 +134,7 @@ const translationMainProcess = {
 
       // file menu
       mainProcess_menuFile: "File",
+      mainProcess_menuFileNew: "New Project",
       mainProcess_menuFileOpen: "Open Project ...",
       mainProcess_menuFileSave: "Save Project",
       mainProcess_menuFileSaveAs: "Save Project as ...",

@@ -690,10 +690,11 @@ class TextTree {
 
   /**
    * add a new empty text to the tree
+   * 
+   * @param {Boolean} edit if true set to edit mode (user can change name immediately)
    */
-  newText() {
+  newText(edit = true) {
     if (!this.#editMode) {
-      this.#editMode = true;
       let tree = this.#treeDiv.jstree();
       let id = uuid();
       this.#texts[id] = new StyledText(
@@ -707,15 +708,18 @@ class TextTree {
         text: this.#texts[id].decoratedName(),
       });
 
-      tree.edit(id, this.#texts[id].name, (n, s, c) => {
-        this.#editMode = false;
-        this.#texts[id].name = tree.get_text(id);
-        tree.rename_node(id, this.#texts[id].decoratedName());
-        tree.check_node(id);
-        tree.deselect_all();
-        tree.select_node(id);
-        setTimeout(() => theTextEditor.blinkText(id), 250);
-      });
+      if (edit) {
+        this.#editMode = true;
+        tree.edit(id, this.#texts[id].name, (n, s, c) => {
+          this.#editMode = false;
+          this.#texts[id].name = tree.get_text(id);
+          tree.rename_node(id, this.#texts[id].decoratedName());
+          tree.check_node(id);
+          tree.deselect_all();
+          tree.select_node(id);
+          setTimeout(() => theTextEditor.blinkText(id), 250);
+        });
+      } else tree.check_node(id);
     }
   }
 
@@ -727,7 +731,7 @@ class TextTree {
       this.#treeDiv.jstree().is_selected(id),
     );
     this.#deleteConfirm(ids).then(() => {
-      this.#checkEvent=false
+      this.#checkEvent = false;
       ids.forEach((id) => {
         this.#treeDiv.jstree().uncheck_node(id);
         this.#nodeDelete(this.#treeDiv.jstree().get_node(id));

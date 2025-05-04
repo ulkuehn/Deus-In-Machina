@@ -303,6 +303,13 @@ function menuList(left, right, bottom) {
     label: _("mainProcess_menuFile"),
     submenu: [
       {
+        label: _("mainProcess_menuFileNew"),
+        accelerator: "ctrl+n",
+        click(item, focusedWindow) {
+          focusedWindow.webContents.send("rendererProcess_newProject", null);
+        },
+      },
+      {
         label: _("mainProcess_menuFileOpen"),
         accelerator: "ctrl+o",
         click(item, focusedWindow) {

@@ -226,6 +226,16 @@ ipcRenderer.on("rendererProcess_loadFile", (event, [tmpDir, id, ext]) => {
 // project related functions
 
 /**
+ * create a new empty project
+ */
+ipcRenderer.on("rendererProcess_newProject", () => {
+  ipcRenderer.invoke("mainProcess_loggingVerbose", [
+    "rendererProcess_newProject",
+  ]);
+  theProject.new();
+});
+
+/**
  * open a project from a given path
  *
  * @param {String} file
