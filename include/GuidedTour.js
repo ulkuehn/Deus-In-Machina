@@ -19,21 +19,21 @@ class GuidedTour {
    */
   static #areas = [
     { id: "SplitGutter", name: "SplitGutter1", where: "right" },
-    { id: "SplitGutter", name: "SplitGutter2", where: "right" },
-    { id: "SplitGutter", name: "SplitGutter3", where: "right" },
+    // { id: "SplitGutter", name: "SplitGutter2", where: "right" },
+    // { id: "SplitGutter", name: "SplitGutter3", where: "right" },
     { id: "TT", name: "TT1", where: "right" },
     { id: "TT", name: "TT2", where: "right" },
     { id: "TCL", name: "TCL1", where: "right" },
-    { id: "TCL", name: "TCL2", where: "right" },
-    { id: "OT", name: "OT1", where: "left" },
-    { id: "OT", name: "OT2", where: "left" },
-    { id: "OT", name: "OT3", where: "left" },
-    { id: "TEE", name: "TEE1", where: "bottom" },
-    { id: "TEE", name: "TEE2", where: "bottom" },
-    { id: "TEE", name: "TEE3", where: "bottom" },
-    { id: "MB", name: "MB", where: "bottom" },
-    { id: "SB", name: "SB", where: "top" },
-    { id: "OR", name: "OR", where: "top" },
+    // { id: "TCL", name: "TCL2", where: "right" },
+    // { id: "OT", name: "OT1", where: "left" },
+    // { id: "OT", name: "OT2", where: "left" },
+    // { id: "OT", name: "OT3", where: "left" },
+    // { id: "TEE", name: "TEE1", where: "bottom" },
+    // { id: "TEE", name: "TEE2", where: "bottom" },
+    // { id: "TEE", name: "TEE3", where: "bottom" },
+    // { id: "MB", name: "MB", where: "bottom" },
+    // { id: "SB", name: "SB", where: "top" },
+    // { id: "OR", name: "OR", where: "top" },
   ];
 
   #transparentOverlay;
@@ -85,13 +85,13 @@ class GuidedTour {
         style: "margin-top:15px",
       })
       .html(
-        `<button type="button" class="btn btn-sm btn-warning" onclick=""> ${_(
+        `<button type="button" class="btn btn-sm btn-warning" style="word-spacing:0.2em; letter-spacing:0.2em"> ${_(
           "tour_start",
         )}</button>`,
       );
     $start.on("click", () => {
       // move around
-      this.explain([...GuidedTour.#areas]);
+      this.explain(0);
     });
     this.#explainDiv.append($start);
     $("body").append(this.#explainDiv);
@@ -144,17 +144,17 @@ class GuidedTour {
   }
 
   /**
-   * explain first area in given list and move to next area on user action
+   * explain #area item referenced by given index and move to next area on user action
    *
-   * @param {Object[]} areas
+   * @param {Number} index
    */
-  explain(areas) {
+  explain(index) {
     if (this.#explainDiv) this.#explainDiv.remove();
-    let area = areas.shift();
-    if (!area) {
+    if (index < 0 || index > GuidedTour.#areas.length) {
       this.abort();
       return;
     }
+    let area = GuidedTour.#areas[index];
     this.#overlays[area.id].addClass("tour-highlight");
     this.#explainDiv = $("<div>").attr({
       class: `tour-info tour-info-${area.where}`,
@@ -174,23 +174,50 @@ class GuidedTour {
             )}px;`,
     });
     this.#explainDiv.append($("<p>").html(_(`tour_${area.name}`)));
-    let $continue = $("<div>")
-      .attr({
-        style: "margin-top:15px",
-      })
-      .html(
-        `<button type="button" class="btn btn-sm btn-warning" onclick=""> ${_(
-          areas.length ? "tour_continue" : "tour_end",
-        )}</button>`,
-      );
-    $continue.on("click", () => {
+    this.#explainDiv.append(
+      $("<div>")
+        .attr({
+          style:
+            "margin-top:15px; display:flex; justify-content:space-between;",
+        })
+        .append(
+          $("<div>").html(
+            `<button type="button" class="btn btn-sm btn-warning" id="back" ${!index ? "disabled" : ""}> ${_(
+              "tour_back",
+            )}</button>`,
+          ),
+        )
+        .append(
+          $("<div>").html(
+            `<button type="button" class="btn btn-sm btn-outline-light" id="abort"> ${_(
+              "tour_abort",
+            )}</button>`,
+          ),
+        )
+        .append(
+          $("<div>").html(
+            `<button type="button" class="btn btn-sm btn-warning" id="continue" style="word-spacing:0.2em; letter-spacing:0.2em"> ${_(
+              index < GuidedTour.#areas.length - 1
+                ? "tour_continue"
+                : "tour_end",
+            )}</button>`,
+          ),
+        ),
+    );
+
+    // this.#explainDiv.append($continue);
+    $("body").append(this.#explainDiv);
+    $("#abort").on("click", () => this.abort());
+    $("#continue").on("click", () => {
       this.#explainDiv.remove();
       this.#overlays[area.id].removeClass("tour-highlight");
-      this.explain(areas);
+      this.explain(index + 1);
     });
-    this.#explainDiv.append($continue);
-    $("body").append(this.#explainDiv);
-
+    $("#back").on("click", () => {
+      this.#explainDiv.remove();
+      this.#overlays[area.id].removeClass("tour-highlight");
+      this.explain(index - 1);
+    });
     switch (area.where) {
       case "left":
         this.#explainDiv.css(

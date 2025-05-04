@@ -10,7 +10,9 @@ const translationTour = {
   de: {
     tour_start: "Rundgang beginnen",
     tour_continue: "Weiter >>>",
-    tour_end: "Rundgang beenden",
+    tour_back: "<<< Zurück",
+    tour_abort: "Tour beenden",
+    tour_end: "Rundgang abschließen",
     tour_All:
       "Herzlich willkommen zu <b>%{programName}</b>!<br>Dieser Rundgang führt durch die wichtigsten Teile der Programmoberfläche und erläutert deren Funktion und Möglichkeiten.<br>Die Tour kann jederzeit durch die Escape-Taste beendet werden.",
 
@@ -58,7 +60,9 @@ const translationTour = {
   en: {
     tour_start: "Start the tour",
     tour_continue: "Continue >>>",
-    tour_end: "End the tour",
+    tour_back: "<<< Back",
+    tour_abort: "End Tour",
+    tour_end: "Finish the tour",
     tour_All:
       "Welcome to <b>%{programName}</b>!<br>This tour takes you through the most important parts of the program interface and explains their functions and options.<br>The tour can be ended at any time by pressing the Escape key.",
 
