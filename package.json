@@ -1,7 +1,7 @@
 {
   "name": "dim",
   "productName": "DeusInMachina",
-  "//software version - semver system": "<major version>.<minor version>.<patch version>+<db scheme version>",
+  "//software version - semver system; only make version changes here as they are taken from here to dim.js by app.getVersion()": "<major version>.<minor version>.<patch version>+<db scheme version>",
   "version": "0.1.1+1",
   "description": "DIM - Deus In Machina",
   "main": "dim.js",
