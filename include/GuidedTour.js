@@ -19,21 +19,21 @@ class GuidedTour {
    */
   static #areas = [
     { id: "SplitGutter", name: "SplitGutter1", where: "right" },
-    // { id: "SplitGutter", name: "SplitGutter2", where: "right" },
-    // { id: "SplitGutter", name: "SplitGutter3", where: "right" },
+    { id: "SplitGutter", name: "SplitGutter2", where: "right" },
+    { id: "SplitGutter", name: "SplitGutter3", where: "right" },
     { id: "TT", name: "TT1", where: "right" },
     { id: "TT", name: "TT2", where: "right" },
     { id: "TCL", name: "TCL1", where: "right" },
-    // { id: "TCL", name: "TCL2", where: "right" },
-    // { id: "OT", name: "OT1", where: "left" },
-    // { id: "OT", name: "OT2", where: "left" },
-    // { id: "OT", name: "OT3", where: "left" },
-    // { id: "TEE", name: "TEE1", where: "bottom" },
-    // { id: "TEE", name: "TEE2", where: "bottom" },
-    // { id: "TEE", name: "TEE3", where: "bottom" },
-    // { id: "MB", name: "MB", where: "bottom" },
-    // { id: "SB", name: "SB", where: "top" },
-    // { id: "OR", name: "OR", where: "top" },
+    { id: "TCL", name: "TCL2", where: "right" },
+    { id: "OT", name: "OT1", where: "left" },
+    { id: "OT", name: "OT2", where: "left" },
+    { id: "OT", name: "OT3", where: "left" },
+    { id: "TEE", name: "TEE1", where: "bottom" },
+    { id: "TEE", name: "TEE2", where: "bottom" },
+    { id: "TEE", name: "TEE3", where: "bottom" },
+    { id: "MB", name: "MB", where: "bottom" },
+    { id: "SB", name: "SB", where: "top" },
+    { id: "OR", name: "OR", where: "top" },
   ];
 
   #transparentOverlay;
@@ -85,7 +85,7 @@ class GuidedTour {
         style: "margin-top:15px",
       })
       .html(
-        `<button type="button" class="btn btn-sm btn-warning" style="word-spacing:0.2em; letter-spacing:0.2em"> ${_(
+        `<button type="button" class="btn btn-sm btn-warning"> ${_(
           "tour_start",
         )}</button>`,
       );
@@ -182,21 +182,21 @@ class GuidedTour {
         })
         .append(
           $("<div>").html(
-            `<button type="button" class="btn btn-sm btn-warning" id="back" ${!index ? "disabled" : ""}> ${_(
+            `<button type="button" class="btn btn-sm btn-outline-warning" id="back" ${!index ? "disabled" : ""}> ${_(
               "tour_back",
             )}</button>`,
           ),
         )
         .append(
           $("<div>").html(
-            `<button type="button" class="btn btn-sm btn-outline-light" id="abort"> ${_(
+            `<button type="button" class="btn btn-sm btn-outline-dark" id="abort"> ${_(
               "tour_abort",
             )}</button>`,
           ),
         )
         .append(
           $("<div>").html(
-            `<button type="button" class="btn btn-sm btn-warning" id="continue" style="word-spacing:0.2em; letter-spacing:0.2em"> ${_(
+            `<button type="button" class="btn btn-sm btn-warning" id="continue"> ${_(
               index < GuidedTour.#areas.length - 1
                 ? "tour_continue"
                 : "tour_end",

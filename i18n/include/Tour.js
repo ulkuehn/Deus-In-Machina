@@ -14,7 +14,7 @@ const translationTour = {
     tour_abort: "Tour beenden",
     tour_end: "Rundgang abschließen",
     tour_All:
-      "Herzlich willkommen zu <b>%{programName}</b>!<br>Dieser Rundgang führt durch die wichtigsten Teile der Programmoberfläche und erläutert deren Funktion und Möglichkeiten.<br>Die Tour kann jederzeit durch die Escape-Taste beendet werden.",
+      "Herzlich willkommen zu <b>%{programName}</b>!<br>Dieser Rundgang führt durch die wichtigsten Teile der Programmoberfläche und erläutert deren Funktion und Möglichkeiten.<br>Die Tour kann jederzeit beendet und über das Hilfe-Menü neu begonnen werden.",
 
     tour_SplitGutter1:
       "Die verschiedenen Bereiche der Programmoberfläche sind mittels verschiebbarer Leisten in ihrer Größe veränderbar. Die Oberfläche kann so auf die eigenen Bedürfnisse und den jeweiligen Bearbeitungsfokus angepasst werden.",
@@ -64,7 +64,7 @@ const translationTour = {
     tour_abort: "End Tour",
     tour_end: "Finish the tour",
     tour_All:
-      "Welcome to <b>%{programName}</b>!<br>This tour takes you through the most important parts of the program interface and explains their functions and options.<br>The tour can be ended at any time by pressing the Escape key.",
+      "Welcome to <b>%{programName}</b>!<br>This tour takes you through the most important parts of the program interface and explains their functions and options.<br>You can end the tour at any time and restart it in the Help menu.",
 
     tour_SplitGutter1:
       "The various areas of the program interface can be resized using sliding rulers. The interface can thus be adapted to your own needs and the respective editing focus.",
