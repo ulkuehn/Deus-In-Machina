@@ -401,17 +401,17 @@ class CollectionTree {
           icon: false,
           color: settings.textCollectionTreeNewCollectionRandomColor
             ? Util.mix_hexes(
-                CollectionTree.colors[
-                  this.#newCounter % CollectionTree.colors.length
-                ],
-                CollectionTree.colors[
-                  (this.#newCounter +
-                    Math.floor(
-                      this.#newCounter / CollectionTree.colors.length,
-                    )) %
-                    CollectionTree.colors.length
-                ],
-              )
+              CollectionTree.colors[
+              this.#newCounter % CollectionTree.colors.length
+              ],
+              CollectionTree.colors[
+              (this.#newCounter +
+                Math.floor(
+                  this.#newCounter / CollectionTree.colors.length,
+                )) %
+              CollectionTree.colors.length
+              ],
+            )
             : settings.textCollectionTreeNewCollectionColor,
         },
       );
@@ -450,15 +450,15 @@ class CollectionTree {
         icon: false,
         color: settings.textCollectionTreeNewCollectionRandomColor
           ? Util.mix_hexes(
-              CollectionTree.colors[
-                this.#newCounter % CollectionTree.colors.length
-              ],
-              CollectionTree.colors[
-                (this.#newCounter +
-                  Math.floor(this.#newCounter / CollectionTree.colors.length)) %
-                  CollectionTree.colors.length
-              ],
-            )
+            CollectionTree.colors[
+            this.#newCounter % CollectionTree.colors.length
+            ],
+            CollectionTree.colors[
+            (this.#newCounter +
+              Math.floor(this.#newCounter / CollectionTree.colors.length)) %
+            CollectionTree.colors.length
+            ],
+          )
           : settings.textCollectionTreeNewSearchCollectionColor,
       },
     );
@@ -550,8 +550,7 @@ class CollectionTree {
         "#TCL .jstree-dim { --jstree-hovered:#80808080 }",
       );
       $("#textCollectionTreeSheet").append(
-        `#TCL .jstree-anchor { margin-left:-${
-          settings.textCollectionTreeSmall ? 12 : 27
+        `#TCL .jstree-anchor { margin-left:-${settings.textCollectionTreeSmall ? 12 : 27
         }px }`,
       );
       Object.keys(this.#collections).forEach((id) => {
@@ -798,6 +797,24 @@ class CollectionTree {
         this.#editProps(nodeID);
       },
     };
+    if (!this.isActive() && !this.#collections[nodeID].search) {
+      let addTexts = []
+      theTextTree.getChecked().forEach((textID) => {
+        if (!this.#collections[nodeID].hasItem(textID)) {
+          addTexts.push(textID);
+        }
+      });
+      if (addTexts.length) {
+        items.addCheckedTexts = {
+          name: _("textCollections_contextMenuAddCheckedTexts"),
+          callback: () => {
+            addTexts.forEach((textID) => {
+              this.#collections[nodeID].addItem(textID);
+            });
+          },
+        };
+      }
+    }
     if (this.#collections[nodeID].search) {
       items.recreate = {
         name: _("textCollections_contextMenuNonSearch"),
