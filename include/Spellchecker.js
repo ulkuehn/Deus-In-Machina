@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of Spellchecker class
  */
 
@@ -52,7 +52,7 @@ class Spellchecker {
       }
     }).then(() => {
       this.#userWords.forEach((word) => {
-        this.#spell.add(word).then(() => {});
+        this.#spell.add(word).then(() => { });
       });
     });
   }
@@ -116,7 +116,7 @@ class Spellchecker {
   addCorrect(word) {
     if (!this.#userWords.includes(word)) {
       this.#userWords.push(word);
-      this.#spell.add(word).then(() => {});
+      this.#spell.add(word).then(() => { });
     }
   }
 
@@ -128,7 +128,7 @@ class Spellchecker {
   removeCorrect(word) {
     if (this.#userWords.includes(word)) {
       this.#userWords.splice(this.#userWords.indexOf(word), 1);
-      this.#spell.remove(word).then(() => {});
+      this.#spell.remove(word).then(() => { });
     }
   }
 
@@ -142,14 +142,14 @@ class Spellchecker {
     this.#userWords.forEach((word) => {
       if (!words.includes(word)) {
         this.#userWords.splice(this.#userWords.indexOf(word), 1);
-        this.#spell.remove(word).then(() => {});
+        this.#spell.remove(word).then(() => { });
       }
     });
     // add new words
     words.forEach((word) => {
       if (!this.#userWords.includes(word)) {
         this.#userWords.push(word);
-        this.#spell.add(word).then(() => {});
+        this.#spell.add(word).then(() => { });
       }
     });
   }

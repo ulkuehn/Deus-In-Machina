@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of ObjectTree class
  */
 
@@ -393,9 +393,8 @@ class ObjectTree {
     } else {
       if (settings.objectTreeSelectionBorder) {
         clickedStyle.background = "unset";
-        clickedStyle["box-shadow"] = `inset 0 0 8px ${
-          settings.objectTreeSmall ? 0 : 3
-        }px ${settings.objectTreeSelectionColor}`;
+        clickedStyle["box-shadow"] = `inset 0 0 8px ${settings.objectTreeSmall ? 0 : 3
+          }px ${settings.objectTreeSelectionColor}`;
         clickedStyle["padding-right"] = "12px";
       } else {
         clickedStyle.background = settings.objectTreeSelectionColor;
@@ -416,9 +415,8 @@ class ObjectTree {
     let clickedStyleRow = {};
     if (settings.objectTreeSelectionBorder) {
       clickedStyleRow.background = "unset";
-      clickedStyleRow["box-shadow"] = `inset 0 0 8px ${
-        settings.objectTreeSmall ? 0 : 3
-      }px ${settings.objectTreeSelectionColor}`;
+      clickedStyleRow["box-shadow"] = `inset 0 0 8px ${settings.objectTreeSmall ? 0 : 3
+        }px ${settings.objectTreeSelectionColor}`;
       clickedStyleRow["padding-right"] = "12px";
     } else {
       clickedStyleRow.background = settings.objectTreeSelectionColor;
@@ -1642,8 +1640,7 @@ class ObjectTree {
         });
         let textSample = settings.objectsTextSample || _("sampleTexts_medium");
         $popup.html(
-          `<span style="display:block; text-align:center">${
-            this.#objects[nodeID].name
+          `<span style="display:block; text-align:center">${this.#objects[nodeID].name
           }</span><br><p style="${Formats.formatToCSS(
             theFormats.formats[UUID0],
           )}"><span style="${effectiveStyle.toCSS()}">${textSample.replace(

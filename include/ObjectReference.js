@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of ObjectReference class
  */
 
@@ -111,7 +111,7 @@ class ObjectReference {
             if (text.id in objectReferences[objectID]) {
               let lastPush =
                 objectReferences[objectID][text.id][
-                  objectReferences[objectID][text.id].length - 1
+                objectReferences[objectID][text.id].length - 1
                 ];
               if (lastPush.pos + lastPush.len == pos) {
                 lastPush.text += deltaOP.insert;
@@ -150,7 +150,7 @@ class ObjectReference {
               }
               citation.push({ content: ref.content, html: ref.html });
               pos = ref.pos + ref.len + 1;
-              len += ref.len + (typeof ref.content=="string" && ref.content.endsWith("\n") ? 1 : 0);
+              len += ref.len + (typeof ref.content == "string" && ref.content.endsWith("\n") ? 1 : 0);
             });
             citations.push({
               pos: startPos,

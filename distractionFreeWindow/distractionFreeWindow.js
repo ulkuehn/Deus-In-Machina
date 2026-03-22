@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of distraction free window
  */
 
@@ -84,10 +84,8 @@ ipcRenderer.on(
               $(this).remove();
               $("#dfw-inner").css(
                 "background-image",
-                `linear-gradient(to bottom, rgba(255,255,255,${
-                  (100 - settings.focusEditorWallpaperOpacity) / 100
-                }) 0%, rgba(255,255,255,${
-                  (100 - settings.focusEditorWallpaperOpacity) / 100
+                `linear-gradient(to bottom, rgba(255,255,255,${(100 - settings.focusEditorWallpaperOpacity) / 100
+                }) 0%, rgba(255,255,255,${(100 - settings.focusEditorWallpaperOpacity) / 100
                 }) 100%), url(${settings.focusEditorWallpaper})`,
               );
               $("#dfw-inner").css("background-repeat", "repeat");
@@ -107,10 +105,8 @@ ipcRenderer.on(
               $(this).remove();
               $("#editor").css(
                 "background-image",
-                `linear-gradient(to bottom, rgba(255,255,255,${
-                  (100 - settings.focusEditorBackgroundOpacity) / 100
-                }) 0%, rgba(255,255,255,${
-                  (100 - settings.focusEditorBackgroundOpacity) / 100
+                `linear-gradient(to bottom, rgba(255,255,255,${(100 - settings.focusEditorBackgroundOpacity) / 100
+                }) 0%, rgba(255,255,255,${(100 - settings.focusEditorBackgroundOpacity) / 100
                 }) 100%), url(${settings.focusEditorBackground})`,
               );
               $("#editor").css("background-attachment", "local");
@@ -134,19 +130,16 @@ ipcRenderer.on(
 
     let $inner = $("<div>").attr({
       id: "dfw-inner",
-      style: `background-color:${
-        settings.focusEditorWallpaperColor || "#ffffff"
-      }; display:flex; align-items:center; justify-content:center;`,
+      style: `background-color:${settings.focusEditorWallpaperColor || "#ffffff"
+        }; display:flex; align-items:center; justify-content:center;`,
     });
 
     let $editor = $("<div>").attr({
       id: "editor",
       spellcheck: false,
-      style: `background-color:${
-        settings.focusEditorBackgroundColor || "#ffffff"
-      }; height:${settings.focusEditorHeight}%; width:${
-        settings.focusEditorWidth
-      }%; padding:5px; overflow:auto; box-shadow:0px -1px 20px rgba(0,0,0,0.5), 0px 1px 20px rgba(0,0,0,0.7)`,
+      style: `background-color:${settings.focusEditorBackgroundColor || "#ffffff"
+        }; height:${settings.focusEditorHeight}%; width:${settings.focusEditorWidth
+        }%; padding:5px; overflow:auto; box-shadow:0px -1px 20px rgba(0,0,0,0.5), 0px 1px 20px rgba(0,0,0,0.7)`,
     });
 
     // bar separators
@@ -297,8 +290,7 @@ ipcRenderer.on(
           style: "grid-column:11; align-self:center; justify-self:center",
         })
         .html(
-          `<input type="checkbox" class="btn-check" id="searchRegex"><label class="btn btn-outline-light btn-sm simple-btn" style="padding:0; width:35px; ${
-            theSettings.searchWithRegex ? "" : "display:none"
+          `<input type="checkbox" class="btn-check" id="searchRegex"><label class="btn btn-outline-light btn-sm simple-btn" style="padding:0; width:35px; ${theSettings.searchWithRegex ? "" : "display:none"
           }" for="searchRegex" title="${_(
             "search_withRegex",
           )}"><span style="font-size:18px;"><b>.*</b></span></label>`,
@@ -398,10 +390,8 @@ ipcRenderer.on(
         .html(
           `<i class="fa-solid fa-arrows-left-right"></i> <span id="widthValue" title="${_(
             "distractionFreeWindow_resetWidth",
-          )}" onclick="$('#widthSelector').val(${
-            theSettings.focusEditorWidth
-          });$('#widthSelector').trigger('change')">${
-            theSettings.focusEditorWidth
+          )}" onclick="$('#widthSelector').val(${theSettings.focusEditorWidth
+          });$('#widthSelector').trigger('change')">${theSettings.focusEditorWidth
           }%</span>`,
         ),
     );
@@ -430,10 +420,8 @@ ipcRenderer.on(
         .html(
           `<i class="fa-solid fa-arrows-up-down"></i> <span id="heightValue" title="${_(
             "distractionFreeWindow_resetHeight",
-          )}" onclick="$('#heightSelector').val(${
-            theSettings.focusEditorHeight
-          });$('#heightSelector').trigger('change')">${
-            theSettings.focusEditorHeight
+          )}" onclick="$('#heightSelector').val(${theSettings.focusEditorHeight
+          });$('#heightSelector').trigger('change')">${theSettings.focusEditorHeight
           }%</span>`,
         ),
     );
@@ -614,8 +602,7 @@ ipcRenderer.on(
       $("<div>")
         .attr({ style: "grid-column:1/span 2; justify-self:center" })
         .html(
-          `<input type="checkbox" ${
-            settings.focusEditorSoundOn ? "checked" : ""
+          `<input type="checkbox" ${settings.focusEditorSoundOn ? "checked" : ""
           } class="btn-check" id="pauseSounds" onclick="pauseSounds()"><label class="btn btn-lg" for="pauseSounds" title="${_(
             "Sounds_pause",
           )}"><i class="fa-solid fa-volume-high"></i></label>`,
@@ -629,10 +616,8 @@ ipcRenderer.on(
             style: "grid-column:1; justify-self:center",
           })
           .html(
-            `<input type="checkbox" class="btn-check" id="${
-              sound.name
-            }OnOff" onclick="soundOnOff('${
-              sound.name
+            `<input type="checkbox" class="btn-check" id="${sound.name
+            }OnOff" onclick="soundOnOff('${sound.name
             }')"><label class="btn" for="${sound.name}OnOff" title="${_(
               sound.i18n,
             )}"><i class="fa-solid ${sound.icon}"></i></label>`,
@@ -648,8 +633,7 @@ ipcRenderer.on(
               theSettings.focusEditorBarColor,
               "range-light",
               "range-dark",
-            )} form-range" min="5" max="100" step="5" style="width:95px" id="${
-              sound.name
+            )} form-range" min="5" max="100" step="5" style="width:95px" id="${sound.name
             }Volume" disabled onchange="setVolume('${sound.name}')">`,
           ),
       );
@@ -923,19 +907,17 @@ ipcRenderer.on(
     // fill in formats
     for (let [formatID, format] of Object.entries(formats)) {
       $("#formatSelector").append(
-        `<option ${
-          theSettings.previewFormats ? `class="format${formatID}"` : ""
+        `<option ${theSettings.previewFormats ? `class="format${formatID}"` : ""
         } value="${formatID}">${Util.escapeHTML(format.formats_name)}</option>`,
       );
     }
 
     // style sheets
     let sheetHTML = `.edi + .edi { border-top-color:${sepColor}; border-top-width:${settings.textSeparatorWidth}px; border-top-style:${settings.textSeparatorStyle}; margin-top:${settings.textSeparatorAbove}px; padding-top:${settings.textSeparatorBelow}px }\n`;
-    sheetHTML += `.ql-editor[contenteditable="false"] { ${
-      settings.lockedBackgroundColor
+    sheetHTML += `.ql-editor[contenteditable="false"] { ${settings.lockedBackgroundColor
         ? `background-color:${settings.lockedBackgroundColor};`
         : ""
-    } opacity:${settings.lockedOpacity / 100} }`;
+      } opacity:${settings.lockedOpacity / 100} }`;
     $("#editorSheet").html(sheetHTML);
     $(":root").css({
       "--selection-foregroundColor": Util.blackOrWhite(settings.selectionColor),
@@ -1047,11 +1029,10 @@ ipcRenderer.on(
     $("#zoomSelector").on("input", () => {
       $("#zoomValue").html(Util.scaledZoom($("#zoomSelector").val()) + "%");
       $(":root").css({
-        "--first-line-indent": `${
-          (theSettings.firstLineIndent *
+        "--first-line-indent": `${(theSettings.firstLineIndent *
             Util.scaledZoom($("#zoomSelector").val())) /
           100
-        }px`,
+          }px`,
       });
       buildFormatSheet();
       buildObjectSheet();
@@ -1259,10 +1240,8 @@ ipcRenderer.on(
       // context menu type for object selection
       $.contextMenu.types.check = function (item, opt, root) {
         $(
-          `<label><input type="checkbox" ${
-            item.checked ? "checked" : ""
-          } class="form-check-input" style="margin-top:2px; border:1px solid #2f2f2f; box-shadow:none"><span>${
-            item.name
+          `<label><input type="checkbox" ${item.checked ? "checked" : ""
+          } class="form-check-input" style="margin-top:2px; border:1px solid #2f2f2f; box-shadow:none"><span>${item.name
           }</span></label>`,
         ).appendTo(this);
         // (de)activate object
@@ -1288,11 +1267,10 @@ ipcRenderer.on(
 
     $("#editor")[0].onwheel = doZoom;
     $(":root").css({
-      "--first-line-indent": `${
-        (theSettings.firstLineIndent *
+      "--first-line-indent": `${(theSettings.firstLineIndent *
           Util.scaledZoom($("#zoomSelector").val())) /
         100
-      }px`,
+        }px`,
     });
   },
 );
@@ -1656,10 +1634,10 @@ function doContextMenu(textID, event) {
                 sel.index,
                 "image",
                 reader.result +
-                  " " +
-                  theSettings.imageWidth +
-                  " " +
-                  theSettings.imageHeight,
+                " " +
+                theSettings.imageWidth +
+                " " +
+                theSettings.imageHeight,
               );
               theEditors[textID].quill.formatText(sel.index, 1, {
                 title: path,
@@ -1963,10 +1941,10 @@ function paste(textID, sel) {
                   sel.index,
                   "image",
                   reader.result +
-                    " " +
-                    theSettings.imageWidth +
-                    " " +
-                    theSettings.imageHeight,
+                  " " +
+                  theSettings.imageWidth +
+                  " " +
+                  theSettings.imageHeight,
                 );
                 theEditors[textID].quill.formatText(sel.index, 1, {
                   title: "",
@@ -2030,10 +2008,9 @@ function buildFormatSheet(opacity = 1.0) {
     }
     if (theSettings.previewFormats) {
       $("#formatSheet").append(
-        `${
-          formatID == UUID0
-            ? `#formatSelector option { `
-            : `#formatSelector .format${formatID} {`
+        `${formatID == UUID0
+          ? `#formatSelector option { `
+          : `#formatSelector .format${formatID} {`
         } ${Formats.toPreviewCSS(format)}}\n`,
       );
     }
@@ -2149,11 +2126,10 @@ function doZoom(event) {
     $("#zoomSelector").val(scale);
     $("#zoomValue").html(Util.scaledZoom($("#zoomSelector").val()) + "%");
     $(":root").css({
-      "--first-line-indent": `${
-        (theSettings.firstLineIndent *
+      "--first-line-indent": `${(theSettings.firstLineIndent *
           Util.scaledZoom($("#zoomSelector").val())) /
         100
-      }px`,
+        }px`,
     });
     buildFormatSheet();
     buildObjectSheet();
@@ -2410,10 +2386,9 @@ function countSearchPositions(skipLocked = false) {
  */
 function findSearchPositions(searchFor, doCase, doWord, doRegex) {
   let rex = RegExp(
-    `${doWord ? "(^|\\P{L})(" : ""}${
-      doRegex
-        ? Util.escapeRegExpSearch(searchFor)
-        : Util.escapeRegExp(searchFor)
+    `${doWord ? "(^|\\P{L})(" : ""}${doRegex
+      ? Util.escapeRegExpSearch(searchFor)
+      : Util.escapeRegExp(searchFor)
     }${doWord ? ")\\P{L}" : ""}`,
     `udg${doCase ? "" : "i"}`,
   );
@@ -2495,7 +2470,7 @@ function search(goDown = true, overlapSelection = true) {
           selection.index +
           (selection.length ? (overlapSelection ? 1 : selection.length) : 0);
         let ediPos = searchPositions[theIDs[editorIndex]];
-        for (; i < ediPos.length && ediPos[i].index < selPos; i++) {}
+        for (; i < ediPos.length && ediPos[i].index < selPos; i++) { }
         if (i >= ediPos.length) {
           // next editor
           editorIndex++;
@@ -2511,7 +2486,7 @@ function search(goDown = true, overlapSelection = true) {
       else {
         let ediPos = searchPositions[theIDs[editorIndex]];
         let i = ediPos.length - 1;
-        for (; i >= 0 && ediPos[i].index >= selection.index; i--) {}
+        for (; i >= 0 && ediPos[i].index >= selection.index; i--) { }
         if (i < 0) {
           // prev editor
           editorIndex--;
@@ -2687,8 +2662,8 @@ function scrollToSelection(verticalShift = 0.5) {
       }
       let scrollTo = Math.round(
         bounds.top +
-          top -
-          verticalShift * ($("#editor").height() - bounds.height),
+        top -
+        verticalShift * ($("#editor").height() - bounds.height),
       );
       if (scrollTo < 0) {
         scrollTo = 0;

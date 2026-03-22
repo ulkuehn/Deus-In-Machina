@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of export editor window
  */
 
@@ -74,9 +74,9 @@ ipcRenderer.on(
         `.ql-editor *::selection { color:${Util.blackOrWhite(
           settings.selectionColor,
         )}; background:${settings.selectionColor} }\n` +
-          `.ql-editor img::selection { color:${Util.blackOrWhite(
-            settings.selectionColor,
-          )}; background:${settings.selectionColor}80 }`,
+        `.ql-editor img::selection { color:${Util.blackOrWhite(
+          settings.selectionColor,
+        )}; background:${settings.selectionColor}80 }`,
       ),
     );
     $("body *").css({

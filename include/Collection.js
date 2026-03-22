@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of Collection class
  */
 
@@ -169,53 +169,52 @@ class Collection {
         result +=
           this.#search.filters && this.#search.filters.length
             ? `<span title='${_(
-                "textCollections_searchFilter",
-                this.#search.filters.length,
-                {
-                  filters: this.#search.filters.length,
-                  text: this.#search.text,
-                },
-              )}'><i class="fa-solid fa-filter" style="margin-right:-2px;"></i><i class="fa-solid fa-magnifying-glass fa-flip-horizontal" style="margin-right:5px;"></i></span>`
+              "textCollections_searchFilter",
+              this.#search.filters.length,
+              {
+                filters: this.#search.filters.length,
+                text: this.#search.text,
+              },
+            )}'><i class="fa-solid fa-filter" style="margin-right:-2px;"></i><i class="fa-solid fa-magnifying-glass fa-flip-horizontal" style="margin-right:5px;"></i></span>`
             : `<i class="fa-solid fa-magnifying-glass" style="margin-right:5px;" title='${_(
-                "textCollections_withSearch",
-                {
-                  text: this.#search.text,
-                },
-              )}'></i>`;
+              "textCollections_withSearch",
+              {
+                text: this.#search.text,
+              },
+            )}'></i>`;
         if (settings.textCollectionTreeShowSearchProperties) {
           result += `<span style="margin-right:5px">`;
           result += this.#search.case
             ? `<i class="fa-solid fa-check fa-xs fa-fw" title="${_(
-                "search_withCase",
-              )}"></i>`
+              "search_withCase",
+            )}"></i>`
             : `<i class="fa-solid fa-minus fa-xs fa-fw" title="${_(
-                "search_withoutCase",
-              )}"></i>`;
+              "search_withoutCase",
+            )}"></i>`;
           result += this.#search.word
             ? `<i class="fa-solid fa-check fa-xs fa-fw" title="${_(
-                "search_wholeWord",
-              )}"></i>`
+              "search_wholeWord",
+            )}"></i>`
             : `<i class="fa-solid fa-minus fa-xs fa-fw" title="${_(
-                "search_ignoreWord",
-              )}"></i>`;
+              "search_ignoreWord",
+            )}"></i>`;
           result += this.#search.regex
             ? `<i class="fa-solid fa-check fa-xs fa-fw" title="${_(
-                "search_withRegex",
-              )}"></i>`
+              "search_withRegex",
+            )}"></i>`
             : `<i class="fa-solid fa-minus fa-xs fa-fw" title="${_(
-                "search_withoutRegex",
-              )}"></i>`;
+              "search_withoutRegex",
+            )}"></i>`;
           result += "</span>";
         }
       }
     } else {
       // empty
       if (settings.textCollectionTreeEmptyIcon && !this.#items.size) {
-        result += `<span class="fa fa-stack" style="opacity:0.5; margin-right:4px; vertical-align:top; width:20px;${
-          settings.textCollectionTreeSmall ? " line-height:1.3em" : ""
-        }" title="${_(
-          "textCollections_empty",
-        )}"><i class="fa-solid fa-list fa-stack-1x"></i><i class="fa-solid fa-slash fa-stack-1x"></i></span>`;
+        result += `<span class="fa fa-stack" style="opacity:0.5; margin-right:4px; vertical-align:top; width:20px;${settings.textCollectionTreeSmall ? " line-height:1.3em" : ""
+          }" title="${_(
+            "textCollections_empty",
+          )}"><i class="fa-solid fa-list fa-stack-1x"></i><i class="fa-solid fa-slash fa-stack-1x"></i></span>`;
       }
     }
 
@@ -227,17 +226,14 @@ class Collection {
       ) {
         result += `<i class="fa-solid fa-${this.#decoration.iconName}" style="color:${this.#decoration.iconColor}; margin-right:8px;"></i>`;
       } else {
-        let i1 = `<i class="${
-          TreeDecoration.stackProps[this.#decoration.stack].class
-        } fa-stack-1x" style="color:${this.#decoration.stackColor}"></i>`;
+        let i1 = `<i class="${TreeDecoration.stackProps[this.#decoration.stack].class
+          } fa-stack-1x" style="color:${this.#decoration.stackColor}"></i>`;
         let i2 = `<i class="fa-solid fa-${this.#decoration.iconName} fa-stack-1x" style="color:${this.#decoration.iconColor}"></i>`;
-        result += `<span class="fa-stack" style="vertical-align:top; ${
-          settings.textCollectionTreeSmall ? "line-height:1.2em;" : ""
-        } width:1em; margin-right:8px;">${
-          TreeDecoration.stackProps[this.#decoration.stack].background
+        result += `<span class="fa-stack" style="vertical-align:top; ${settings.textCollectionTreeSmall ? "line-height:1.2em;" : ""
+          } width:1em; margin-right:8px;">${TreeDecoration.stackProps[this.#decoration.stack].background
             ? i1 + i2
             : i2 + i1
-        }</span>`;
+          }</span>`;
       }
     }
 

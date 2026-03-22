@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of web page import window
  */
 
@@ -95,7 +95,7 @@ window.api.onInit((settings) => {
       .html(
         `<input type="range" title="${_("importFromURLWindow_zoom")}" class="${Util.blackOrWhite(
           theSettings.importfromurlBackgroundColor ||
-            theSettings.generalBackgroundColor,
+          theSettings.generalBackgroundColor,
           "range-light",
           "range-dark",
         )} form-range" style="padding-top:5px" min="0" max="160" id="zoom" value="80" disabled onchange="zoom(this.value)">`,
@@ -156,7 +156,7 @@ window.api.onInit((settings) => {
     .css({
       "--foreground-color": Util.blackOrWhite(
         theSettings.importfromurlBackgroundColor ||
-          theSettings.generalBackgroundColor,
+        theSettings.generalBackgroundColor,
       ),
       "--background-color":
         theSettings.importfromurlBackgroundColor ||

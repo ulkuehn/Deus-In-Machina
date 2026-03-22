@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of settings window
  */
 
@@ -109,21 +109,17 @@ ipcRenderer.on(
               .html(
                 `<input title="${_(
                   "settingsWindow_globalSetting",
-                )}" class="form-check-input" type="checkbox" id="${
-                  setting.name
+                )}" class="form-check-input" type="checkbox" id="${setting.name
                 }_global">`,
               ),
           );
           $grid.append(
             $("<div>")
               .attr({
-                style: `grid-column:3/span ${
-                  tab.globalOnly ? "3" : "1"
-                }; place-self:center ${
-                  tab.globalOnly ? "start" : "center"
-                }; line-height:normal; text-align:${
-                  tab.globalOnly ? "left" : "center"
-                }`,
+                style: `grid-column:3/span ${tab.globalOnly ? "3" : "1"
+                  }; place-self:center ${tab.globalOnly ? "start" : "center"
+                  }; line-height:normal; text-align:${tab.globalOnly ? "left" : "center"
+                  }`,
               })
               .html(_(`settingsWindow_${setting.name}`)),
           );
@@ -136,16 +132,11 @@ ipcRenderer.on(
                 .html(
                   `<div class="form-check form-switch" style="padding-top:2px"><input title="${_(
                     "settingsWindow_switchProjectSetting",
-                  )}" class="form-check-input" onclick="$(\'#${
-                    setting.name
-                  }_project').prop('disabled',!$('#${
-                    setting.name
-                  }_project').prop('disabled')); $(\'#${
-                    setting.name
-                  }_project').prop('checked',$(\'#${
-                    setting.name
-                  }_global').prop('checked'))" id="${
-                    setting.name
+                  )}" class="form-check-input" onclick="$(\'#${setting.name
+                  }_project').prop('disabled',!$('#${setting.name
+                  }_project').prop('disabled')); $(\'#${setting.name
+                  }_project').prop('checked',$(\'#${setting.name
+                  }_global').prop('checked'))" id="${setting.name
                   }_active" type="checkbox"></div>`,
                 ),
             );
@@ -157,8 +148,7 @@ ipcRenderer.on(
                 .html(
                   `<input title="${_(
                     "settingsWindow_projectSetting",
-                  )}" class="form-check-input" type="checkbox" id="${
-                    setting.name
+                  )}" class="form-check-input" type="checkbox" id="${setting.name
                   }_project">`,
                 ),
             );
@@ -183,13 +173,10 @@ ipcRenderer.on(
           $grid.append(
             $("<div>")
               .attr({
-                style: `grid-column:3/span ${
-                  tab.globalOnly ? "3" : "1"
-                }; place-self:center ${
-                  tab.globalOnly ? "start" : "center"
-                }; line-height:normal; text-align:${
-                  tab.globalOnly ? "left" : "center"
-                }`,
+                style: `grid-column:3/span ${tab.globalOnly ? "3" : "1"
+                  }; place-self:center ${tab.globalOnly ? "start" : "center"
+                  }; line-height:normal; text-align:${tab.globalOnly ? "left" : "center"
+                  }`,
               })
               .html(_(`settingsWindow_${setting.name}`)),
           );
@@ -202,22 +189,17 @@ ipcRenderer.on(
                 .html(
                   `<div class="form-check form-switch" style="padding-top:2px"><input title="${_(
                     "settingsWindow_switchProjectSetting",
-                  )}" class="form-check-input" onclick="$('#${
-                    setting.name
-                  }_project').prop('disabled',!$('#${
-                    setting.name
-                  }_project').prop('disabled')); $('#${
-                    setting.name
-                  }_project').val($('#${setting.name}_global').val())" id="${
-                    setting.name
+                  )}" class="form-check-input" onclick="$('#${setting.name
+                  }_project').prop('disabled',!$('#${setting.name
+                  }_project').prop('disabled')); $('#${setting.name
+                  }_project').val($('#${setting.name}_global').val())" id="${setting.name
                   }_active" type="checkbox"></div>`,
                 ),
             );
             html = `<select title="${_(
               "settingsWindow_projectSetting",
-            )}" class="form-select form-select-sm" id="${
-              setting.name
-            }_project">`;
+            )}" class="form-select form-select-sm" id="${setting.name
+              }_project">`;
             setting.values.forEach((value) => {
               html += `<option value="${value}">${_(value)}</option>`;
             });
@@ -235,15 +217,13 @@ ipcRenderer.on(
         if (setting.type == "font") {
           let html = `<select title="${_(
             "settingsWindow_globalSetting",
-          )}" class="form-select form-select-sm" id="${
-            setting.name
-          }_global"><optgroup label="${_("Fonts_web")}">`;
+          )}" class="form-select form-select-sm" id="${setting.name
+            }_global"><optgroup label="${_("Fonts_web")}">`;
           for (let family of Fonts.standardFamilies) {
-            html += `<option style="font-size:16px;font-family:'${
-              family.class
-            }'" value="'${family.class}'">${_(
-              `Fonts_${family.class}`,
-            )}</option>`;
+            html += `<option style="font-size:16px;font-family:'${family.class
+              }'" value="'${family.class}'">${_(
+                `Fonts_${family.class}`,
+              )}</option>`;
           }
           html += `</optgroup><optgroup label="${_("Fonts_system")}">`;
           fonts.forEach((value) => {
@@ -260,13 +240,10 @@ ipcRenderer.on(
           $grid.append(
             $("<div>")
               .attr({
-                style: `grid-column:3/span ${
-                  tab.globalOnly ? "3" : "1"
-                }; place-self:center ${
-                  tab.globalOnly ? "start" : "center"
-                }; line-height:normal; text-align:${
-                  tab.globalOnly ? "left" : "center"
-                }`,
+                style: `grid-column:3/span ${tab.globalOnly ? "3" : "1"
+                  }; place-self:center ${tab.globalOnly ? "start" : "center"
+                  }; line-height:normal; text-align:${tab.globalOnly ? "left" : "center"
+                  }`,
               })
               .html(_(`settingsWindow_${setting.name}`)),
           );
@@ -279,22 +256,17 @@ ipcRenderer.on(
                 .html(
                   `<div class="form-check form-switch" style="padding-top:2px"><input title="${_(
                     "settingsWindow_switchProjectSetting",
-                  )}" class="form-check-input" onclick="$('#${
-                    setting.name
-                  }_project').prop('disabled',!$('#${
-                    setting.name
-                  }_project').prop('disabled')); $('#${
-                    setting.name
-                  }_project').val($('#${setting.name}_global').val())" id="${
-                    setting.name
+                  )}" class="form-check-input" onclick="$('#${setting.name
+                  }_project').prop('disabled',!$('#${setting.name
+                  }_project').prop('disabled')); $('#${setting.name
+                  }_project').val($('#${setting.name}_global').val())" id="${setting.name
                   }_active" type="checkbox"></div>`,
                 ),
             );
             html = `<select title="${_(
               "settingsWindow_projectSetting",
-            )}" class="form-select form-select-sm" id="${
-              setting.name
-            }_project">`;
+            )}" class="form-select form-select-sm" id="${setting.name
+              }_project">`;
             fonts.forEach((value) => {
               html += `<option value="${value}">${value}</option>`;
             });
@@ -317,21 +289,17 @@ ipcRenderer.on(
                 title: _("settingsWindow_globalSetting"),
               })
               .html(
-                `<input class="${
-                  setting.type == "color" ? "colorPicker" : "emptyColorPicker"
+                `<input class="${setting.type == "color" ? "colorPicker" : "emptyColorPicker"
                 }" id="${setting.name}_global"></input>`,
               ),
           );
           $grid.append(
             $("<div>")
               .attr({
-                style: `grid-column:3/span ${
-                  tab.globalOnly ? "3" : "1"
-                }; place-self:center ${
-                  tab.globalOnly ? "start" : "center"
-                }; line-height:normal; text-align:${
-                  tab.globalOnly ? "left" : "center"
-                }`,
+                style: `grid-column:3/span ${tab.globalOnly ? "3" : "1"
+                  }; place-self:center ${tab.globalOnly ? "start" : "center"
+                  }; line-height:normal; text-align:${tab.globalOnly ? "left" : "center"
+                  }`,
               })
               .html(_(`settingsWindow_${setting.name}`)),
           );
@@ -344,14 +312,10 @@ ipcRenderer.on(
                 .html(
                   `<div class="form-check form-switch" style="padding-top:2px"><input title="${_(
                     "settingsWindow_switchProjectSetting",
-                  )}" class="form-check-input" onclick="$('#${
-                    setting.name
-                  }_project').spectrum(this.checked? 'enable':'disable'); $('#${
-                    setting.name
-                  }_project').spectrum('set',$('#${
-                    setting.name
-                  }_global').val())" id="${
-                    setting.name
+                  )}" class="form-check-input" onclick="$('#${setting.name
+                  }_project').spectrum(this.checked? 'enable':'disable'); $('#${setting.name
+                  }_project').spectrum('set',$('#${setting.name
+                  }_global').val())" id="${setting.name
                   }_active" type="checkbox"></div>`,
                 ),
             );
@@ -363,12 +327,12 @@ ipcRenderer.on(
                 })
                 .html(
                   '<input class="' +
-                    (setting.type == "color"
-                      ? "colorPicker"
-                      : "emptyColorPicker") +
-                    '" id="' +
-                    setting.name +
-                    '_project"></input>',
+                  (setting.type == "color"
+                    ? "colorPicker"
+                    : "emptyColorPicker") +
+                  '" id="' +
+                  setting.name +
+                  '_project"></input>',
                 ),
             );
           }
@@ -396,28 +360,22 @@ ipcRenderer.on(
                   "settingsWindow_globalSetting",
                 )}" type="range" class="${Util.blackOrWhite(
                   effectiveSettings.settingsBackgroundColor ||
-                    effectiveSettings.generalBackgroundColor,
+                  effectiveSettings.generalBackgroundColor,
                   "range-light",
                   "range-dark",
-                )} form-range" style="padding-top:7px" min="${
-                  setting.min
-                }" max="${setting.max}" step="${setting.step}" id="${
-                  setting.name
-                }_global" onchange="$('#${
-                  setting.name
+                )} form-range" style="padding-top:7px" min="${setting.min
+                }" max="${setting.max}" step="${setting.step}" id="${setting.name
+                }_global" onchange="$('#${setting.name
                 }_globalvalue').html(this.value)">`,
               ),
           );
           $grid.append(
             $("<div>")
               .attr({
-                style: `grid-column:3/span ${
-                  tab.globalOnly ? "3" : "1"
-                }; place-self:center ${
-                  tab.globalOnly ? "start" : "center"
-                }; line-height:normal; text-align:${
-                  tab.globalOnly ? "left" : "center"
-                }`,
+                style: `grid-column:3/span ${tab.globalOnly ? "3" : "1"
+                  }; place-self:center ${tab.globalOnly ? "start" : "center"
+                  }; line-height:normal; text-align:${tab.globalOnly ? "left" : "center"
+                  }`,
               })
               .html(_(`settingsWindow_${setting.name}`)),
           );
@@ -430,16 +388,11 @@ ipcRenderer.on(
                 .html(
                   `<div class="form-check form-switch" style="padding-top:2px"><input title="${_(
                     "settingsWindow_switchProjectSetting",
-                  )}" class="form-check-input" onclick="$('#${
-                    setting.name
-                  }_project').prop('disabled',!$('#${
-                    setting.name
-                  }_project').prop('disabled')); $('#${
-                    setting.name
-                  }_project').val($('#${setting.name}_global').val()); $('#${
-                    setting.name
-                  }_projectvalue').html($('#${setting.name}_global').val())" id="${
-                    setting.name
+                  )}" class="form-check-input" onclick="$('#${setting.name
+                  }_project').prop('disabled',!$('#${setting.name
+                  }_project').prop('disabled')); $('#${setting.name
+                  }_project').val($('#${setting.name}_global').val()); $('#${setting.name
+                  }_projectvalue').html($('#${setting.name}_global').val())" id="${setting.name
                   }_active" type="checkbox"></div>`,
                 ),
             );
@@ -453,15 +406,12 @@ ipcRenderer.on(
                     "settingsWindow_projectSetting",
                   )}" type="range" class="${Util.blackOrWhite(
                     effectiveSettings.settingsBackgroundColor ||
-                      effectiveSettings.generalBackgroundColor,
+                    effectiveSettings.generalBackgroundColor,
                     "range-light",
                     "range-dark",
-                  )} form-range" style="padding-top:7px" min="${
-                    setting.min
-                  }" max="${setting.max}" step="${setting.step}" id="${
-                    setting.name
-                  }_project" onchange="$('#${
-                    setting.name
+                  )} form-range" style="padding-top:7px" min="${setting.min
+                  }" max="${setting.max}" step="${setting.step}" id="${setting.name
+                  }_project" onchange="$('#${setting.name
                   }_projectvalue').html(this.value)">`,
                 ),
             );
@@ -483,30 +433,24 @@ ipcRenderer.on(
           $grid.append(
             $("<div>")
               .attr({
-                style: `grid-column:1/span 2; place-self:center end;${
-                  setting.size ? "" : "width:100%"
-                }`,
+                style: `grid-column:1/span 2; place-self:center end;${setting.size ? "" : "width:100%"
+                  }`,
               })
               .html(
                 `<input title="${_(
                   "settingsWindow_globalSetting",
-                )}" type="text" class="form-control form-control-sm" spellcheck="false" id="${
-                  setting.name
-                }_global" ${
-                  setting.size ? `size="${setting.size}"` : `style="width:100%"`
+                )}" type="text" class="form-control form-control-sm" spellcheck="false" id="${setting.name
+                }_global" ${setting.size ? `size="${setting.size}"` : `style="width:100%"`
                 }>`,
               ),
           );
           $grid.append(
             $("<div>")
               .attr({
-                style: `grid-column:3/span ${
-                  tab.globalOnly ? "3" : "1"
-                }; place-self:center ${
-                  tab.globalOnly ? "start" : "center"
-                }; line-height:normal; text-align:${
-                  tab.globalOnly ? "left" : "center"
-                }`,
+                style: `grid-column:3/span ${tab.globalOnly ? "3" : "1"
+                  }; place-self:center ${tab.globalOnly ? "start" : "center"
+                  }; line-height:normal; text-align:${tab.globalOnly ? "left" : "center"
+                  }`,
               })
               .html(_(`settingsWindow_${setting.name}`)),
           );
@@ -519,33 +463,26 @@ ipcRenderer.on(
                 .html(
                   `<div class="form-check form-switch" style="padding-top:2px"><input title="${_(
                     "settingsWindow_switchProjectSetting",
-                  )}" class="form-check-input" onclick="$('#${
-                    setting.name
-                  }_project').prop('disabled',!$('#${
-                    setting.name
-                  }_project').prop('disabled')); $('#${
-                    setting.name
-                  }_project').val($('#${setting.name}_global').val())" id="${
-                    setting.name
+                  )}" class="form-check-input" onclick="$('#${setting.name
+                  }_project').prop('disabled',!$('#${setting.name
+                  }_project').prop('disabled')); $('#${setting.name
+                  }_project').val($('#${setting.name}_global').val())" id="${setting.name
                   }_active" type="checkbox"></div>`,
                 ),
             );
             $grid.append(
               $("<div>")
                 .attr({
-                  style: `grid-column:5/span 2; place-self:center start;${
-                    setting.size ? "" : "width:100%"
-                  }`,
+                  style: `grid-column:5/span 2; place-self:center start;${setting.size ? "" : "width:100%"
+                    }`,
                 })
                 .html(
                   `<input title="${_(
                     "settingsWindow_projectSetting",
-                  )}" type="text" class="form-control form-control-sm" spellcheck="false" id="${
-                    setting.name
-                  }_project" ${
-                    setting.size
-                      ? `size="${setting.size}"`
-                      : `style="width:100%"`
+                  )}" type="text" class="form-control form-control-sm" spellcheck="false" id="${setting.name
+                  }_project" ${setting.size
+                    ? `size="${setting.size}"`
+                    : `style="width:100%"`
                   }>`,
                 ),
             );
@@ -562,21 +499,17 @@ ipcRenderer.on(
               .html(
                 `<textarea title="${_(
                   "settingsWindow_globalSetting",
-                )}" spellcheck="false" class="form-control form-control-sm" rows="${
-                  setting.rows
+                )}" spellcheck="false" class="form-control form-control-sm" rows="${setting.rows
                 }" id="${setting.name}_global" style="width:100%"></textarea>`,
               ),
           );
           $grid.append(
             $("<div>")
               .attr({
-                style: `grid-column:3/span ${
-                  tab.globalOnly ? "3" : "1"
-                }; place-self:center ${
-                  tab.globalOnly ? "start" : "center"
-                }; line-height:normal; text-align:${
-                  tab.globalOnly ? "left" : "center"
-                }`,
+                style: `grid-column:3/span ${tab.globalOnly ? "3" : "1"
+                  }; place-self:center ${tab.globalOnly ? "start" : "center"
+                  }; line-height:normal; text-align:${tab.globalOnly ? "left" : "center"
+                  }`,
               })
               .html(_(`settingsWindow_${setting.name}`)),
           );
@@ -589,14 +522,10 @@ ipcRenderer.on(
                 .html(
                   `<div class="form-check form-switch" style="padding-top:2px"><input title="${_(
                     "settingsWindow_switchProjectSetting",
-                  )}" class="form-check-input" onclick="$('#${
-                    setting.name
-                  }_project').prop('disabled',!$('#${
-                    setting.name
-                  }_project').prop('disabled')); $('#${
-                    setting.name
-                  }_project').val($('#${setting.name}_global').val())" id="${
-                    setting.name
+                  )}" class="form-check-input" onclick="$('#${setting.name
+                  }_project').prop('disabled',!$('#${setting.name
+                  }_project').prop('disabled')); $('#${setting.name
+                  }_project').val($('#${setting.name}_global').val())" id="${setting.name
                   }_active" type="checkbox"></div>`,
                 ),
             );
@@ -609,10 +538,8 @@ ipcRenderer.on(
                 .html(
                   `<textarea title="${_(
                     "settingsWindow_projectSetting",
-                  )}" spellcheck="false" class="form-control form-control-sm" rows="${
-                    setting.rows
-                  }" id="${
-                    setting.name
+                  )}" spellcheck="false" class="form-control form-control-sm" rows="${setting.rows
+                  }" id="${setting.name
                   }_project" style="width:100%"></textarea>`,
                 ),
             );
@@ -626,17 +553,13 @@ ipcRenderer.on(
                 style: `grid-column:1/span 2; place-self:center end;`,
               })
               .html(
-                `<img title="${_("settingsWindow_globalSetting")}" id="${
-                  setting.name
-                }_global" style="height:${
-                  setting.height
+                `<img title="${_("settingsWindow_globalSetting")}" id="${setting.name
+                }_global" style="height:${setting.height
                 }; cursor:pointer; box-shadow:
                 0px -1px 10px rgba(0,0,0,0.5), 0px 1px 10px rgba(0,0,0,0.7)"><div style="position:relative; margin-bottom:-35px; bottom:35px; left:calc(50% - 32px)"><button type="button" class="btn btn-outline-light btn-sm" title="${_(
                   "settingsWindow_loadImage",
-                )}" onclick="loadImage('${
-                  setting.name
-                }_global')"><i class="fas fa-image"></i></button><button type="button" class="btn btn-outline-light btn-sm" onclick="resetImage('${
-                  setting.name
+                )}" onclick="loadImage('${setting.name
+                }_global')"><i class="fas fa-image"></i></button><button type="button" class="btn btn-outline-light btn-sm" onclick="resetImage('${setting.name
                 }','${setting.name}_global')" title="${_(
                   "settingsWindow_resetImage",
                 )}"><i class="fas fa-trash"></i></button></div>`,
@@ -645,13 +568,10 @@ ipcRenderer.on(
           $grid.append(
             $("<div>")
               .attr({
-                style: `grid-column:3/span ${
-                  tab.globalOnly ? "3" : "1"
-                }; place-self:center ${
-                  tab.globalOnly ? "start" : "center"
-                }; line-height:normal; text-align:${
-                  tab.globalOnly ? "left" : "center"
-                }`,
+                style: `grid-column:3/span ${tab.globalOnly ? "3" : "1"
+                  }; place-self:center ${tab.globalOnly ? "start" : "center"
+                  }; line-height:normal; text-align:${tab.globalOnly ? "left" : "center"
+                  }`,
               })
               .html(_(`settingsWindow_${setting.name}`)),
           );
@@ -664,14 +584,10 @@ ipcRenderer.on(
                 .html(
                   `<div class="form-check form-switch" style="padding-top:2px"><input title="${_(
                     "settingsWindow_switchProjectSetting",
-                  )}" class="form-check-input" onclick="$('#${
-                    setting.name
-                  }_overlay').css('display',$('#${
-                    setting.name
-                  }_overlay').css('display')=='none'?'':'none'); $('#${
-                    setting.name
-                  }_project').attr('src',$('#${setting.name}_global').attr('src'))" id="${
-                    setting.name
+                  )}" class="form-check-input" onclick="$('#${setting.name
+                  }_overlay').css('display',$('#${setting.name
+                  }_overlay').css('display')=='none'?'':'none'); $('#${setting.name
+                  }_project').attr('src',$('#${setting.name}_global').attr('src'))" id="${setting.name
                   }_active" type="checkbox"></div>`,
                 ),
             );
@@ -683,17 +599,13 @@ ipcRenderer.on(
                 .html(
                   `<div style="position:relative;"><img title="${_(
                     "settingsWindow_projectSetting",
-                  )}" id="${setting.name}_project" style="height:${
-                    setting.height
+                  )}" id="${setting.name}_project" style="height:${setting.height
                   }; cursor:pointer; box-shadow:
-                  0px -1px 10px rgba(0,0,0,0.5), 0px 1px 10px rgba(0,0,0,0.7)"><div id="${
-                    setting.name
+                  0px -1px 10px rgba(0,0,0,0.5), 0px 1px 10px rgba(0,0,0,0.7)"><div id="${setting.name
                   }_overlay" style="position:absolute; top:0; left:0; width:100%; height:calc(100% - 35px); z-index:10; background-color:#ffffffc0"></div><div style="position:relative; margin-bottom:-35px; bottom:35px; left:calc(50% - 32px)"><button type="button" class="btn btn-outline-light btn-sm" title="${_(
                     "settingsWindow_loadImage",
-                  )}" onclick="loadImage('${
-                    setting.name
-                  }_project')"><i class="fas fa-image"></i></button><button type="button" class="btn btn-outline-light btn-sm" onclick="resetImage('${
-                    setting.name
+                  )}" onclick="loadImage('${setting.name
+                  }_project')"><i class="fas fa-image"></i></button><button type="button" class="btn btn-outline-light btn-sm" onclick="resetImage('${setting.name
                   }','${setting.name}_project')" title="${_(
                     "settingsWindow_resetImage",
                   )}"><i class="fas fa-trash"></i></button></div></div>`,
@@ -719,13 +631,10 @@ ipcRenderer.on(
           $grid.append(
             $("<div>")
               .attr({
-                style: `grid-column:3/span ${
-                  tab.globalOnly ? "3" : "1"
-                }; place-self:center ${
-                  tab.globalOnly ? "start" : "center"
-                }; line-height:normal; text-align:${
-                  tab.globalOnly ? "left" : "center"
-                }`,
+                style: `grid-column:3/span ${tab.globalOnly ? "3" : "1"
+                  }; place-self:center ${tab.globalOnly ? "start" : "center"
+                  }; line-height:normal; text-align:${tab.globalOnly ? "left" : "center"
+                  }`,
               })
               .html(_(`settingsWindow_${setting.name}`)),
           );
@@ -766,23 +675,18 @@ ipcRenderer.on(
                 .html(
                   `<input title="${_(
                     "settingsWindow_globalSetting",
-                  )}" class="form-check-input" style="margin:8px 10px 0px 10px" type="checkbox" id="${
-                    setting.name
-                  }_${sound.name}on_global" onclick="playSounds('${
-                    setting.name
+                  )}" class="form-check-input" style="margin:8px 10px 0px 10px" type="checkbox" id="${setting.name
+                  }_${sound.name}on_global" onclick="playSounds('${setting.name
                   }')"><input title="${_(
                     "distractionFreeWindow_soundVolume",
                   )}" type="range" class="${Util.blackOrWhite(
                     effectiveSettings.settingsBackgroundColor ||
-                      effectiveSettings.generalBackgroundColor,
+                    effectiveSettings.generalBackgroundColor,
                     "range-light",
                     "range-dark",
-                  )} form-range" min="${setting.min}" max="${
-                    setting.max
-                  }" step="${setting.step}" style="padding-top:7px" id="${
-                    setting.name
-                  }_${sound.name}vol_global" onchange="playSounds('${
-                    setting.name
+                  )} form-range" min="${setting.min}" max="${setting.max
+                  }" step="${setting.step}" style="padding-top:7px" id="${setting.name
+                  }_${sound.name}vol_global" onchange="playSounds('${setting.name
                   }')">`,
                 ),
             );
@@ -792,8 +696,7 @@ ipcRenderer.on(
                   style: `grid-column:3; place-self:center center; line-height:normal; text-align:center`,
                 })
                 .html(
-                  `${_(sound.i18n)}<i class="fa-solid ${
-                    sound.icon
+                  `${_(sound.i18n)}<i class="fa-solid ${sound.icon
                   }" style="margin-left:15px"></i>`,
                 ),
             );
@@ -805,26 +708,16 @@ ipcRenderer.on(
                 .html(
                   `<div class="form-check form-switch" style="padding-top:2px"><input title="${_(
                     "settingsWindow_switchProjectSetting",
-                  )}" class="form-check-input" onclick="playSounds('${
-                    setting.name
-                  }'); $(\'#${setting.name}_${
-                    sound.name
-                  }on_project').prop('disabled',!$('#${setting.name}_${
-                    sound.name
-                  }on_project').prop('disabled')); $(\'#${setting.name}_${
-                    sound.name
-                  }vol_project').prop('disabled',!$('#${setting.name}_${
-                    sound.name
-                  }vol_project').prop('disabled')); $(\'#${setting.name}_${
-                    sound.name
-                  }on_project').prop('checked',$('#${setting.name}_${
-                    sound.name
-                  }on_global').prop('checked')); $(\'#${setting.name}_${
-                    sound.name
-                  }vol_project').val($('#${setting.name}_${
-                    sound.name
-                  }vol_global').val())" id="${setting.name}_${
-                    sound.name
+                  )}" class="form-check-input" onclick="playSounds('${setting.name
+                  }'); $(\'#${setting.name}_${sound.name
+                  }on_project').prop('disabled',!$('#${setting.name}_${sound.name
+                  }on_project').prop('disabled')); $(\'#${setting.name}_${sound.name
+                  }vol_project').prop('disabled',!$('#${setting.name}_${sound.name
+                  }vol_project').prop('disabled')); $(\'#${setting.name}_${sound.name
+                  }on_project').prop('checked',$('#${setting.name}_${sound.name
+                  }on_global').prop('checked')); $(\'#${setting.name}_${sound.name
+                  }vol_project').val($('#${setting.name}_${sound.name
+                  }vol_global').val())" id="${setting.name}_${sound.name
                   }_active" type="checkbox"></div>`,
                 ),
             );
@@ -836,23 +729,18 @@ ipcRenderer.on(
                 .html(
                   `<input title="${_(
                     "settingsWindow_projectSetting",
-                  )}" class="form-check-input" style="margin:8px 10px 0px 0px" type="checkbox" id="${
-                    setting.name
-                  }_${sound.name}on_project" onclick="playSounds('${
-                    setting.name
+                  )}" class="form-check-input" style="margin:8px 10px 0px 0px" type="checkbox" id="${setting.name
+                  }_${sound.name}on_project" onclick="playSounds('${setting.name
                   }')"><input title="${_(
                     "distractionFreeWindow_soundVolume",
                   )}" type="range" class="${Util.blackOrWhite(
                     effectiveSettings.settingsBackgroundColor ||
-                      effectiveSettings.generalBackgroundColor,
+                    effectiveSettings.generalBackgroundColor,
                     "range-light",
                     "range-dark",
-                  )} form-range" min="${setting.min}" max="${
-                    setting.max
-                  }" step="${setting.step}" style="padding-top:10px" id="${
-                    setting.name
-                  }_${sound.name}vol_project" onchange="playSounds('${
-                    setting.name
+                  )} form-range" min="${setting.min}" max="${setting.max
+                  }" step="${setting.step}" style="padding-top:10px" id="${setting.name
+                  }_${sound.name}vol_project" onchange="playSounds('${setting.name
                   }')">`,
                 ),
             );
@@ -976,19 +864,19 @@ ipcRenderer.on(
       "--scrollbar-back": Util.scrollbarBack(
         effectiveSettings.scrollbarStyle,
         effectiveSettings.settingsBackgroundColor ||
-          effectiveSettings.generalBackgroundColor,
+        effectiveSettings.generalBackgroundColor,
       ),
       "--scrollbar-fore": Util.scrollbarFore(
         effectiveSettings.scrollbarStyle,
         effectiveSettings.settingsBackgroundColor ||
-          effectiveSettings.generalBackgroundColor,
+        effectiveSettings.generalBackgroundColor,
       ),
     });
     $("body")
       .css({
         "--foreground-color": Util.blackOrWhite(
           effectiveSettings.settingsBackgroundColor ||
-            effectiveSettings.generalBackgroundColor,
+          effectiveSettings.generalBackgroundColor,
         ),
         "--background-color":
           effectiveSettings.settingsBackgroundColor ||
@@ -1405,9 +1293,9 @@ function collectSettings() {
               (projectSettings[setting.name].center[0] !=
                 projectOrig[setting.name].center[0] ||
                 projectSettings[setting.name].center[1] !=
-                  projectOrig[setting.name].center[1] ||
+                projectOrig[setting.name].center[1] ||
                 projectSettings[setting.name].zoom !=
-                  projectOrig[setting.name].zoom) &&
+                projectOrig[setting.name].zoom) &&
                 (projectChanged = true);
             }
           } else {
@@ -1416,9 +1304,9 @@ function collectSettings() {
           (globalSettings[setting.name].center[0] !=
             globalOrig[setting.name].center[0] ||
             globalSettings[setting.name].center[1] !=
-              globalOrig[setting.name].center[1] ||
+            globalOrig[setting.name].center[1] ||
             globalSettings[setting.name].zoom !=
-              globalOrig[setting.name].zoom) &&
+            globalOrig[setting.name].zoom) &&
             (globalChanged = true);
           break;
         case "sounds":
@@ -1548,7 +1436,7 @@ function loadImage(imageID) {
     .then((result) => {
       $(`#${imageID}`).attr("src", result);
     })
-    .catch(() => {});
+    .catch(() => { });
 }
 
 /**

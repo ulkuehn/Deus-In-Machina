@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of spelling correction window
  */
 
@@ -162,7 +162,7 @@ function sendCorrection() {
     theWordIndex,
     // adapt wordPos for longer or shorter substitute (e.g. "colour"->"color": wordPos is one less)
     theWordPos +
-      ($("#correctedWord").val().length - $("#misspelledWord").html().length),
+    ($("#correctedWord").val().length - $("#misspelledWord").html().length),
     true,
     $("#correctedWord").val(),
   ]);

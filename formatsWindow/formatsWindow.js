@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of "about" menu item
  */
 
@@ -89,11 +89,10 @@ ipcRenderer.on("formatsWindow_init", (event, [settings, formats, fonts]) => {
       );
     })
     .forEach((formatID) => {
-      html += `<option value="${formatID}" ${
-        settings.previewFormats ? `class="format${formatID}"` : ""
-      } ${formatID == currentID ? "selected" : ""}>${Util.escapeHTML(
-        theFormats[formatID].formats_name,
-      )}</option>`;
+      html += `<option value="${formatID}" ${settings.previewFormats ? `class="format${formatID}"` : ""
+        } ${formatID == currentID ? "selected" : ""}>${Util.escapeHTML(
+          theFormats[formatID].formats_name,
+        )}</option>`;
     });
   html += "</select>";
   $grid.append(
@@ -173,8 +172,7 @@ ipcRenderer.on("formatsWindow_init", (event, [settings, formats, fonts]) => {
               style: "grid-column:3/span 2; justify-self:start;",
             })
             .html(
-              `<input class="${
-                setting.type == "color" ? "colorPicker" : "emptyColorPicker"
+              `<input class="${setting.type == "color" ? "colorPicker" : "emptyColorPicker"
               }" id="${setting.name}" onchange="restyleSample();"></input>`,
             ),
         );
@@ -210,9 +208,8 @@ ipcRenderer.on("formatsWindow_init", (event, [settings, formats, fonts]) => {
         let html = `<select class="form-select form-select-sm" id="${setting.name}" onchange="restyleSample();">`;
         let i = 0;
         setting.values.forEach((value) => {
-          html += `<option value="${value}">${
-            setting.i18nValues ? _(setting.i18nValues[i]) : value
-          }</option>`;
+          html += `<option value="${value}">${setting.i18nValues ? _(setting.i18nValues[i]) : value
+            }</option>`;
           i++;
         });
         html += "</select>";
@@ -227,9 +224,8 @@ ipcRenderer.on("formatsWindow_init", (event, [settings, formats, fonts]) => {
       }
       // fonts
       if (setting.type == "font") {
-        let html = `<select class="form-select form-select-sm" id="${
-          setting.name
-        }" onchange="restyleSample();" ><optgroup label="${_("Fonts_web")}">`;
+        let html = `<select class="form-select form-select-sm" id="${setting.name
+          }" onchange="restyleSample();" ><optgroup label="${_("Fonts_web")}">`;
         for (let family of Fonts.standardFamilies) {
           html += `<option style="font-size:16px;font-family:'${family.class}'" value="'${family.class}'">${_(
             `Fonts_${family.class}`,
@@ -260,7 +256,7 @@ ipcRenderer.on("formatsWindow_init", (event, [settings, formats, fonts]) => {
             .html(
               `<input type="range" class="${Util.blackOrWhite(
                 settings.formatsBackgroundColor ||
-                  settings.generalBackgroundColor,
+                settings.generalBackgroundColor,
                 "range-light",
                 "range-dark",
               )} form-range" min="${setting.min}" max="${setting.max}" step="${setting.step}" id="${setting.name}" onchange="$('#${setting.name}_value').html(this.value);restyleSample();">`,
@@ -414,9 +410,9 @@ function applyFormat() {
           $(`#${setting.name}`).prop(
             "disabled",
             !hasName ||
-              ("mandatory" in setting &&
-                setting.mandatory &&
-                currentID == UUID0),
+            ("mandatory" in setting &&
+              setting.mandatory &&
+              currentID == UUID0),
           );
           break;
       }
@@ -463,10 +459,9 @@ function restyleSample() {
     formatSheet.append(`#formatsPreview ${Formats.toCSS(formatID, format)}`);
     if (theSettings.previewFormats) {
       formatSheet.append(
-        `${
-          formatID == UUID0
-            ? `#formats option { `
-            : `#formats .format${formatID} {`
+        `${formatID == UUID0
+          ? `#formats option { `
+          : `#formats .format${formatID} {`
         } ${Formats.toPreviewCSS(format)}}\n`,
       );
     }
@@ -474,19 +469,17 @@ function restyleSample() {
   $("#formatsPreview").html(
     `<p>${_("formatsWindow_sampleText", {
       name: Util.escapeHTML(theFormats[UUID0].formats_name),
-    })} ${theSettings.editorFormatSample}</p>${
-      currentID != UUID0
-        ? `<p class="format${currentID}-true">${_("formatsWindow_sampleText", {
-            name: Util.escapeHTML(theFormats[currentID].formats_name),
-          })} ${
-            theSettings.editorFormatSample
-          }</p><p class="format${currentID}-true">${_(
-            "formatsWindow_sampleText",
-            {
-              name: Util.escapeHTML(theFormats[currentID].formats_name),
-            },
-          )} ${theSettings.editorFormatSample}</p>`
-        : ""
+    })} ${theSettings.editorFormatSample}</p>${currentID != UUID0
+      ? `<p class="format${currentID}-true">${_("formatsWindow_sampleText", {
+        name: Util.escapeHTML(theFormats[currentID].formats_name),
+      })} ${theSettings.editorFormatSample
+      }</p><p class="format${currentID}-true">${_(
+        "formatsWindow_sampleText",
+        {
+          name: Util.escapeHTML(theFormats[currentID].formats_name),
+        },
+      )} ${theSettings.editorFormatSample}</p>`
+      : ""
     }<p>${_("formatsWindow_sampleText", {
       name: Util.escapeHTML(theFormats[UUID0].formats_name),
     })} ${theSettings.editorFormatSample}</p>`,

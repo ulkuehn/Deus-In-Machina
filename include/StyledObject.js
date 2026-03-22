@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of StyledObject class
  */
 
@@ -307,19 +307,16 @@ class StyledObject {
       ) {
         result += `<i class="fa-solid fa-${this.#decoration.iconName}" style="color:${this.#decoration.iconColor}; margin-right:8px;"></i>`;
       } else {
-        let i1 = `<i class="${
-          TreeDecoration.stackProps[this.#decoration.stack].class
-        } fa-stack-1x" style="color:${this.#decoration.stackColor}"></i>`;
+        let i1 = `<i class="${TreeDecoration.stackProps[this.#decoration.stack].class
+          } fa-stack-1x" style="color:${this.#decoration.stackColor}"></i>`;
         let i2 = `<i class="fa-solid fa-${this.#decoration.iconName} fa-stack-1x" style="color:${this.#decoration.iconColor}"></i>`;
-        result += `<span class="fa-stack" style="vertical-align:top; ${
-          theSettings.effectiveSettings().objectTreeSmall
+        result += `<span class="fa-stack" style="vertical-align:top; ${theSettings.effectiveSettings().objectTreeSmall
             ? "line-height:1.2em;"
             : ""
-        } width:1em; margin-right:8px;">${
-          TreeDecoration.stackProps[this.#decoration.stack].background
+          } width:1em; margin-right:8px;">${TreeDecoration.stackProps[this.#decoration.stack].background
             ? i1 + i2
             : i2 + i1
-        }</span>`;
+          }</span>`;
       }
     }
 
@@ -367,7 +364,7 @@ class StyledObject {
                     Math.round(
                       (zoom / 10) * this.#styleProperties[area][key][j],
                     ) /
-                      10 +
+                    10 +
                     ctrl.unit;
                 } else if (
                   ctrl.type == "emptycolor" &&
@@ -416,7 +413,7 @@ class StyledObject {
                   StylingControls.controls[area][i].unit,
                 )
                   ? Math.round((zoom / 10) * this.#styleProperties[area][key]) /
-                    10
+                  10
                   : this.#styleProperties[area][key]) +
                 StylingControls.controls[area][i].unit;
             }
@@ -549,10 +546,9 @@ class StyledObject {
     searchTexts = true,
   ) {
     let rex = RegExp(
-      `${doWord ? "(^|\\P{L})(" : ""}${
-        doRegex
-          ? Util.escapeRegExpSearch(searchFor)
-          : Util.escapeRegExp(searchFor)
+      `${doWord ? "(^|\\P{L})(" : ""}${doRegex
+        ? Util.escapeRegExpSearch(searchFor)
+        : Util.escapeRegExp(searchFor)
       }${doWord ? ")($|\\P{L})" : ""}`,
       `udg${doCase ? "" : "i"}`,
     );
@@ -689,9 +685,9 @@ class StyledObject {
                           part.html ? part.text : Util.escapeHTML(part.text),
                         )
                         .join("") +
-                        Util.escapeHTML(
-                          parts[index].text.substring(0, r.indices[0][0]),
-                        ),
+                      Util.escapeHTML(
+                        parts[index].text.substring(0, r.indices[0][0]),
+                      ),
                       Util.escapeHTML(
                         parts[index].text.substring(
                           r.indices[0][0],
@@ -701,12 +697,12 @@ class StyledObject {
                       Util.escapeHTML(
                         parts[index].text.substring(r.indices[0][1]),
                       ) +
-                        parts
-                          .slice(index + 1)
-                          .map((part) =>
-                            part.html ? part.text : Util.escapeHTML(part.text),
-                          )
-                          .join(""),
+                      parts
+                        .slice(index + 1)
+                        .map((part) =>
+                          part.html ? part.text : Util.escapeHTML(part.text),
+                        )
+                        .join(""),
                     ],
                   });
                 }
@@ -744,12 +740,12 @@ class StyledObject {
                       part.html ? part.content : Util.escapeHTML(part.content),
                     )
                     .join("") +
-                    Util.escapeHTML(
-                      citation.parts[index].content.substring(
-                        0,
-                        r.indices[0][0],
-                      ),
+                  Util.escapeHTML(
+                    citation.parts[index].content.substring(
+                      0,
+                      r.indices[0][0],
                     ),
+                  ),
                   Util.escapeHTML(
                     citation.parts[index].content.substring(
                       r.indices[0][0],
@@ -759,14 +755,14 @@ class StyledObject {
                   Util.escapeHTML(
                     citation.parts[index].content.substring(r.indices[0][1]),
                   ) +
-                    citation.parts
-                      .slice(index + 1)
-                      .map((part) =>
-                        part.html
-                          ? part.content
-                          : Util.escapeHTML(part.content),
-                      )
-                      .join(""),
+                  citation.parts
+                    .slice(index + 1)
+                    .map((part) =>
+                      part.html
+                        ? part.content
+                        : Util.escapeHTML(part.content),
+                    )
+                    .join(""),
                 ],
               });
             }

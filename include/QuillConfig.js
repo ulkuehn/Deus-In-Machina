@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file Configuration for Quill
  */
 
@@ -60,7 +60,7 @@ class QuillConfig {
                   : null;
             },
           },
-          tab: { key: 9, handler: function () {} },
+          tab: { key: 9, handler: function () { } },
           // cut: { key: "x", ctrlKey: true, handler: function () {} },
         },
       },

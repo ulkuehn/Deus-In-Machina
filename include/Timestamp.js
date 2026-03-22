@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file provide Timestamp Class
  */
 
@@ -208,9 +208,9 @@ class Timestamp {
       (daysPassed >= 3
         ? ""
         : _("time_timeToNowJoin") +
-          _("time_timeToNowHours", hoursPassed, {
-            hours: hoursPassed,
-          }))
+        _("time_timeToNowHours", hoursPassed, {
+          hours: hoursPassed,
+        }))
     );
   }
 }

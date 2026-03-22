@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of Scheme class
  */
 
@@ -686,8 +686,7 @@ class Scheme {
           style: "grid-column:3/span 2;",
         })
         .html(
-          `<input class="form-check-input" type="checkbox" id="property_${id}_${item}" data-type="checkbox" ${
-            value ? " checked" : ""
+          `<input class="form-check-input" type="checkbox" id="property_${id}_${item}" data-type="checkbox" ${value ? " checked" : ""
           }>`,
         ),
     );
@@ -710,12 +709,9 @@ class Scheme {
     $openButton.on("click", this.#openSchemeFile.bind(this, id, item));
 
     let $loadButton = $(
-      `<button class="btn btn-outline-secondary btn-sm" id="filebutton_${id}_${item}" data-type="file" ${
-        value ? "" : "disabled"
-      } title="${_("Scheme_loadFile")}" data-time="${
-        value.fileModtime || ""
-      }" data-id="${value.id ?? ""}" data-path="${
-        value && value.filePath ? Util.escapeHTML(value.filePath) : ""
+      `<button class="btn btn-outline-secondary btn-sm" id="filebutton_${id}_${item}" data-type="file" ${value ? "" : "disabled"
+      } title="${_("Scheme_loadFile")}" data-time="${value.fileModtime || ""
+      }" data-id="${value.id ?? ""}" data-path="${value && value.filePath ? Util.escapeHTML(value.filePath) : ""
       }" ><i class="fa-solid fa-eye"></i></button>`,
     );
     $loadButton.on("click", this.#loadSchemeFile.bind(this, id, item));
@@ -737,30 +733,27 @@ class Scheme {
             ),
             `<div style="grid-column:3; justify-self:end">${_(
               "Scheme_fileName",
-            )}:</div><div style="grid-column:4;" id="filename_${id}_${item}">${
-              value && value.filePath
-                ? `<i class="fa-solid fa-arrow-up-right-from-square" style="cursor:pointer; margin-right:10px" title="${_(
-                    "Scheme_showFile",
-                  )}" onclick="Scheme.showFile('${encodeURI(
-                    value.filePath,
-                  )}')"></i>${Util.escapeHTML(value.filePath)}`
-                : "---"
+            )}:</div><div style="grid-column:4;" id="filename_${id}_${item}">${value && value.filePath
+              ? `<i class="fa-solid fa-arrow-up-right-from-square" style="cursor:pointer; margin-right:10px" title="${_(
+                "Scheme_showFile",
+              )}" onclick="Scheme.showFile('${encodeURI(
+                value.filePath,
+              )}')"></i>${Util.escapeHTML(value.filePath)}`
+              : "---"
             }</div>`,
             `<div style="grid-column:3; justify-self:end">${_(
               "Scheme_fileSize",
-            )}:</div><div style="grid-column:4" id="filesize_${id}_${item}">${
-              value && value.id && value.id in this.#files
-                ? Util.formatBytes(this.#files[value.id].size)
-                : "---"
+            )}:</div><div style="grid-column:4" id="filesize_${id}_${item}">${value && value.id && value.id in this.#files
+              ? Util.formatBytes(this.#files[value.id].size)
+              : "---"
             }</div>`,
             `<div style="grid-column:3; justify-self:end">${_(
               "Scheme_fileTime",
-            )}:</div><div style="grid-column:4" id="filetime_${id}_${item}">${
-              value && value.fileModtime
-                ? new Timestamp(value.fileModtime).toLocalString(
-                    theSettings.dateTimeFormatLong,
-                  )
-                : "---"
+            )}:</div><div style="grid-column:4" id="filetime_${id}_${item}">${value && value.fileModtime
+              ? new Timestamp(value.fileModtime).toLocalString(
+                theSettings.dateTimeFormatLong,
+              )
+              : "---"
             }</div>`,
           ),
         ),
@@ -892,7 +885,7 @@ class Scheme {
         })
         .html(
           `<span id="range_${id}_${item}">${value}</span>` +
-            (unit == undefined ? "" : `&nbsp;${Util.escapeHTML(unit)}`),
+          (unit == undefined ? "" : `&nbsp;${Util.escapeHTML(unit)}`),
         ),
     );
   }
@@ -935,13 +928,11 @@ class Scheme {
   #radioControl($propertiesGrid, id, item, value, options) {
     let html = "";
     options.forEach((radio) => {
-      html += `<div class="form-check${
-        options.length <= 2 ? " form-check-inline" : ""
-      }"><input class="form-check-input" type="radio" name="property_${id}_${item}" value="${Util.escapeHTML(
-        radio,
-      )}" ${
-        radio == value ? "checked" : ""
-      }><label class="form-check-label">${Util.escapeHTML(radio)}</label></div>`;
+      html += `<div class="form-check${options.length <= 2 ? " form-check-inline" : ""
+        }"><input class="form-check-input" type="radio" name="property_${id}_${item}" value="${Util.escapeHTML(
+          radio,
+        )}" ${radio == value ? "checked" : ""
+        }><label class="form-check-label">${Util.escapeHTML(radio)}</label></div>`;
     });
     $propertiesGrid.append(
       $("<div>")
@@ -992,12 +983,11 @@ class Scheme {
           style: "grid-column:3/span 2;",
         })
         .html(
-          `<input type="text" class="form-control form-control-sm" style="text-align:center; width:fit-content${
-            isRange ? "; display:inline;" : ""
+          `<input type="text" class="form-control form-control-sm" style="text-align:center; width:fit-content${isRange ? "; display:inline;" : ""
           }" id="property_${id}_${item}" data-type="${isRange ? "dateRange" : "date"}"></input>` +
-            (isRange
-              ? `<span style="margin-left:10px"; id="days_${id}_${item}"></span>`
-              : ""),
+          (isRange
+            ? `<span style="margin-left:10px"; id="days_${id}_${item}"></span>`
+            : ""),
         ),
     );
     $(`#property_${id}_${item}`).daterangepicker({
@@ -1095,9 +1085,8 @@ class Scheme {
     let html = "";
     for (let c = 255; c >= 0; c -= 55) {
       let h = ("0" + c.toString(16)).slice(-2);
-      html += `<div style="display:inline-block; vertical-align:top; margin-left:20px; height:40px; width:40px; border:#${h}${h}${h} solid 10px; background-color:${
-        value != "" ? value : "#000"
-      }" id="colorBox_${id}_${item}_${h}"></div>`;
+      html += `<div style="display:inline-block; vertical-align:top; margin-left:20px; height:40px; width:40px; border:#${h}${h}${h} solid 10px; background-color:${value != "" ? value : "#000"
+        }" id="colorBox_${id}_${item}_${h}"></div>`;
     }
     $flex.append($("<div>").attr({ style: "align-self:center" }).html(html));
     $propertiesGrid.append(
@@ -1152,7 +1141,7 @@ class Scheme {
       formats,
       Util.blackOrWhite(
         this.#settings.objectBackgroundColor ||
-          this.#settings.generalBackgroundColor,
+        this.#settings.generalBackgroundColor,
         "btn-outline-light",
         "btn-outline-dark",
       ),
@@ -1414,8 +1403,7 @@ class Scheme {
                     style: "grid-column:5/span 1;",
                   })
                   .html(
-                    `<input type="${param.type}" class="form-control form-control-sm" spellcheck="false" disabled style="${
-                      param.style
+                    `<input type="${param.type}" class="form-control form-control-sm" spellcheck="false" disabled style="${param.style
                     }" value="${Util.escapeHTML(scheme.params[i])}">`,
                   ),
               );
@@ -1480,8 +1468,7 @@ class Scheme {
           .html(
             `<input type="text" class="form-control form-control-sm" spellcheck="false" value="${Util.escapeHTML(
               this.#scheme[itemNo].name,
-            )}" id="schemeName_${
-              this.#scheme[itemNo].id
+            )}" id="schemeName_${this.#scheme[itemNo].id
             }_${itemNo}" style="width:100%">`,
           ),
       );
@@ -1525,10 +1512,8 @@ class Scheme {
                 style: "grid-column:5/span 1",
               })
               .html(
-                `<input type="${param.type}" class="form-control form-control-sm" spellcheck="false" style="${
-                  param.style
-                }" id="schemeParam_${
-                  this.#scheme[itemNo].id
+                `<input type="${param.type}" class="form-control form-control-sm" spellcheck="false" style="${param.style
+                }" id="schemeParam_${this.#scheme[itemNo].id
                 }_${itemNo}_${i}" value="${Util.escapeHTML(
                   this.#scheme[itemNo].params[i],
                 )}">`,

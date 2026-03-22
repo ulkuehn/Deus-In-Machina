@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of project properties window
  */
 
@@ -221,27 +221,27 @@ ipcRenderer.on(
           render: function (data, type, row) {
             return type == "display"
               ? _(
-                  "statistics_wordFrequency",
-                  Math.round(statistics.words / data),
-                  {
-                    absolute: data,
-                    relative:
-                      data / statistics.words > 1 / 100
-                        ? Number.parseFloat(
-                            (data / statistics.words) * 100,
-                          ).toLocaleString(theLanguage, {
-                            minimumFractionDigits: 1,
-                            maximumFractionDigits: 1,
-                          }) + " %"
-                        : Number.parseFloat(
-                            (data / statistics.words) * 1000,
-                          ).toLocaleString(theLanguage, {
-                            minimumFractionDigits: 1,
-                            maximumFractionDigits: 1,
-                          }) + " &permil;",
-                    every: Math.round(statistics.words / data),
-                  },
-                )
+                "statistics_wordFrequency",
+                Math.round(statistics.words / data),
+                {
+                  absolute: data,
+                  relative:
+                    data / statistics.words > 1 / 100
+                      ? Number.parseFloat(
+                        (data / statistics.words) * 100,
+                      ).toLocaleString(theLanguage, {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                      }) + " %"
+                      : Number.parseFloat(
+                        (data / statistics.words) * 1000,
+                      ).toLocaleString(theLanguage, {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                      }) + " &permil;",
+                  every: Math.round(statistics.words / data),
+                },
+              )
               : data;
           },
         },
@@ -750,11 +750,11 @@ function projectTab(settings, project) {
       .html(
         project[0]
           ? new Timestamp(project[0]).toLocalString(
-              settings.dateTimeFormatLong,
-            ) +
-              ` (${_("time_timePassed", {
-                time: new Timestamp(project[0]).timeToNow(),
-              })})`
+            settings.dateTimeFormatLong,
+          ) +
+          ` (${_("time_timePassed", {
+            time: new Timestamp(project[0]).timeToNow(),
+          })})`
           : "---",
       ),
   );
@@ -782,11 +782,11 @@ function projectTab(settings, project) {
       .html(
         project[1]
           ? new Timestamp(project[1]).toLocalString(
-              settings.dateTimeFormatLong,
-            ) +
-              ` (${_("time_timePassed", {
-                time: new Timestamp(project[1]).timeToNow(),
-              })})`
+            settings.dateTimeFormatLong,
+          ) +
+          ` (${_("time_timePassed", {
+            time: new Timestamp(project[1]).timeToNow(),
+          })})`
           : "---",
       ),
   );
@@ -837,8 +837,8 @@ function projectTab(settings, project) {
       .html(
         project[3]
           ? `<i class="fa-solid fa-up-right-from-square" onclick="ipcRenderer.invoke('mainProcess_openFileInExplorer', thePath)" title="${_(
-              "projectPropertiesWindow_exploreFileTitle",
-            )}" style="cursor:pointer; margin-right:10px"></i>${project[3]}`
+            "projectPropertiesWindow_exploreFileTitle",
+          )}" style="cursor:pointer; margin-right:10px"></i>${project[3]}`
           : "---",
       ),
   );

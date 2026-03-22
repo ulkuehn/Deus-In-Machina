@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of "about" menu item
  */
 
@@ -275,7 +275,7 @@ function mediaInfo(programName) {
     $content.append(
       $("<p>").html(
         `<span style="cursor:pointer" onmouseover="this.style.fontWeight='bold';" onmouseout="this.style.fontWeight='normal'" onclick="ipcRenderer.invoke('mainProcess_openURL','${sound.source}');">${sound.source}</span> &mdash; ` +
-          _("aboutWindow_credits", { credits: sound.credits }),
+        _("aboutWindow_credits", { credits: sound.credits }),
       ),
     );
   });

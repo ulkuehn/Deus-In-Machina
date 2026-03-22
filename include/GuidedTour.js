@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of GuidedTour class
  */
 
@@ -161,17 +161,17 @@ class GuidedTour {
       style:
         area.where == "left" || area.where == "right"
           ? `max-height:${this.#overlays[area.id].innerHeight() - 20}px; max-width:${Math.min(
-              GuidedTour.maxWidth,
-              $("body").innerWidth() -
-                this.#overlays[area.id].innerWidth() -
-                20,
-            )}px;`
+            GuidedTour.maxWidth,
+            $("body").innerWidth() -
+            this.#overlays[area.id].innerWidth() -
+            20,
+          )}px;`
           : `max-height:${$("body").innerHeight() - 20}px; max-width:${Math.min(
-              GuidedTour.maxWidth,
-              $("body").innerWidth() -
-                this.#overlays[area.id].offset().left -
-                10,
-            )}px;`,
+            GuidedTour.maxWidth,
+            $("body").innerWidth() -
+            this.#overlays[area.id].offset().left -
+            10,
+          )}px;`,
     });
     this.#explainDiv.append($("<p>").html(_(`tour_${area.name}`)));
     this.#explainDiv.append(
@@ -223,45 +223,45 @@ class GuidedTour {
         this.#explainDiv.css(
           "left",
           this.#overlays[area.id].offset().left -
-            this.#explainDiv.innerWidth() -
-            10,
+          this.#explainDiv.innerWidth() -
+          10,
         );
         this.#explainDiv.css(
           "top",
           this.#overlays[area.id].offset().top +
-            (this.#overlays[area.id].innerHeight() -
-              this.#explainDiv.innerHeight()) /
-              2,
+          (this.#overlays[area.id].innerHeight() -
+            this.#explainDiv.innerHeight()) /
+          2,
         );
         break;
       case "right":
         this.#explainDiv.css(
           "left",
           this.#overlays[area.id].offset().left +
-            this.#overlays[area.id].innerWidth() +
-            10,
+          this.#overlays[area.id].innerWidth() +
+          10,
         );
         this.#explainDiv.css(
           "top",
           this.#overlays[area.id].offset().top +
-            (this.#overlays[area.id].innerHeight() -
-              this.#explainDiv.innerHeight()) /
-              2,
+          (this.#overlays[area.id].innerHeight() -
+            this.#explainDiv.innerHeight()) /
+          2,
         );
         break;
       case "top":
         this.#explainDiv.css(
           "top",
           this.#overlays[area.id].offset().top -
-            this.#explainDiv.innerHeight() -
-            5,
+          this.#explainDiv.innerHeight() -
+          5,
         );
         this.#explainDiv.css(
           "left",
           this.#overlays[area.id].offset().left +
-            (this.#overlays[area.id].innerWidth() -
-              this.#explainDiv.innerWidth()) /
-              2,
+          (this.#overlays[area.id].innerWidth() -
+            this.#explainDiv.innerWidth()) /
+          2,
         );
         break;
       case "bottom":
@@ -269,17 +269,17 @@ class GuidedTour {
           "top",
           Math.min(
             this.#overlays[area.id].offset().top +
-              this.#overlays[area.id].innerHeight() +
-              5,
+            this.#overlays[area.id].innerHeight() +
+            5,
             $("body").innerHeight() - this.#explainDiv.innerHeight(),
           ),
         );
         this.#explainDiv.css(
           "left",
           this.#overlays[area.id].offset().left +
-            (this.#overlays[area.id].innerWidth() -
-              this.#explainDiv.innerWidth()) /
-              2,
+          (this.#overlays[area.id].innerWidth() -
+            this.#explainDiv.innerWidth()) /
+          2,
         );
         break;
     }

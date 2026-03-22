@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of StyledText class
  */
 
@@ -360,15 +360,13 @@ class StyledText {
         }
       }
       if (status != UUID0) {
-        result += `<i style="color:${color}; margin-right:4px;" class="fa-solid fa-${
-          settings.textTreeShowStatusForm
-        }" title="${_("texts_status", { text: title })}"></i> `;
+        result += `<i style="color:${color}; margin-right:4px;" class="fa-solid fa-${settings.textTreeShowStatusForm
+          }" title="${_("texts_status", { text: title })}"></i> `;
       } else if (settings.textTreeShowNoStatus) {
-        result += `<i style="color:#808080; margin-right:4px" class="fa-regular fa-${
-          settings.textTreeShowStatusForm
-        }" title="${_("texts_status", {
-          text: _("categories_noStatus"),
-        })}"></i> `;
+        result += `<i style="color:#808080; margin-right:4px" class="fa-regular fa-${settings.textTreeShowStatusForm
+          }" title="${_("texts_status", {
+            text: _("categories_noStatus"),
+          })}"></i> `;
       }
     }
     // type
@@ -392,13 +390,11 @@ class StyledText {
         }
       }
       if (type != UUID0) {
-        result += `<i style="color:${color}; margin-right:4px" class="fa-solid fa-${
-          settings.textTreeShowTypeForm
-        }" title="${_("texts_type", { text: title })}"></i> `;
+        result += `<i style="color:${color}; margin-right:4px" class="fa-solid fa-${settings.textTreeShowTypeForm
+          }" title="${_("texts_type", { text: title })}"></i> `;
       } else if (settings.textTreeShowNoType) {
-        result += `<i style="color:#808080; margin-right:4px" class="fa-regular fa-${
-          settings.textTreeShowTypeForm
-        }" title="${_("texts_type", { text: _("categories_noType") })}"></i> `;
+        result += `<i style="color:#808080; margin-right:4px" class="fa-regular fa-${settings.textTreeShowTypeForm
+          }" title="${_("texts_type", { text: _("categories_noType") })}"></i> `;
       }
     }
     // user
@@ -422,13 +418,11 @@ class StyledText {
         }
       }
       if (user != UUID0) {
-        result += `<i style="color:${color}; margin-right:4px" class="fa-solid fa-${
-          settings.textTreeShowUserForm
-        }" title="${_("texts_user", { text: title })}"></i> `;
+        result += `<i style="color:${color}; margin-right:4px" class="fa-solid fa-${settings.textTreeShowUserForm
+          }" title="${_("texts_user", { text: title })}"></i> `;
       } else if (settings.textTreeShowNoUser) {
-        result += `<i style="color:#808080; margin-right:4px" class="fa-regular fa-${
-          settings.textTreeShowUserForm
-        }" title="${_("texts_user", { text: _("categories_noUser") })}"></i> `;
+        result += `<i style="color:#808080; margin-right:4px" class="fa-regular fa-${settings.textTreeShowUserForm
+          }" title="${_("texts_user", { text: _("categories_noUser") })}"></i> `;
       }
     }
     // add some extra space to the right
@@ -443,17 +437,14 @@ class StyledText {
       ) {
         result += `<i class="fa-solid fa-${this.#decoration.iconName}" style="color:${this.#decoration.iconColor}; margin-right:8px;"></i>`;
       } else {
-        let i1 = `<i class="${
-          TreeDecoration.stackProps[this.#decoration.stack].class
-        } fa-stack-1x" style="color:${this.#decoration.stackColor}"></i>`;
+        let i1 = `<i class="${TreeDecoration.stackProps[this.#decoration.stack].class
+          } fa-stack-1x" style="color:${this.#decoration.stackColor}"></i>`;
         let i2 = `<i class="fa-solid fa-${this.#decoration.iconName} fa-stack-1x" style="color:${this.#decoration.iconColor}"></i>`;
-        result += `<span class="fa-stack" style="vertical-align:top; ${
-          settings.textTreeSmall ? "line-height:1.2em;" : ""
-        } width:1em; margin-right:8px;">${
-          TreeDecoration.stackProps[this.#decoration.stack].background
+        result += `<span class="fa-stack" style="vertical-align:top; ${settings.textTreeSmall ? "line-height:1.2em;" : ""
+          } width:1em; margin-right:8px;">${TreeDecoration.stackProps[this.#decoration.stack].background
             ? i1 + i2
             : i2 + i1
-        }</span>`;
+          }</span>`;
       }
     }
     // name
@@ -481,10 +472,9 @@ class StyledText {
    */
   find(searchFor, doCase = false, doWord = false, doRegex = false) {
     let rex = RegExp(
-      `${doWord ? "(^|\\P{L})(" : ""}${
-        doRegex
-          ? Util.escapeRegExpSearch(searchFor)
-          : Util.escapeRegExp(searchFor)
+      `${doWord ? "(^|\\P{L})(" : ""}${doRegex
+        ? Util.escapeRegExpSearch(searchFor)
+        : Util.escapeRegExp(searchFor)
       }${doWord ? ")\\P{L}" : ""}`,
       `udg${doCase ? "" : "i"}`,
     );

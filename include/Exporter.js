@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of Exporter class
  */
 
@@ -94,8 +94,8 @@ class Exporter {
           type: "text",
           content: theProject.created
             ? theProject.created.toLocalString(
-                theSettings.effectiveSettings().dateTimeFormatLong,
-              )
+              theSettings.effectiveSettings().dateTimeFormatLong,
+            )
             : "---",
         };
       },
@@ -107,8 +107,8 @@ class Exporter {
           type: "text",
           content: theProject.changed
             ? theProject.changed.toLocalString(
-                theSettings.effectiveSettings().dateTimeFormatLong,
-              )
+              theSettings.effectiveSettings().dateTimeFormatLong,
+            )
             : "---",
         };
       },
@@ -774,19 +774,16 @@ class Exporter {
             case "schemeTypes_file":
               return {
                 type: "text",
-                content: `${_("Scheme_fileName")}: ${
-                  content && content.filePath ? content.filePath : "---"
-                }, ${_("Scheme_fileSize")}: ${
-                  content && content.id && theFiles[content.id]
+                content: `${_("Scheme_fileName")}: ${content && content.filePath ? content.filePath : "---"
+                  }, ${_("Scheme_fileSize")}: ${content && content.id && theFiles[content.id]
                     ? Util.formatBytes(theFiles[content.id].size)
                     : "---"
-                }, ${_("Scheme_fileTime")}: ${
-                  content && content.fileModtime
+                  }, ${_("Scheme_fileTime")}: ${content && content.fileModtime
                     ? new Timestamp(content.fileModtime).toLocalString(
-                        theSettings.effectiveSettings().dateTimeFormatLong,
-                      )
+                      theSettings.effectiveSettings().dateTimeFormatLong,
+                    )
                     : "---"
-                }`,
+                  }`,
               };
               break;
           }
@@ -1114,14 +1111,14 @@ class Exporter {
     let formatCSS = `<style id="${domID}">\n`;
     Object.keys(formats).forEach(
       (id) =>
-        (formatCSS += Formats.toCSS(
-          id,
-          theFormats.getFormat(id),
-          undefined,
-          undefined,
-          undefined,
-          true,
-        )),
+      (formatCSS += Formats.toCSS(
+        id,
+        theFormats.getFormat(id),
+        undefined,
+        undefined,
+        undefined,
+        true,
+      )),
     );
     return formatCSS + "</style>\n";
   }
@@ -1352,9 +1349,9 @@ class Exporter {
                 id,
                 profile.exportType == "txt" && id == UUID0
                   ? {
-                      formats_fontFamily: "'monospace'",
-                      formats_fontSize: 12,
-                    }
+                    formats_fontFamily: "'monospace'",
+                    formats_fontSize: 12,
+                  }
                   : theFormats.getFormat(id),
               ]),
             ),
@@ -1530,7 +1527,7 @@ class Exporter {
                       });
                       break;
                   }
-                } catch (err) {}
+                } catch (err) { }
               }
             });
           }
@@ -2274,7 +2271,7 @@ class Exporter {
               for (let i = 0; i < c.width.length - 1; i++) {
                 let w = Math.floor(
                   (c.width[i] / 100) *
-                    theSettings.effectiveSettings().exportTableLineLength,
+                  theSettings.effectiveSettings().exportTableLineLength,
                 );
                 width += w;
                 columns.push({

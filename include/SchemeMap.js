@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of SchemeMap class
  */
 
@@ -17,9 +17,8 @@ class SchemeMap {
    */
   static leafletIcon(color, highlight) {
     return Leaflet.divIcon({
-      html: `<span class="fa-stack fa-2x ${
-        highlight ? "fa-flip" : ""
-      }" style="width:36px"><i class="fa-solid fa-location-pin fa-stack-2x"></i><i class="fa-solid fa-location-pin fa-stack-1x" style="color:${color}"></i></span>`,
+      html: `<span class="fa-stack fa-2x ${highlight ? "fa-flip" : ""
+        }" style="width:36px"><i class="fa-solid fa-location-pin fa-stack-2x"></i><i class="fa-solid fa-location-pin fa-stack-1x" style="color:${color}"></i></span>`,
       iconSize: [36, 48],
       iconAnchor: [18, 48],
       popupAnchor: [0, -27],
@@ -66,14 +65,13 @@ class SchemeMap {
           .html(
             `<i class="fa-solid fa-map-location-dot" id="go_${markerNum}" title="${_(
               "schemeMap_showLocation",
-            )}" style="cursor:pointer; opacity:${
-              map.getBounds().contains(latLng) ? 1.0 : 0.4
+            )}" style="cursor:pointer; opacity:${map.getBounds().contains(latLng) ? 1.0 : 0.4
             }"></i>`,
           ),
         $("<div>").attr({ num: markerNum, style: "grid-column:2" }).html(`
              <span id="lat_${markerNum}">${Leaflet.Util.formatNum(
-               latLng.lat,
-             ).toFixed(6)}</span>`),
+          latLng.lat,
+        ).toFixed(6)}</span>`),
         $("<div>").attr({ num: markerNum, style: "grid-column:3" }).html(`
         <span id="lng_${markerNum}">${Leaflet.Util.formatNum(
           Leaflet.latLng(latLng).wrap().lng,

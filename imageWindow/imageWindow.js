@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of image window
  */
 
@@ -102,8 +102,8 @@ ipcRenderer.on(
         style: "grid-column:3; grid-row:auto/span 2; align-self:center",
       })
         .html(`<div class="form-check"><input class="form-check-input" type="checkbox" id="ratio" checked><label class="form-check-label" for="ratio">${_(
-        "imageWindow_keepRatio",
-      )}</label>
+          "imageWindow_keepRatio",
+        )}</label>
       </div>`),
     );
     $grid.append(
@@ -130,11 +130,10 @@ ipcRenderer.on(
           style: "grid-column:1/span 3; justify-self:end",
         })
         .html(
-          `<button type="button" class="btn btn-outline-primary btn-sm" ${
-            theSpecs.height == theSpecs.origheight &&
+          `<button type="button" class="btn btn-outline-primary btn-sm" ${theSpecs.height == theSpecs.origheight &&
             theSpecs.width == theSpecs.origwidth
-              ? "disabled"
-              : ""
+            ? "disabled"
+            : ""
           } onclick="$('#width').val(parseInt(theSpecs.origwidth));$('#height').val(parseInt(theSpecs.origheight));theRatio=parseInt(theSpecs.origwidth)/parseInt(theSpecs.origheight)"><i class="fa-solid fa-rotate-left"></i></button> ${_(
             "imageWindow_originalSize",
             {
@@ -169,8 +168,7 @@ ipcRenderer.on(
           style: "grid-column:2/span 2; justify-self:stretch;",
         })
         .html(
-          `<textarea spellcheck="false" class="form-control form-control-sm" rows="5" id="title" style="width:100%">${
-            "title" in theSpecs ? Util.escapeHTML(theSpecs.title) : ""
+          `<textarea spellcheck="false" class="form-control form-control-sm" rows="5" id="title" style="width:100%">${"title" in theSpecs ? Util.escapeHTML(theSpecs.title) : ""
           }</textarea>`,
         ),
     );
@@ -197,9 +195,8 @@ ipcRenderer.on(
         });
         sample += `">`;
       }
-      html += `<div class="form-check"><input class="form-check-input" type="radio" name="alignment" style="margin-top:${DIMImage.adjust[c]}px" value="${c}" ${
-        theSpecs.alignment == c ? "checked" : ""
-      }><br><label class="form-check-label">${_(c)} ${sample}</label></div>`;
+      html += `<div class="form-check"><input class="form-check-input" type="radio" name="alignment" style="margin-top:${DIMImage.adjust[c]}px" value="${c}" ${theSpecs.alignment == c ? "checked" : ""
+        }><br><label class="form-check-label">${_(c)} ${sample}</label></div>`;
     });
     $grid.append(
       $("<div>")
@@ -223,8 +220,7 @@ ipcRenderer.on(
           style: "grid-column:2/span 2",
         })
         .html(
-          `<input class="form-check-input" type="checkbox" id="shadow"${
-            theSpecs.shadow == "true" ? " checked" : ""
+          `<input class="form-check-input" type="checkbox" id="shadow"${theSpecs.shadow == "true" ? " checked" : ""
           }>`,
         ),
     );

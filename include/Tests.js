@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of Tests class
  */
 
@@ -912,7 +912,7 @@ class Tests {
         return (
           "'" +
           theFonts.availableFamilies[
-            Util.randomIntExclusive(0, theFonts.availableFamilies.length)
+          Util.randomIntExclusive(0, theFonts.availableFamilies.length)
           ] +
           "'"
         );

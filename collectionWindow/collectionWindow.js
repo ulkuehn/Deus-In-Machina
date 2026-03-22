@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of text collection window
  */
 
@@ -251,27 +251,27 @@ ipcRenderer.on(
           render: function (data, type, row) {
             return type == "display"
               ? _(
-                  "statistics_wordFrequency",
-                  Math.round(statistics.words / data),
-                  {
-                    absolute: data,
-                    relative:
-                      data / statistics.words > 1 / 100
-                        ? Number.parseFloat(
-                            (data / statistics.words) * 100,
-                          ).toLocaleString(theLanguage, {
-                            minimumFractionDigits: 1,
-                            maximumFractionDigits: 1,
-                          }) + " %"
-                        : Number.parseFloat(
-                            (data / statistics.words) * 1000,
-                          ).toLocaleString(theLanguage, {
-                            minimumFractionDigits: 1,
-                            maximumFractionDigits: 1,
-                          }) + " &permil;",
-                    every: Math.round(statistics.words / data),
-                  },
-                )
+                "statistics_wordFrequency",
+                Math.round(statistics.words / data),
+                {
+                  absolute: data,
+                  relative:
+                    data / statistics.words > 1 / 100
+                      ? Number.parseFloat(
+                        (data / statistics.words) * 100,
+                      ).toLocaleString(theLanguage, {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                      }) + " %"
+                      : Number.parseFloat(
+                        (data / statistics.words) * 1000,
+                      ).toLocaleString(theLanguage, {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                      }) + " &permil;",
+                  every: Math.round(statistics.words / data),
+                },
+              )
               : data;
           },
         },
@@ -416,9 +416,8 @@ function infoTab(textPaths, settings) {
   );
   let html = "";
   for (let [mod, tags] of Object.entries(TreeDecoration.modTags)) {
-    html += `<span style="margin-right:20px;"><label><input id="${mod}" class="form-check-input" type="checkbox"${
-      theCollection.decoration[mod] ? " checked" : ""
-    }> ${tags[0]}${_(mod)}${tags[1]}</label></span>`;
+    html += `<span style="margin-right:20px;"><label><input id="${mod}" class="form-check-input" type="checkbox"${theCollection.decoration[mod] ? " checked" : ""
+      }> ${tags[0]}${_(mod)}${tags[1]}</label></span>`;
   }
   $grid.append(
     $("<div>")
@@ -474,8 +473,7 @@ function infoTab(textPaths, settings) {
         style: `grid-column:3/span 1; place-self:center start; margin-bottom:-${gridGap};`,
       })
       .html(
-        `<div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="iconSwitch" onchange="showIcons();" ${
-          theCollection.getDecorationValue("icon") ? "checked" : ""
+        `<div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="iconSwitch" onchange="showIcons();" ${theCollection.getDecorationValue("icon") ? "checked" : ""
         }></div>`,
       ),
   );
@@ -483,18 +481,16 @@ function infoTab(textPaths, settings) {
     "decoration_iconOverlay",
   )}</span> <select id="iconStack" class="form-select form-select-sm" style="display:unset; width:unset">`;
   TreeDecoration.stackIcons.forEach((stack) => {
-    html += `<option value="${stack}"${
-      theCollection.getDecorationValue("stack") == stack ? " selected" : ""
-    }>${_(stack)}</option>`;
+    html += `<option value="${stack}"${theCollection.getDecorationValue("stack") == stack ? " selected" : ""
+      }>${_(stack)}</option>`;
   });
   html += "</select>";
   $grid.append(
     $("<div>")
       .attr({
         id: "iconSpecs",
-        style: `grid-column:4/span 1; place-self:center end; margin-bottom:-${gridGap}; visibility:${
-          theCollection.getDecorationValue("icon") ? "visible" : "hidden"
-        }`,
+        style: `grid-column:4/span 1; place-self:center end; margin-bottom:-${gridGap}; visibility:${theCollection.getDecorationValue("icon") ? "visible" : "hidden"
+          }`,
       })
       .html(
         `${_(
@@ -502,24 +498,22 @@ function infoTab(textPaths, settings) {
         )} <input class="colorPicker" id="iconColor" value="${theCollection.getDecorationValue(
           "iconColor",
         )}">` +
-          html +
-          `<span style="margin-left:30px">${_(
-            "decoration_overlayColor",
-          )}</span> <input class="colorPicker" id="stackColor" value="${theCollection.getDecorationValue(
-            "stackColor",
-          )}">`,
+        html +
+        `<span style="margin-left:30px">${_(
+          "decoration_overlayColor",
+        )}</span> <input class="colorPicker" id="stackColor" value="${theCollection.getDecorationValue(
+          "stackColor",
+        )}">`,
       ),
   );
-  html = `<div id="icons" style="margin-top:10px; max-height:200px; overflow-y:auto; border:1px dotted; padding:10px; display:${
-    theCollection.getDecorationValue("icon") ? "block" : "none"
-  }">`;
+  html = `<div id="icons" style="margin-top:10px; max-height:200px; overflow-y:auto; border:1px dotted; padding:10px; display:${theCollection.getDecorationValue("icon") ? "block" : "none"
+    }">`;
   TreeDecoration.treeItemIcons.forEach((icon) => {
     if (!icon) {
       html += "<br>";
     } else {
-      html += `<div class="form-check form-check-inline" style="width:50px;"><input class="form-check-input" type="radio" name="iconsRadio" id="icons_${icon}" value="${icon}"${
-        icon == theCollection.getDecorationValue("iconName") ? " checked" : ""
-      }><label class="form-check-label" for="icons_${icon}" onmouseover="iconPopup(this,'${icon}')" onmouseout="iconPopdown()"><i class="fa-solid fa-${icon}"></i></label></div>`;
+      html += `<div class="form-check form-check-inline" style="width:50px;"><input class="form-check-input" type="radio" name="iconsRadio" id="icons_${icon}" value="${icon}"${icon == theCollection.getDecorationValue("iconName") ? " checked" : ""
+        }><label class="form-check-label" for="icons_${icon}" onmouseover="iconPopup(this,'${icon}')" onmouseout="iconPopdown()"><i class="fa-solid fa-${icon}"></i></label></div>`;
     }
   });
   html += "</div>";
@@ -692,8 +686,7 @@ function searchTab(settings, $filterDiv) {
         style: "grid-column:2; justify-self:end",
       })
       .html(
-        `<input type="checkbox" class="form-check-input" id="searchCase"${
-          theCollection.search.case ? " checked" : ""
+        `<input type="checkbox" class="form-check-input" id="searchCase"${theCollection.search.case ? " checked" : ""
         }>`,
       ),
   );
@@ -710,8 +703,7 @@ function searchTab(settings, $filterDiv) {
         style: "grid-column:4; justify-self:end",
       })
       .html(
-        `<input type="checkbox" class="form-check-input" id="searchWord"${
-          theCollection.search.word ? " checked" : ""
+        `<input type="checkbox" class="form-check-input" id="searchWord"${theCollection.search.word ? " checked" : ""
         }>`,
       ),
   );
@@ -728,8 +720,7 @@ function searchTab(settings, $filterDiv) {
         style: "grid-column:6; justify-self:end",
       })
       .html(
-        `<input type="checkbox" class="form-check-input" id="searchRegex"${
-          theCollection.search.regex ? " checked" : ""
+        `<input type="checkbox" class="form-check-input" id="searchRegex"${theCollection.search.regex ? " checked" : ""
         }>`,
       ),
   );
@@ -1112,10 +1103,10 @@ function iconPopup(element, icon) {
   if ($("#iconStack").val() == TreeDecoration.noStack) {
     $popup.html(
       '<i class="fa-solid fa-' +
-        icon +
-        ' fa-3x" style="color:' +
-        $("#iconColor").val() +
-        '"></i>',
+      icon +
+      ' fa-3x" style="color:' +
+      $("#iconColor").val() +
+      '"></i>',
     );
   } else {
     let i1 =
@@ -1132,10 +1123,10 @@ function iconPopup(element, icon) {
       '"></i>';
     $popup.html(
       '<span class="fa-stack" style="font-size:2.4em;">' +
-        (TreeDecoration.stackProps[$("#iconStack").val()].background
-          ? i1 + i2
-          : i2 + i1) +
-        "</span> ",
+      (TreeDecoration.stackProps[$("#iconStack").val()].background
+        ? i1 + i2
+        : i2 + i1) +
+      "</span> ",
     );
   }
   $popup.offset({

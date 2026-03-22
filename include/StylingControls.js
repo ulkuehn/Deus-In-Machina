@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of StylingControls class
  */
 
@@ -515,7 +515,7 @@ class StylingControls {
 
     // borders get precedence over outlines
     // individual borders not implemented
-    let bColor=null;
+    let bColor = null;
     let bStyle = docx.BorderStyle.SINGLE;
     let bSize; // size of the border is in 1/8 pt
     if (properties.formats_outline && properties.formats_outline[0]) {
@@ -666,7 +666,7 @@ class StylingControls {
     }
 
     // line color and strength not supported in rtf
-    
+
     if (properties.formats_border && properties.formats_border[0]) {
       let colorIndex = colorTable.indexOf(properties.formats_border[0]);
       if (colorIndex >= 0) {

@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of import from project window
  */
 
@@ -709,11 +709,10 @@ function itemControls(prefix, clearID = null, clearText = "") {
       )}"><i class="fa-solid fa-check-double"></i> <i class="fa-solid fa-plus"></i></button> <button type="button" class="btn btn-outline-danger btn-sm" onclick="changeAll('${prefix}',false)" title="${_(
         "importWindow_unselectAll",
       )}"><i class="fa-solid fa-check-double"></i> <i class="fa-solid fa-minus"></i></button>
-            ${
-              clearID
-                ? `<label><input class="form-check-input" type="checkbox" id="${clearID}" style="margin:7px 0 0 20px"></input> ${clearText}</label>`
-                : ``
-            }`,
+            ${clearID
+        ? `<label><input class="form-check-input" type="checkbox" id="${clearID}" style="margin:7px 0 0 20px"></input> ${clearText}</label>`
+        : ``
+      }`,
     );
 }
 
@@ -755,11 +754,11 @@ function upConnect(prefix, user = true) {
     prefix == "text" ? theTextTree : theObjectTree,
     prefix == "text"
       ? Object.keys(textStates).filter(
-          (x) => textStates[x][0] || textStates[x][1],
-        )
+        (x) => textStates[x][0] || textStates[x][1],
+      )
       : Object.keys(objectStates).filter(
-          (x) => objectStates[x][0] || objectStates[x][1],
-        ),
+        (x) => objectStates[x][0] || objectStates[x][1],
+      ),
     [],
   );
 }

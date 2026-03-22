@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of object search window
  */
 
@@ -364,17 +364,16 @@ ipcRenderer.on("objectSearchWindow_result", (event, results) => {
   results.forEach((result) => {
     result.result.forEach((r) => {
       table.push([
-        `<i class="fa-solid fa-arrow-up-right-from-square" style="cursor:pointer; margin-right:10px" onclick="showObject('${
-          result.id
+        `<i class="fa-solid fa-arrow-up-right-from-square" style="cursor:pointer; margin-right:10px" onclick="showObject('${result.id
         }',false)" oncontextmenu="showObject('${result.id}',true)" title="${_(
           "objectSearchWindow_showObject",
         )}")></i>${result.name}`,
         _(`objectSearchWindow_${r.type}`, { type: _(r.info) }),
         r.value[0] +
-          `<span style="color:#000000; background-color:#ffff00">` +
-          r.value[1] +
-          "</span>" +
-          r.value[2],
+        `<span style="color:#000000; background-color:#ffff00">` +
+        r.value[1] +
+        "</span>" +
+        r.value[2],
       ]);
     });
   });

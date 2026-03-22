@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of Layout class
  */
 
@@ -491,7 +491,7 @@ class Layout {
     if (this.#displayBottom) {
       size +=
         this.#verticalSizes[Layout.#horizontalUncollapse][
-          Layout.#bottomCollapse
+        Layout.#bottomCollapse
         ];
     } else {
       vAreas.pop();
@@ -499,8 +499,8 @@ class Layout {
     let vSizes = vAreas.map((x) =>
       x == Layout.#bottomCollapse
         ? this.#verticalSizes[Layout.#horizontalUncollapse][
-            Layout.#bottomCollapse
-          ]
+        Layout.#bottomCollapse
+        ]
         : 100 - size,
     );
 

@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of Placeholder class
  */
 
@@ -44,12 +44,12 @@ class Placeholder extends Parchment.Embed {
           (theSettings.exportPlaceholderBackgroundColor
             ? `color:${Util.blackOrWhite(theSettings.exportPlaceholderBackgroundColor)};`
             : "") +
-            (theSettings.exportPlaceholderBorderColor
-              ? `border:2px solid ${theSettings.exportPlaceholderBorderColor};`
-              : "") +
-            (theSettings.exportPlaceholderBackgroundColor
-              ? `background-color:${theSettings.exportPlaceholderBackgroundColor}`
-              : ""),
+          (theSettings.exportPlaceholderBorderColor
+            ? `border:2px solid ${theSettings.exportPlaceholderBorderColor};`
+            : "") +
+          (theSettings.exportPlaceholderBackgroundColor
+            ? `background-color:${theSettings.exportPlaceholderBackgroundColor}`
+            : ""),
         );
       $(node).append($span);
     } else {
@@ -62,12 +62,12 @@ class Placeholder extends Parchment.Embed {
           (theSettings.exportPlaceholderBackgroundColor
             ? `color:${Util.blackOrWhite(theSettings.exportPlaceholderBackgroundColor)};`
             : "") +
-            (theSettings.exportPlaceholderBorderColor
-              ? `border:2px solid ${theSettings.exportPlaceholderBorderColor};`
-              : "") +
-            (theSettings.exportPlaceholderBackgroundColor
-              ? `background-color:${theSettings.exportPlaceholderBackgroundColor}`
-              : ""),
+          (theSettings.exportPlaceholderBorderColor
+            ? `border:2px solid ${theSettings.exportPlaceholderBorderColor};`
+            : "") +
+          (theSettings.exportPlaceholderBackgroundColor
+            ? `background-color:${theSettings.exportPlaceholderBackgroundColor}`
+            : ""),
         );
       $(node).append(
         // document.createTextNode(

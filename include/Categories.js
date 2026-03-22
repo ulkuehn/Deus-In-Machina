@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of Categories class
  */
 
@@ -500,8 +500,7 @@ class Categories {
     );
     $addButton.on("click", () => this.#addListItem(list));
     let $clearButton = $(
-      `<button type="button" class="btn btn-outline-danger btn-sm" onclick="clearList('${
-        list.name
+      `<button type="button" class="btn btn-outline-danger btn-sm" onclick="clearList('${list.name
       }')" title="${_(
         "categories_clearList",
       )}"><i class="fas fa-trash"></i></button>`,
@@ -566,16 +565,14 @@ class Categories {
           )}" id="${list.properties[i].name}-${entryNo}" style="width:100%">`;
         }
         if (list.properties[i].type == "textarea") {
-          html = `<textarea spellcheck="false" class="form-control form-control-sm" id="${
-            list.properties[i].name
-          }-${entryNo}" style="height:1px; width:100%">${Util.escapeHTML(
-            entries[entryNo][list.properties[i].name],
-          )}</textarea>`;
+          html = `<textarea spellcheck="false" class="form-control form-control-sm" id="${list.properties[i].name
+            }-${entryNo}" style="height:1px; width:100%">${Util.escapeHTML(
+              entries[entryNo][list.properties[i].name],
+            )}</textarea>`;
         }
         if (list.properties[i].type == "color") {
-          html = `<input class="colorPicker" value="${
-            entries[entryNo][list.properties[i].name]
-          }" id="${list.properties[i].name}-${entryNo}"></input>`;
+          html = `<input class="colorPicker" value="${entries[entryNo][list.properties[i].name]
+            }" id="${list.properties[i].name}-${entryNo}"></input>`;
         }
         $(id).append(
           $("<div>")

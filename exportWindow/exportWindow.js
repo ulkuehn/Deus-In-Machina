@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of export window
  */
 
@@ -79,9 +79,9 @@ ipcRenderer.on(
         `.ql-editor *::selection { color:${Util.blackOrWhite(
           settings.selectionColor,
         )}; background:${settings.selectionColor} }\n` +
-          `.ql-editor img::selection { color:${Util.blackOrWhite(
-            settings.selectionColor,
-          )}; background:${settings.selectionColor}80 }`,
+        `.ql-editor img::selection { color:${Util.blackOrWhite(
+          settings.selectionColor,
+        )}; background:${settings.selectionColor}80 }`,
       ),
     );
     $("body *").css({
@@ -145,9 +145,8 @@ ipcRenderer.on(
         );
       })
       .forEach((id) => {
-        html += `<option value="${id}"${
-          id == theProfileID ? " selected" : ""
-        }>${Util.escapeHTML(theProfiles[id].profileName)}</option>`;
+        html += `<option value="${id}"${id == theProfileID ? " selected" : ""
+          }>${Util.escapeHTML(theProfiles[id].profileName)}</option>`;
       });
     html += "</select>";
 
@@ -218,13 +217,12 @@ function fillTab(settings, $grid) {
         .html(
           setting.type == "editor"
             ? `${_(
-                setting.i18n || setting.name,
-              )} <i class="fa-solid fa-arrow-up-right-from-square" style="cursor:pointer" id="editor_${
-                setting.name
-              }"></i>`
+              setting.i18n || setting.name,
+            )} <i class="fa-solid fa-arrow-up-right-from-square" style="cursor:pointer" id="editor_${setting.name
+            }"></i>`
             : `<span style="white-space:nowrap">${_(
-                setting.i18n || setting.name,
-              )}</span>`,
+              setting.i18n || setting.name,
+            )}</span>`,
         ),
     );
     // open editor in extra window
@@ -310,7 +308,7 @@ function fillTab(settings, $grid) {
           setting.placeholders,
           Util.blackOrWhite(
             theSettings.exportBackgroundColor ||
-              theSettings.generalBackgroundColor,
+            theSettings.generalBackgroundColor,
             "btn-outline-light",
             "btn-outline-dark",
           ),
@@ -383,7 +381,7 @@ function applyProfile() {
   $("#previewButton").prop(
     "disabled",
     theProfiles[theProfileID].exportType == "rtf" ||
-      theProfiles[theProfileID].exportType == "docx",
+    theProfiles[theProfileID].exportType == "docx",
   );
 
   // update Exporter

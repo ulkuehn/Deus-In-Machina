@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of TextTree class
  */
 
@@ -344,9 +344,8 @@ class TextTree {
     } else {
       if (settings.textTreeSelectionBorder) {
         clickedStyle.background = "unset";
-        clickedStyle["box-shadow"] = `inset 0 0 8px ${
-          settings.textTreeSmall ? 0 : 3
-        }px ${settings.textTreeSelectionColor}`;
+        clickedStyle["box-shadow"] = `inset 0 0 8px ${settings.textTreeSmall ? 0 : 3
+          }px ${settings.textTreeSelectionColor}`;
         clickedStyle["padding-right"] = "12px";
       } else {
         clickedStyle.background = settings.textTreeSelectionColor;
@@ -365,9 +364,8 @@ class TextTree {
     let clickedStyleRow = {};
     if (settings.textTreeSelectionBorder) {
       clickedStyleRow.background = "unset";
-      clickedStyleRow["box-shadow"] = `inset 0 0 8px ${
-        settings.textTreeSmall ? 0 : 3
-      }px ${settings.textTreeSelectionColor}`;
+      clickedStyleRow["box-shadow"] = `inset 0 0 8px ${settings.textTreeSmall ? 0 : 3
+        }px ${settings.textTreeSelectionColor}`;
       clickedStyleRow["padding-right"] = "12px";
     } else {
       clickedStyleRow.background = settings.textTreeSelectionColor;
@@ -385,21 +383,21 @@ class TextTree {
         settings.TTBackgroundColor || settings.generalBackgroundColor,
       )} }
           #TT .jstree-dim .jstree-clicked { ${Object.keys(clickedStyle)
-            .map((k) => `${k}:${clickedStyle[k]}`)
-            .join("; ")} }
+        .map((k) => `${k}:${clickedStyle[k]}`)
+        .join("; ")} }
           #TT .jstree-dim .jstree-hovered { ${Object.keys(hoveredStyle)
-            .map((k) => `${k}:${hoveredStyle[k]}`)
-            .join("; ")} }
+        .map((k) => `${k}:${hoveredStyle[k]}`)
+        .join("; ")} }
           #TT .jstree-dim .jstree-wholerow-clicked { ${Object.keys(
-            clickedStyleRow,
-          )
-            .map((k) => `${k}:${clickedStyleRow[k]}`)
-            .join("; ")} }
+          clickedStyleRow,
+        )
+        .map((k) => `${k}:${clickedStyleRow[k]}`)
+        .join("; ")} }
           #TT .jstree-dim .jstree-wholerow-hovered { ${Object.keys(
-            hoveredStyleRow,
-          )
-            .map((k) => `${k}:${hoveredStyleRow[k]}`)
-            .join("; ")} }
+          hoveredStyleRow,
+        )
+        .map((k) => `${k}:${hoveredStyleRow[k]}`)
+        .join("; ")} }
           `,
     );
   }

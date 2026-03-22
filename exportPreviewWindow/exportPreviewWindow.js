@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of export preview window
  */
 
@@ -127,9 +127,8 @@ ipcRenderer.on(
         $grid,
         $("<div>")
           .attr({
-            style: `height:calc(100vh - 60px); overflow-y:auto; padding:20px; color:#000000; background-color:#ffffff; ${
-              profile.exportType == "html" ? "" : "white-space:pre-wrap;"
-            }`,
+            style: `height:calc(100vh - 60px); overflow-y:auto; padding:20px; color:#000000; background-color:#ffffff; ${profile.exportType == "html" ? "" : "white-space:pre-wrap;"
+              }`,
           })
           .html(
             profile.exportType == "html"

@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of Formats class
  */
 
@@ -298,10 +298,9 @@ class Formats {
       }
       if (settings.previewFormats) {
         $("#formatSheet").append(
-          `${
-            formatID == UUID0
-              ? `#formatSelector option { `
-              : `#formatSelector .format${formatID} {`
+          `${formatID == UUID0
+            ? `#formatSelector option { `
+            : `#formatSelector .format${formatID} {`
           } ${Formats.toPreviewCSS(format)}}\n`,
         );
       }
@@ -325,9 +324,8 @@ class Formats {
     Formats.settings.forEach((setting) => {
       if (setting.css && setting.preview && setting.name in format) {
         let value = format[setting.name];
-        css += `${setting.css}: ${value}${
-          "unit" in setting ? setting.unit : ""
-        }; `;
+        css += `${setting.css}: ${value}${"unit" in setting ? setting.unit : ""
+          }; `;
       }
     });
 
@@ -377,12 +375,11 @@ class Formats {
           css += `--alpha:${alpha}; --rgb:${r},${g},${b}; `;
           value = "rgba(var(--rgb),var(--alpha))";
         }
-        css += `${setting.css}:${
-          "unit" in setting &&
-          ["pt", "px", "pc", "cm", "mm"].includes(setting.unit)
+        css += `${setting.css}:${"unit" in setting &&
+            ["pt", "px", "pc", "cm", "mm"].includes(setting.unit)
             ? Math.round((zoom / 10) * value) / 10
             : value
-        }${"unit" in setting ? setting.unit : ""}; `;
+          }${"unit" in setting ? setting.unit : ""}; `;
       }
     });
     css += " }\n";
@@ -507,9 +504,8 @@ class Formats {
         )
       ) {
         if (format[setting.name]) {
-          css += `${setting.css}:${format[setting.name]}${
-            "unit" in setting ? setting.unit : ""
-          }; `;
+          css += `${setting.css}:${format[setting.name]}${"unit" in setting ? setting.unit : ""
+            }; `;
         }
       }
     });

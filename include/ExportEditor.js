@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of ExportEditor class
  */
 
@@ -68,9 +68,8 @@ class ExportEditor {
 
     let $boldDiv = $("<div>")
       .attr({
-        style: `grid-column:1; align-self:center; visibility:${
-          withFormat ? "visible" : "hidden"
-        }`,
+        style: `grid-column:1; align-self:center; visibility:${withFormat ? "visible" : "hidden"
+          }`,
       })
       .append(
         $boldControl,
@@ -82,9 +81,8 @@ class ExportEditor {
       );
     let $italicDiv = $("<div>")
       .attr({
-        style: `grid-column:2; align-self:center; visibility:${
-          withFormat ? "visible" : "hidden"
-        }`,
+        style: `grid-column:2; align-self:center; visibility:${withFormat ? "visible" : "hidden"
+          }`,
       })
       .append(
         $italicControl,
@@ -96,9 +94,8 @@ class ExportEditor {
       );
     let $underlineDiv = $("<div>")
       .attr({
-        style: `grid-column:3; align-self:center; visibility:${
-          withFormat ? "visible" : "hidden"
-        }`,
+        style: `grid-column:3; align-self:center; visibility:${withFormat ? "visible" : "hidden"
+          }`,
       })
       .append(
         $underlineControl,
@@ -110,9 +107,8 @@ class ExportEditor {
       );
     let $strikeDiv = $("<div>")
       .attr({
-        style: `grid-column:4; align-self:center; visibility:${
-          withFormat ? "visible" : "hidden"
-        }`,
+        style: `grid-column:4; align-self:center; visibility:${withFormat ? "visible" : "hidden"
+          }`,
       })
       .append(
         $strikeControl,
@@ -143,8 +139,7 @@ class ExportEditor {
       })
       .forEach((formatID) => {
         $formatSelect.append(
-          `<option ${
-            settings.previewFormats ? `class="format${formatID}"` : ""
+          `<option ${settings.previewFormats ? `class="format${formatID}"` : ""
           } value="${formatID}" ${formatID == UUID0 ? "selected" : ""}>${Util.escapeHTML(formats[formatID].formats_name)}</option>`,
         );
         $(`#formatSheet${id}`).append(
@@ -158,10 +153,9 @@ class ExportEditor {
         );
         if (settings.previewFormats) {
           $(`#formatSheet${id}`).append(
-            `${
-              formatID == UUID0
-                ? `#format${id} option { `
-                : `#format${id} .format${formatID} {`
+            `${formatID == UUID0
+              ? `#format${id} option { `
+              : `#format${id} .format${formatID} {`
             } ${Formats.toPreviewCSS(formats[formatID])}}\n`,
           );
         }
@@ -176,9 +170,8 @@ class ExportEditor {
       });
     let $formatDiv = $("<div>")
       .attr({
-        style: `grid-column:5; align-self:center; visibility:${
-          withFormat ? "visible" : "hidden"
-        }`,
+        style: `grid-column:5; align-self:center; visibility:${withFormat ? "visible" : "hidden"
+          }`,
       })
       .append($formatSelect);
 
@@ -193,19 +186,17 @@ class ExportEditor {
       );
       placeholders.forEach((placeholder) => {
         $placeholderSelect.append(
-          `<option value="${placeholder}" ${
-            Exporter.placeholders[placeholder].block
-              ? `style="text-align:center;"`
-              : ""
+          `<option value="${placeholder}" ${Exporter.placeholders[placeholder].block
+            ? `style="text-align:center;"`
+            : ""
           }>${_(`placeholders_${placeholder}`)}</option>`,
         );
       });
     }
     let $placeholderDiv = $("<div>")
       .attr({
-        style: `grid-column:6/span ${
-          withZoom ? 1 : 3
-        }; justify-self:stretch; align-self:center;`,
+        style: `grid-column:6/span ${withZoom ? 1 : 3
+          }; justify-self:stretch; align-self:center;`,
       })
       .append($placeholderSelect);
 
@@ -426,10 +417,10 @@ class ExportEditor {
                       sel.index,
                       "image",
                       reader.result +
-                        " " +
-                        theSettings.imageWidth +
-                        " " +
-                        theSettings.imageHeight,
+                      " " +
+                      theSettings.imageWidth +
+                      " " +
+                      theSettings.imageHeight,
                     );
                     quill.formatText(sel.index, 1, {
                       title: path,
@@ -512,10 +503,9 @@ class ExportEditor {
           );
           if (settings.previewFormats) {
             $(`#formatSheet${id}`).append(
-              `${
-                formatID == UUID0
-                  ? `#format${id} option { `
-                  : `#format${id} .format${formatID} {`
+              `${formatID == UUID0
+                ? `#format${id} option { `
+                : `#format${id} .format${formatID} {`
               } ${Formats.toPreviewCSS(formats[formatID])}}\n`,
             );
           }
@@ -548,10 +538,9 @@ class ExportEditor {
               );
               if (settings.previewFormats) {
                 $(`#formatSheet${id}`).append(
-                  `${
-                    formatID == UUID0
-                      ? `#format${id} option { `
-                      : `#format${id} .format${formatID} {`
+                  `${formatID == UUID0
+                    ? `#format${id} option { `
+                    : `#format${id} .format${formatID} {`
                   } ${Formats.toPreviewCSS(formats[formatID])}}\n`,
                 );
               }
@@ -657,10 +646,10 @@ class ExportEditor {
                     selection.index,
                     "image",
                     reader.result +
-                      " " +
-                      theSettings.imageWidth +
-                      " " +
-                      theSettings.imageHeight,
+                    " " +
+                    theSettings.imageWidth +
+                    " " +
+                    theSettings.imageHeight,
                   );
                   this.#editor.formatText(selection.index, 1, {
                     title: "",

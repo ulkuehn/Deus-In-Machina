@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of Project class
  */
 
@@ -1140,7 +1140,7 @@ class Project {
         this.#reset();
         setTimeout(() => theTextTree.newText(false), 500);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => {
         this.#doAutoSave = true;
       });
@@ -1164,9 +1164,9 @@ class Project {
               new Timestamp().epochSeconds,
             ]);
           })
-          .catch(() => {});
+          .catch(() => { });
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => {
         this.#doAutoSave = true;
       });
@@ -1190,7 +1190,7 @@ class Project {
           }
         }
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => {
         this.#doAutoSave = true;
       });
@@ -1204,7 +1204,7 @@ class Project {
   save(saveAs = false) {
     this.#doAutoSave = false;
     this.#saveProject(saveAs)
-      .then(() => {})
+      .then(() => { })
       .catch((path) => {
         ipcRenderer.invoke("mainProcess_errorMessage", [
           _("project_saveErrorTitle"),
@@ -1384,7 +1384,7 @@ class Project {
             }
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     });
   }
 

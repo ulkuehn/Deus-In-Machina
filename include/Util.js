@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of Util class
  */
 
@@ -56,7 +56,7 @@ class Util {
     } else {
       return Math.round(
         100 +
-          (400 * (linearValue - Util.neutralZoomValue)) / Util.neutralZoomValue,
+        (400 * (linearValue - Util.neutralZoomValue)) / Util.neutralZoomValue,
       );
     }
   }
@@ -280,10 +280,10 @@ class Util {
     let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
       ? [
-          parseInt(result[1], 16),
-          parseInt(result[2], 16),
-          parseInt(result[3], 16),
-        ]
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16),
+      ]
       : [0, 0, 0];
   }
 

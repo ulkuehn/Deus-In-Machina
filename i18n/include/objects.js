@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file i18n translations for objects
  */
 
@@ -15,11 +15,11 @@ const translationObjects = {
     objects_deleteTitle: "Objekt(e) löschen",
     objects_deleteMessage:
       [
-      [1, 1, '"%{name1}" wirklich löschen?'],
-      [2, 2, '"%{name1}" und "%{name2}" wirklich löschen?'],
-      [3, 3, '"%{name1}", "%{name2}" und "%{name3}" wirklich löschen?'],
-      [4, null, '"%{name1}", "%{name2}" und %{objects} weitere Objekte wirklich löschen?'],
-    ],
+        [1, 1, '"%{name1}" wirklich löschen?'],
+        [2, 2, '"%{name1}" und "%{name2}" wirklich löschen?'],
+        [3, 3, '"%{name1}", "%{name2}" und "%{name3}" wirklich löschen?'],
+        [4, null, '"%{name1}", "%{name2}" und %{objects} weitere Objekte wirklich löschen?'],
+      ],
     objects_deleteWarning:
       "\n\nACHTUNG: Die Objekte in diesem Zweig verlieren alle Eigenschaften, die auf dem Schema dieses Objekts beruhen!",
     objects_deleteBranchTitle: "Zweig löschen",

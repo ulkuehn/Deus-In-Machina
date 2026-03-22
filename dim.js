@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file electron main process
  */
 
@@ -181,7 +181,7 @@ app.whenReady().then(() => {
   try {
     settings = JSON.parse(fs.readFileSync(settingsFilePath));
     debugMode = settings.debug;
-  } catch (err) {}
+  } catch (err) { }
   if (debugMode) {
     theLogger.level = "verbose";
   }
@@ -1342,7 +1342,7 @@ function getGlobalState() {
   theLogger.info("getting global state");
   try {
     theState = JSON.parse(fs.readFileSync(stateFilePath));
-  } catch (err) {}
+  } catch (err) { }
 }
 
 /**
@@ -1352,7 +1352,7 @@ function setGlobalState() {
   theLogger.info("setting global state");
   try {
     fs.writeFileSync(stateFilePath, JSON.stringify(theState, null, 2));
-  } catch (err) {}
+  } catch (err) { }
 }
 
 /*
@@ -1951,22 +1951,22 @@ ipcMain.handle(
                     // ask for user confirmation if saving is necessary
                     if (changed) {
                       switch (
-                        dialog.showMessageBoxSync(
-                          BrowserWindow.getFocusedWindow(),
-                          {
-                            type: "none",
-                            title: _("mainProcess_windowCloseTitle", {
-                              title: title,
-                            }),
-                            message:
-                              message || _("mainProcess_windowCloseMessage"),
-                            buttons: [
-                              yes || _("mainProcess_windowCloseSave"),
-                              no || _("mainProcess_windowCloseNoSave"),
-                            ],
-                            cancelId: -1,
-                          },
-                        )
+                      dialog.showMessageBoxSync(
+                        BrowserWindow.getFocusedWindow(),
+                        {
+                          type: "none",
+                          title: _("mainProcess_windowCloseTitle", {
+                            title: title,
+                          }),
+                          message:
+                            message || _("mainProcess_windowCloseMessage"),
+                          buttons: [
+                            yes || _("mainProcess_windowCloseSave"),
+                            no || _("mainProcess_windowCloseNoSave"),
+                          ],
+                          cancelId: -1,
+                        },
+                      )
                       ) {
                         // abort message window
                         case -1:
@@ -2073,8 +2073,7 @@ ipcMain.handle("mainProcess_loadImageAsDataURL", () => {
     });
     if (result) {
       resolve(
-        `data:image/${
-          result[0].endsWith("png") ? "png" : "jpeg"
+        `data:image/${result[0].endsWith("png") ? "png" : "jpeg"
         };base64,${fs.readFileSync(result[0], "base64")}`,
       );
     } else {
@@ -2387,7 +2386,7 @@ ipcMain.handle("mainProcess_getGlobalSettings", () => {
   let settings = null;
   try {
     settings = JSON.parse(fs.readFileSync(settingsFilePath));
-  } catch (err) {}
+  } catch (err) { }
   return settings;
 });
 
@@ -2406,7 +2405,7 @@ ipcMain.handle("mainProcess_storeGlobalSettings", (event, settings) => {
   theLogger.verbose("mainProcess_storeGlobalSettings", { settings });
   try {
     fs.writeFileSync(settingsFilePath, JSON.stringify(settings, null, 2));
-  } catch (err) {}
+  } catch (err) { }
 });
 
 /**
@@ -2780,7 +2779,7 @@ ipcMain.handle("mainProcess_clearTmpDir", () => {
     fs.readdirSync(theTmpDir).forEach((file) =>
       fs.rmSync(`${theTmpDir}${path.sep}${file}`, { force: true }),
     );
-  } catch (err) {}
+  } catch (err) { }
 });
 
 /**
@@ -2834,13 +2833,13 @@ ipcMain.handle("mainWindow_print2PDF", () => {
                 });
               } else {
                 switch (
-                  dialog.showMessageBoxSync(BrowserWindow.getFocusedWindow(), {
-                    type: "none",
-                    title: _("mainWindow_printingDone"),
-                    message: _("mainWindow_printingOpen", { file: file }),
-                    cancelId: -1,
-                    buttons: [_("general_answerYes"), _("general_answerNo")],
-                  })
+                dialog.showMessageBoxSync(BrowserWindow.getFocusedWindow(), {
+                  type: "none",
+                  title: _("mainWindow_printingDone"),
+                  message: _("mainWindow_printingOpen", { file: file }),
+                  cancelId: -1,
+                  buttons: [_("general_answerYes"), _("general_answerNo")],
+                })
                 ) {
                   case 0:
                     shell.openPath(file).then((error) => {

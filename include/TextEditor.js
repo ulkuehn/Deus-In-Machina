@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of TextEditor class
  */
 
@@ -316,8 +316,7 @@ class TextEditor {
           style: "grid-column:12; align-self:center; justify-self:center",
         })
         .html(
-          `<input type="checkbox" class="btn-check" id="searchRegex"><label class="btn btn-outline-light btn-sm simple-btn" style="padding:0; width:35px; ${
-            settings.searchWithRegex ? "" : "display:none"
+          `<input type="checkbox" class="btn-check" id="searchRegex"><label class="btn btn-outline-light btn-sm simple-btn" style="padding:0; width:35px; ${settings.searchWithRegex ? "" : "display:none"
           }" for="searchRegex" title="${_(
             "search_withRegex",
           )}"><span style="font-size:18px;"><b>.*</b></span></label>`,
@@ -429,8 +428,7 @@ class TextEditor {
         .html(
           `<i class="fa-solid fa-text-height"></i> <span id="zoomValue" style="cursor:pointer" title="${_(
             "editorBars_resetZoomTitle",
-          )}" onclick="$('#zoomSelector').val(${
-            Util.neutralZoomValue
+          )}" onclick="$('#zoomSelector').val(${Util.neutralZoomValue
           });$('#zoomSelector').trigger('input')">${Util.scaledZoom(
             zoomValue,
           )}%</span>`,
@@ -663,11 +661,10 @@ class TextEditor {
       theLayout.zoomValue = $("#zoomSelector").val();
       $("#zoomValue").html(Util.scaledZoom($("#zoomSelector").val()) + "%");
       $(":root").css({
-        "--first-line-indent": `${
-          (settings.firstLineIndent *
+        "--first-line-indent": `${(settings.firstLineIndent *
             Util.scaledZoom($("#zoomSelector").val())) /
           100
-        }px`,
+          }px`,
       });
       theObjectTree.buildObjectSheet();
     });
@@ -788,10 +785,8 @@ class TextEditor {
     // extend contextmenu to handle objects connected with a text selection
     $.contextMenu.types.checkclick = function (item, opt, root) {
       $(
-        `<label><input type="checkbox" ${
-          item.checked ? "checked" : ""
-        } class="form-check-input" style="margin-top:2px; border:1px solid #2f2f2f; box-shadow:none"><span>${
-          item.name
+        `<label><input type="checkbox" ${item.checked ? "checked" : ""
+        } class="form-check-input" style="margin-top:2px; border:1px solid #2f2f2f; box-shadow:none"><span>${item.name
         }</span></label>`,
       ).appendTo(this);
 
@@ -859,10 +854,9 @@ class TextEditor {
       "--background-color": bgColor,
     });
     $(":root").css({
-      "--first-line-indent": `${
-        (settings.firstLineIndent * Util.scaledZoom($("#zoomSelector").val())) /
+      "--first-line-indent": `${(settings.firstLineIndent * Util.scaledZoom($("#zoomSelector").val())) /
         100
-      }px`,
+        }px`,
     });
 
     $("#emptyEditor").empty();
@@ -939,11 +933,10 @@ class TextEditor {
 
     // styles
     let sheetHTML = `.edi + .edi { border-top-color:${settings.textSeparatorColor || Util.blackOrWhite(bgColor)}; border-top-width:${settings.textSeparatorWidth}px; border-top-style:${settings.textSeparatorStyle}; margin-top:${settings.textSeparatorAbove}px; padding-top:${settings.textSeparatorBelow}px }\n`;
-    sheetHTML += `.ql-editor[contenteditable="false"] { ${
-      settings.lockedBackgroundColor
+    sheetHTML += `.ql-editor[contenteditable="false"] { ${settings.lockedBackgroundColor
         ? `background-color:${settings.lockedBackgroundColor};`
         : ""
-    } opacity:${settings.lockedOpacity / 100} }\n`;
+      } opacity:${settings.lockedOpacity / 100} }\n`;
 
     if (settings.spellcheckDecorationColor || settings.spellcheckShadowColor) {
       sheetHTML += `.edi::spelling-error { `;
@@ -1083,10 +1076,9 @@ class TextEditor {
       })
       .forEach((formatID) => {
         $("#formatSelector").append(
-          `<option ${
-            theSettings.effectiveSettings().previewFormats
-              ? `class="format${formatID}"`
-              : ""
+          `<option ${theSettings.effectiveSettings().previewFormats
+            ? `class="format${formatID}"`
+            : ""
           } value="${formatID}">${Util.escapeHTML(
             formats[formatID].formats_name,
           )}</option>`,
@@ -1287,8 +1279,8 @@ class TextEditor {
         }
         let scrollTo = Math.round(
           bounds.top +
-            top -
-            verticalShift * ($("#TEE").height() - bounds.height),
+          top -
+          verticalShift * ($("#TEE").height() - bounds.height),
         );
         if (scrollTo < 0) {
           scrollTo = 0;
@@ -1890,11 +1882,10 @@ class TextEditor {
       theLayout.zoomValue = $("#zoomSelector").val();
       $("#zoomValue").html(Util.scaledZoom($("#zoomSelector").val()) + "%");
       $(":root").css({
-        "--first-line-indent": `${
-          (theSettings.effectiveSettings().firstLineIndent *
+        "--first-line-indent": `${(theSettings.effectiveSettings().firstLineIndent *
             Util.scaledZoom($("#zoomSelector").val())) /
           100
-        }px`,
+          }px`,
       });
       theObjectTree.buildObjectSheet();
     }
@@ -1952,10 +1943,10 @@ class TextEditor {
                     sel.index,
                     "image",
                     reader.result +
-                      " " +
-                      settings.imageWidth +
-                      " " +
-                      settings.imageHeight,
+                    " " +
+                    settings.imageWidth +
+                    " " +
+                    settings.imageHeight,
                   );
                   this.#editors[textID].quill.formatText(sel.index, 1, {
                     title: "",
@@ -2441,10 +2432,10 @@ class TextEditor {
                   sel.index,
                   "image",
                   reader.result +
-                    " " +
-                    settings.imageWidth +
-                    " " +
-                    settings.imageHeight,
+                  " " +
+                  settings.imageWidth +
+                  " " +
+                  settings.imageHeight,
                 );
                 this.#editors[textID].quill.formatText(sel.index, 1, {
                   title: path,
@@ -2541,15 +2532,14 @@ class TextEditor {
       items.splitSep = "x";
       items.split = {
         isHtmlName: true,
-        name: `${_("editorContextMenu_split")}<br><em>${
-          sel.index > citeLen ? `${ellip} ` : ""
-        }${this.#editors[textID].quill.getText(
-          sel.index > citeLen ? sel.index - citeLen : 0,
-          sel.index > citeLen ? citeLen : sel.index,
-        )}${sep}${this.#editors[textID].quill.getText(
-          sel.index,
-          sel.index < len - citeLen ? citeLen : len - sel.index,
-        )}${sel.index < len - citeLen ? ` ${ellip}` : ""}</em>`,
+        name: `${_("editorContextMenu_split")}<br><em>${sel.index > citeLen ? `${ellip} ` : ""
+          }${this.#editors[textID].quill.getText(
+            sel.index > citeLen ? sel.index - citeLen : 0,
+            sel.index > citeLen ? citeLen : sel.index,
+          )}${sep}${this.#editors[textID].quill.getText(
+            sel.index,
+            sel.index < len - citeLen ? citeLen : len - sel.index,
+          )}${sel.index < len - citeLen ? ` ${ellip}` : ""}</em>`,
         callback: function () {
           theTextEditor.splitText();
         },
@@ -2827,10 +2817,9 @@ class TextEditor {
    */
   #findSearchPositions(searchFor, doCase, doWord, doRegex) {
     let rex = RegExp(
-      `${doWord ? "(^|\\P{L})(" : ""}${
-        doRegex
-          ? Util.escapeRegExpSearch(searchFor)
-          : Util.escapeRegExp(searchFor)
+      `${doWord ? "(^|\\P{L})(" : ""}${doRegex
+        ? Util.escapeRegExpSearch(searchFor)
+        : Util.escapeRegExp(searchFor)
       }${doWord ? ")\\P{L}" : ""}`,
       `udg${doCase ? "" : "i"}`,
     );
@@ -2886,7 +2875,7 @@ class TextEditor {
             selection.index +
             (selection.length ? (overlapSelection ? 1 : selection.length) : 0);
           let ediPos = this.#searchPositions[this.#ids[editorIndex]];
-          for (; i < ediPos.length && ediPos[i].index < selPos; i++) {}
+          for (; i < ediPos.length && ediPos[i].index < selPos; i++) { }
           if (i >= ediPos.length) {
             // next editor
             editorIndex++;
@@ -2902,7 +2891,7 @@ class TextEditor {
         else {
           let ediPos = this.#searchPositions[this.#ids[editorIndex]];
           let i = ediPos.length - 1;
-          for (; i >= 0 && ediPos[i].index >= selection.index; i--) {}
+          for (; i >= 0 && ediPos[i].index >= selection.index; i--) { }
           if (i < 0) {
             // prev editor
             editorIndex--;

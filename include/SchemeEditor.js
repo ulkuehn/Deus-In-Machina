@@ -1,7 +1,7 @@
 /**
  * DIM - Deus In Machina
  *
- * @author Ulrich Kühn 2024, 2025
+ * @author Ulrich Kühn 2024, 2025, 2026
  * @file implementation of SchemeEditor class
  */
 
@@ -124,16 +124,14 @@ class SchemeEditor {
       })
       .forEach((formatID) => {
         $formatSelect.append(
-          `<option ${
-            settings.previewFormats ? `class="format${formatID}"` : ""
+          `<option ${settings.previewFormats ? `class="format${formatID}"` : ""
           } value="${formatID}" ${formatID == UUID0 ? "selected" : ""}>${Util.escapeHTML(formats[formatID].formats_name)}</option>`,
         );
         if (settings.previewFormats) {
           $("#formatSheet").append(
-            `${
-              formatID == UUID0
-                ? `#schemeEditorFormat${id} option { `
-                : `#schemeEditorFormat${id} .format${formatID} {`
+            `${formatID == UUID0
+              ? `#schemeEditorFormat${id} option { `
+              : `#schemeEditorFormat${id} .format${formatID} {`
             } ${Formats.toPreviewCSS(formats[formatID])}}\n`,
           );
         }
@@ -306,10 +304,9 @@ class SchemeEditor {
           );
           if (settings.previewFormats) {
             $("#formatSheet").append(
-              `${
-                formatID == UUID0
-                  ? `#schemeEditorFormat${id} option { `
-                  : `#schemeEditorFormat${id} .format${formatID} {`
+              `${formatID == UUID0
+                ? `#schemeEditorFormat${id} option { `
+                : `#schemeEditorFormat${id} .format${formatID} {`
               } ${Formats.toPreviewCSS(format)}}\n`,
             );
           }
@@ -345,19 +342,17 @@ class SchemeEditor {
               );
               if (settings.previewFormats) {
                 $("#formatSheet").append(
-                  `${
-                    formatID == UUID0
-                      ? `#schemeEditorFormat${id} option { `
-                      : `#schemeEditorFormat${id} .format${formatID} {`
+                  `${formatID == UUID0
+                    ? `#schemeEditorFormat${id} option { `
+                    : `#schemeEditorFormat${id} .format${formatID} {`
                   } ${Formats.toPreviewCSS(format)}}\n`,
                 );
               }
             }
             $("#formatSheet").append(`img { zoom:${zoom}% }`);
             $(":root").css({
-              "--first-line-indent": `${
-                (settings.firstLineIndent * zoom) / 100
-              }px`,
+              "--first-line-indent": `${(settings.firstLineIndent * zoom) / 100
+                }px`,
             });
           }
         },
@@ -547,10 +542,10 @@ class SchemeEditor {
                       sel.index,
                       "image",
                       reader.result +
-                        " " +
-                        theSettings.imageWidth +
-                        " " +
-                        theSettings.imageHeight,
+                      " " +
+                      theSettings.imageWidth +
+                      " " +
+                      theSettings.imageHeight,
                     );
                     quill.formatText(sel.index, 1, {
                       title: path,
@@ -651,10 +646,10 @@ class SchemeEditor {
                     selection.index,
                     "image",
                     reader.result +
-                      " " +
-                      theSettings.imageWidth +
-                      " " +
-                      theSettings.imageHeight,
+                    " " +
+                    theSettings.imageWidth +
+                    " " +
+                    theSettings.imageHeight,
                   );
                   this.#editor.formatText(selection.index, 1, {
                     title: "",
