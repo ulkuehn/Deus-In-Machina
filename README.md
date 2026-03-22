@@ -38,7 +38,7 @@ Make sure you have git (install from github.com), node (install from node.js) an
 git clone https://github.com/ulkuehn/Deus-In-Machina.git
 npm install
 npm run dim       <-- run directly from repo
-npm run windows   <-- create an installable exe file in dist folder
+npm run windows   <-- create an installable exe file in dist folder (run as admin or enable developer mode to have privileges for setting sym links)
 ```
 
 ### Linux
