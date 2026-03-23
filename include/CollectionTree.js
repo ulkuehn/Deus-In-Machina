@@ -799,10 +799,11 @@ class CollectionTree {
     };
     if (!this.isActive() && !this.#collections[nodeID].search) {
       let addTexts = []
+      let removeTexts = []
       theTextTree.getChecked().forEach((textID) => {
-        if (!this.#collections[nodeID].hasItem(textID)) {
-          addTexts.push(textID);
-        }
+        if (this.#collections[nodeID].hasItem(textID))
+          removeTexts.push(textID);
+        else addTexts.push(textID);
       });
       if (addTexts.length) {
         items.addCheckedTexts = {
@@ -811,9 +812,21 @@ class CollectionTree {
             addTexts.forEach((textID) => {
               this.#collections[nodeID].addItem(textID);
             });
+            this.updateName(nodeID); // to update decoration
           },
         };
       }
+        if (removeTexts.length) {
+          items.removeCheckedTexts = {
+            name: _("textCollections_contextMenuRemoveCheckedTexts"),
+            callback: () => {
+              removeTexts.forEach((textID) => {
+                this.#collections[nodeID].removeItem(textID);
+              });
+              this.updateName(nodeID); // to update decoration
+            },
+          };
+        }
     }
     if (this.#collections[nodeID].search) {
       items.recreate = {

@@ -21,6 +21,7 @@ const translationTextCollections = {
     textCollections_contextMenuResearch: "erneut suchen",
     textCollections_contextMenuProps: "Eigenschaften ...",
     textCollections_contextMenuAddCheckedTexts: "aktivierte Texte hinzufügen",
+    textCollections_contextMenuRemoveCheckedTexts: "aktivierte Texte entfernen",
     textCollections_contextMenuNonSearch: "in reguläre Textliste kopieren",
     textCollections_contextMenuDelete: "Textliste löschen",
     textCollections_withFilter: [
@@ -51,6 +52,7 @@ const translationTextCollections = {
     textCollections_contextMenuResearch: "Search again",
     textCollections_contextMenuProps: "Properties ...",
     textCollections_contextMenuAddCheckedTexts: "Add Checked Texts",
+    textCollections_contextMenuRemoveCheckedTexts: "Remove Checked Texts",
     textCollections_contextMenuNonSearch: "Copy to non-search Collection",
     textCollections_contextMenuDelete: "Delete Collection",
     textCollections_withFilter: [
