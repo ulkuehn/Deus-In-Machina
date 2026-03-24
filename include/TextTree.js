@@ -63,7 +63,15 @@ class TextTree {
       autoHide: true,
       zIndex: 10,
       build: ($trigger, e) => {
+        $trigger.children('a').addClass('jstree-cm');
+        $trigger.children('div').addClass('jstree-wholerow-cm');
         return this.#editMode ? false : this.#itemContextMenu($trigger[0].id);
+      },
+      events: {
+        hide: () => {
+          $('.jstree-cm').removeClass('jstree-cm')
+          $('.jstree-wholerow-cm').removeClass('jstree-wholerow-cm')
+        }
       },
     });
 
@@ -385,7 +393,7 @@ class TextTree {
           #TT .jstree-dim .jstree-clicked { ${Object.keys(clickedStyle)
         .map((k) => `${k}:${clickedStyle[k]}`)
         .join("; ")} }
-          #TT .jstree-dim .jstree-hovered { ${Object.keys(hoveredStyle)
+          #TT .jstree-dim .jstree-hovered, #TT .jstree-dim .jstree-cm { ${Object.keys(hoveredStyle)
         .map((k) => `${k}:${hoveredStyle[k]}`)
         .join("; ")} }
           #TT .jstree-dim .jstree-wholerow-clicked { ${Object.keys(
@@ -393,7 +401,7 @@ class TextTree {
         )
         .map((k) => `${k}:${clickedStyleRow[k]}`)
         .join("; ")} }
-          #TT .jstree-dim .jstree-wholerow-hovered { ${Object.keys(
+          #TT .jstree-dim .jstree-wholerow-hovered, #TT .jstree-dim .jstree-wholerow-cm { ${Object.keys(
           hoveredStyleRow,
         )
         .map((k) => `${k}:${hoveredStyleRow[k]}`)

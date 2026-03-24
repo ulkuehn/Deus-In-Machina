@@ -35,7 +35,15 @@ class TextCollection {
       autoHide: true,
       zIndex: 10,
       build: ($trigger, e) => {
+        $trigger.children('a').addClass('jstree-cm');
+        $trigger.children('div').addClass('jstree-wholerow-cm');
         return this.#contextMenu($trigger[0].id);
+      },
+      events: {
+        hide: () => {
+          $('.jstree-cm').removeClass('jstree-cm')
+          $('.jstree-wholerow-cm').removeClass('jstree-wholerow-cm')
+        }
       },
     });
   }

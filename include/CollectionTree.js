@@ -342,7 +342,13 @@ class CollectionTree {
       autoHide: true,
       zIndex: 10,
       build: ($trigger, e) => {
+        $trigger.children('div').addClass('jstree-cm');
         return this.#itemContextMenu($trigger[0].id);
+      },
+      events: {
+        hide: () => {
+          $('.jstree-cm').removeClass('jstree-cm')
+        }
       },
     });
 
@@ -548,6 +554,9 @@ class CollectionTree {
       $("#textCollectionTreeSheet").empty();
       $("#textCollectionTreeSheet").append(
         "#TCL .jstree-dim { --jstree-hovered:#80808080 }",
+      );
+      $("#textCollectionTreeSheet").append(
+        "#TCL .jstree-dim .jstree-cm { background:#80808080 }",
       );
       $("#textCollectionTreeSheet").append(
         `#TCL .jstree-anchor { margin-left:-${settings.textCollectionTreeSmall ? 12 : 27

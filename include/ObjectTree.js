@@ -65,9 +65,17 @@ class ObjectTree {
       autoHide: true,
       zIndex: 10,
       build: ($trigger, e) => {
+        $trigger.children('a').addClass('jstree-cm');
+        $trigger.children('div').addClass('jstree-wholerow-cm');
         return this.#editMode
           ? false
           : this.#itemContextMenu($trigger[0].id, e);
+      },
+      events: {
+        hide: () => {
+          $('.jstree-cm').removeClass('jstree-cm')
+          $('.jstree-wholerow-cm').removeClass('jstree-wholerow-cm')
+        }
       },
     });
 
@@ -436,13 +444,13 @@ class ObjectTree {
       #OT .jstree-dim .jstree-clicked { ${Object.keys(clickedStyle)
         .map((k) => `${k}:${clickedStyle[k]}`)
         .join("; ")} }
-      #OT .jstree-dim .jstree-hovered { ${Object.keys(hoveredStyle)
+      #OT .jstree-dim .jstree-hovered, #OT .jstree-dim .jstree-cm { ${Object.keys(hoveredStyle)
         .map((k) => `${k}:${hoveredStyle[k]}`)
         .join("; ")} }
       #OT .jstree-dim .jstree-wholerow-clicked { ${Object.keys(clickedStyleRow)
         .map((k) => `${k}:${clickedStyleRow[k]}`)
         .join("; ")} }
-      #OT .jstree-dim .jstree-wholerow-hovered { ${Object.keys(hoveredStyleRow)
+      #OT .jstree-dim .jstree-wholerow-hovered, #OT .jstree-dim .jstree-wholerow-cm { ${Object.keys(hoveredStyleRow)
         .map((k) => `${k}:${hoveredStyleRow[k]}`)
         .join("; ")} }
       `,
