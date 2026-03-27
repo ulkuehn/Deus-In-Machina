@@ -294,10 +294,10 @@ class TextTree {
       this.#treeDiv.jstree().set_id(node, id);
       this.#texts[id] = new StyledText(
         id,
-        _("texts_textCopy", { name: this.#texts[originalNode.id].name }),
-        this.#texts[originalNode.id].delta,
-        this.#texts[originalNode.id].characters,
-        this.#texts[originalNode.id].words,
+        theAltKey ? this.#texts[originalNode.id].name : _("texts_textCopy", { name: this.#texts[originalNode.id].name }),
+        theAltKey ? [] : this.#texts[originalNode.id].delta,
+        theAltKey ? 0 : this.#texts[originalNode.id].characters,
+        theAltKey ? 0 : this.#texts[originalNode.id].words,
         undefined,
         this.#texts[originalNode.id].editable,
         Object.assign({}, this.#texts[originalNode.id].decoration),
@@ -313,7 +313,7 @@ class TextTree {
       if (theShiftKey) {
         this.#copyChildren(node, originalNode);
       } else {
-        node.children.forEach((id) => {
+        [...node.children].forEach((id) => {
           this.#treeDiv.jstree().delete_node(id);
         });
       }
@@ -1166,10 +1166,10 @@ class TextTree {
       this.#treeDiv.jstree().set_id(child, id);
       this.#texts[id] = new StyledText(
         child.id,
-        _("texts_textCopy", { name: this.#texts[originalChild.id].name }),
-        this.#texts[originalChild.id].delta,
-        this.#texts[originalChild.id].characters,
-        this.#texts[originalChild.id].words,
+        theAltKey ? this.#texts[originalChild.id].name : _("texts_textCopy", { name: this.#texts[originalChild.id].name }),
+        theAltKey ? [] : this.#texts[originalChild.id].delta,
+        theAltKey ? 0 : this.#texts[originalChild.id].characters,
+        theAltKey ? 0 : this.#texts[originalChild.id].words,
         undefined,
         this.#texts[originalChild.id].editable,
         this.#texts[originalChild.id].decoration,

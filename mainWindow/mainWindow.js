@@ -69,6 +69,7 @@ let theFormats = null;
 let theSpellChecker = null;
 let theFonts = null;
 let theShiftKey = false;
+let theAltKey = false;
 let theGuidedTour = null;
 
 /**
@@ -100,14 +101,54 @@ $(document).on("dnd_start.vakata", function (e, data) {
     text = theTextCollectionTree.getCollection(id).name;
   }
   if (text) $("#jstree-dnd").children("span").empty().text(text);
+
+  // when moving more than one tree item add a count of moved items
+  let count = data.data.nodes.length;
+  if (count > 1) {
+    let textNode = null;
+    data.helper[0].childNodes[0].childNodes.forEach((n) => {
+      if (n.nodeType === 3 && n.nodeValue.trim() !== "") {
+        textNode = n;
+        return false;
+      }
+    });
+    let name = data.data.origin.get_node(data.data.nodes[0]).text.split(">")[1].split("<")[0].trim();
+    textNode.nodeValue = name + ` [+${count - 1}]`
+  }
+  // hide the copy icon, as it is not clear what it should indicate in our case and it is not possible to change the icon to something more meaningful
+  $(data.helper).find('.jstree-copy').text("")
+  // add a place for more menaingful icons to indicate that the item will be moved, fully copied or empty copied
+  $(data.helper).find('.jstree-icon').after('<div class="jstree-mode"></div>')
+});
+
+
+/**
+ * indicate mode in dnd helper (move when no ctrl key; full copy on ctrl, empty copy in ctrl+alt)
+ */
+$(document).on('dnd_move.vakata', function (e, data) {
+  $(data.helper).find('.jstree-mode').empty();
+  if (data.event.shiftKey)
+    $(data.helper).find('.jstree-mode').append('<i class="fas fa-tree"></i>');
+  else
+    $(data.helper).find('.jstree-mode').append('<i class="fas fa-leaf"></i>');
+
+  if (data.event.ctrlKey) {
+    if (data.event.altKey)
+      $(data.helper).find('.jstree-mode').append('<i class="fa-regular fa-copy"></i>');
+    else
+      $(data.helper).find('.jstree-mode').append('<i class="fas fa-copy"></i>');
+  }
+  else
+    $(data.helper).find('.jstree-mode').append('<i class="fa-solid fa-arrows-up-down-left-right"></i>');
 });
 
 /**
  * this event triggers at the end of a jstree dnd action and before jstree specific events like copy_node do trigger
- * we save the state of the shift key globally so we can use it in the jstree specific events (the key states are not available in those events)
+ * we save the state of the shift and alt keys globally so we can use it in the jstree specific events (the key states are not available in those events)
  */
 $(document).on("dnd_stop.vakata", (e, data) => {
   theShiftKey = data.event.shiftKey;
+  theAltKey = data.event.altKey;
 });
 
 /**

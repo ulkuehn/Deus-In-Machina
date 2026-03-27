@@ -367,7 +367,7 @@ class ObjectTree {
           [originalNode.id]: node.id,
         });
       } else {
-        node.children.forEach((id) => {
+        [...node.children].forEach((id) => {
           this.#treeDiv.jstree().delete_node(id);
         });
       }
@@ -1387,14 +1387,19 @@ class ObjectTree {
         );
       }
     });
-    return new StyledObject(
-      toNode.id,
-      _("objects_objectCopy", { name: this.#objects[fromNode.id].name }),
-      JSON.parse(JSON.stringify(this.#objects[fromNode.id].decoration)),
-      JSON.parse(JSON.stringify(this.#objects[fromNode.id].styleProperties)),
-      JSON.parse(JSON.stringify(this.#objects[fromNode.id].scheme)),
-      toProperties,
-    );
+    if (theAltKey)
+      return new StyledObject(toNode.id,
+        this.#objects[fromNode.id].name,
+        JSON.parse(JSON.stringify(this.#objects[fromNode.id].decoration)))
+    else
+      return new StyledObject(
+        toNode.id,
+        _("objects_objectCopy", { name: this.#objects[fromNode.id].name }),
+        JSON.parse(JSON.stringify(this.#objects[fromNode.id].decoration)),
+        JSON.parse(JSON.stringify(this.#objects[fromNode.id].styleProperties)),
+        JSON.parse(JSON.stringify(this.#objects[fromNode.id].scheme)),
+        toProperties,
+      );
   }
 
   /**
