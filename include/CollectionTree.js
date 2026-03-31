@@ -544,7 +544,7 @@ class CollectionTree {
   #treeSheet(id = null) {
     if (id) {
       $("#textCollectionTreeSheet").append(
-        `#TCL .jstree-dim #${id} { background:${this.#collections[id].decoration.color || "unset"} }`,
+        `#TCL .jstree-dim #${id} { background:${Util.backgroundColor(this.#collections[id].decoration.color)} }`,
       );
       $("#textCollectionTreeSheet").append(
         `#TCL .jstree-dim #${id} .jstree-anchor { color:${Util.blackOrWhite(this.#collections[id].decoration.color || "#ffffff")} }`,
@@ -564,7 +564,7 @@ class CollectionTree {
       );
       Object.keys(this.#collections).forEach((id) => {
         $("#textCollectionTreeSheet").append(
-          `#TCL .jstree-dim #${id} { background:${this.#collections[id].decoration.color || "unset"} }`,
+          `#TCL .jstree-dim #${id} { background:${Util.backgroundColor(this.#collections[id].decoration.color)} }`,
         );
         $("#textCollectionTreeSheet").append(
           `#TCL .jstree-dim #${id} .jstree-anchor { color:${Util.blackOrWhite(this.#collections[id].decoration.color || "#ffffff")} }`,
@@ -644,7 +644,7 @@ class CollectionTree {
       );
       this.#$displayDiv.css(
         "background",
-        `linear-gradient(90deg, transparent 5px, ${this.#collections[checked[0]].decoration.color} 5px 10px, ${bgColor} 30px)`,
+        `${Util.backgroundColor(this.#collections[checked[0]].decoration.color,true)}, ${bgColor}`
       );
     } else {
       // show whole text tree
@@ -825,17 +825,17 @@ class CollectionTree {
           },
         };
       }
-        if (removeTexts.length) {
-          items.removeCheckedTexts = {
-            name: _("textCollections_contextMenuRemoveCheckedTexts"),
-            callback: () => {
-              removeTexts.forEach((textID) => {
-                this.#collections[nodeID].removeItem(textID);
-              });
-              this.updateName(nodeID); // to update decoration
-            },
-          };
-        }
+      if (removeTexts.length) {
+        items.removeCheckedTexts = {
+          name: _("textCollections_contextMenuRemoveCheckedTexts"),
+          callback: () => {
+            removeTexts.forEach((textID) => {
+              this.#collections[nodeID].removeItem(textID);
+            });
+            this.updateName(nodeID); // to update decoration
+          },
+        };
+      }
     }
     if (this.#collections[nodeID].search) {
       items.recreate = {

@@ -241,6 +241,10 @@ class TextTree {
       !data || !data.length ? "flex" : "none",
     );
 
+    this.#treeDiv.on('open_node.jstree close_node.jstree create_node.jstree move_node.jstree copy_node.jstree', (e, data) => {
+      this.#colorNodes()
+    });
+
     this.#treeDiv.on("create_node.jstree delete_node.jstree", () => {
       if (this.#treeDiv.jstree().get_node("#").children.length)
         this.#emptyTreeOverlay.css("display", "none");
@@ -339,6 +343,7 @@ class TextTree {
       if (theSettings.effectiveSettings().textTreeDots) {
         this.#treeDiv.jstree().show_dots();
       }
+      this.#colorNodes()
       doUndirty && this.undirty();
       this.#ready = true;
     });
@@ -600,6 +605,9 @@ class TextTree {
       }
     }
     this.#treeDiv.jstree().rename_node(id, this.#texts[id].decoratedName());
+
+    var $node = this.#treeDiv.jstree().get_node(id, true);
+    $node.css("background", Util.backgroundColor(this.#texts[id].getDecorationValue("color")));
   }
 
   /**
@@ -1147,6 +1155,30 @@ class TextTree {
       ordered.push(childID, ...this.#allNodesDepthFirst(childID));
     });
     return ordered;
+  }
+
+  /**
+   * get ids of all descendants of a node given by its id
+   */
+  #getDescendants(nodeID, include = true) {
+    let descendants = include ? [nodeID] : []
+    let node = this.#treeDiv.jstree().get_node(nodeID);
+    node.children.forEach((id) => {
+      descendants.push(id, ...this.#getDescendants(id))
+    })
+    return descendants;
+  }
+
+  /**
+   * recolor the whole tree, i.e. the li-elements of all nodes
+   */
+  #colorNodes() {
+    setTimeout(() => {
+      this.#getDescendants(this.#treeDiv.jstree().get_node("#"), false).forEach((id) => {
+        var $node = this.#treeDiv.jstree().get_node(id, true);
+        $node.css("background", Util.backgroundColor(this.#texts[id].getDecorationValue("color")));
+      });
+    }, 0)
   }
 
   /**

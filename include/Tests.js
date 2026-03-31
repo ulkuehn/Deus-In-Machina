@@ -496,6 +496,12 @@ class Tests {
           },
         ],
         1,
+        undefined,
+        undefined,
+        undefined,
+        {
+          color: "#7e57c2",
+        },
       ),
     );
     let node = theTextTree.tree.jstree().create_node(null, {
@@ -536,6 +542,12 @@ class Tests {
           },
         ],
         1,
+        undefined,
+        undefined,
+        undefined,
+        {
+          color: "#246708",
+        },
       ),
     );
     theTextTree.tree.jstree().create_node(node, {

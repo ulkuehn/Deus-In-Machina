@@ -168,6 +168,24 @@ ipcRenderer.on(
         containerClassName: "dim",
       });
     });
+    document.querySelectorAll(".emptyColorPicker").forEach(function (ele) {
+      $(ele).spectrum({
+        type: "color",
+        showPalette: settings.palette != noPalette,
+        palette: systemPalettes[settings.palette],
+        showInput: true,
+        preferredFormat: "hex",
+        showInitial: true,
+        allowEmpty: true,
+        showAlpha: false,
+        clickoutFiresChange: false,
+        cancelText: _("colorpicker_cancel"),
+        chooseText: _("colorpicker_choose"),
+        clearText: _("colorpicker_empty"),
+        noColorSelectedText: _("colorpicker_nocolor"),
+        containerClassName: "dim",
+      });
+    });
 
     // quotes table
     let quoteList = [];
@@ -624,6 +642,31 @@ function infoTab(categories, path, collections, settings) {
       })
       .html(html),
   );
+  // background color
+  $grid.append(
+    $("<div>")
+      .attr({
+        style: `grid-column:1/span 1; place-self:center center;`,
+      })
+      .html('<i class="fa-solid fa-palette fa-fw"></i>'),
+  );
+  $grid.append(
+    $("<div>")
+      .attr({
+        style: "grid-column:2/span 1; place-self:center start;",
+      })
+      .html(_("decoration_color")),
+  );
+  $grid.append(
+    $("<div>")
+      .attr({
+        style: `grid-column:3/span 2; place-self:center start;`,
+      })
+      .html(`<input class="emptyColorPicker" id="color" value="${theStyledText.getDecorationValue(
+          "color",
+        )}">`
+      ),
+  );
   // icon
   $grid.append(
     $("<div>")
@@ -916,6 +959,7 @@ function collectValues() {
       decoration[mod] = true;
     }
   }
+  decoration.color = $("#color").val()
   decoration.icon = $("#iconSwitch").prop("checked");
   if (decoration.icon) {
     decoration.iconName = $("input:radio[name=iconsRadio]:checked").val();

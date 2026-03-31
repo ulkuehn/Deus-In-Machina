@@ -533,6 +533,12 @@ class Util {
     return mixture_hex;
   }
 
+  static backgroundColor(col, pad = false) {
+    if (!col) return "unset";
+    return pad ?
+      `linear-gradient(90deg, transparent 0, transparent 6px, ${col} 6px, rgba(${Util.hexToRgb(col).join(",")},0) 90%)` : `linear-gradient(90deg, ${col} 0, rgba(${Util.hexToRgb(col).join(",")},0) 90%)`
+  }
+
   // randomizing methods
 
   /**
