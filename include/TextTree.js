@@ -241,7 +241,7 @@ class TextTree {
       !data || !data.length ? "flex" : "none",
     );
 
-    this.#treeDiv.on('open_node.jstree close_node.jstree create_node.jstree move_node.jstree copy_node.jstree', (e, data) => {
+    this.#treeDiv.on('open_all.jstree open_node.jstree close_node.jstree create_node.jstree move_node.jstree copy_node.jstree select_all.jstree deselect_all.jstree select_node.jstree deselect_node.jstree disable_checkbox.jstree enable_checkbox.jstree', (e, data) => {
       this.#colorNodes()
     });
 
@@ -752,6 +752,7 @@ class TextTree {
       });
       this.#checkEvent = true;
       theTextEditor.showTextsInEditor(this.getChecked());
+      this.#colorNodes();
     });
   }
 
@@ -914,6 +915,7 @@ class TextTree {
     });
     theTextEditor.showTextsInEditor(this.getChecked());
     this.#checkEvent = true;
+    this.#colorNodes()
   }
 
   /**
@@ -1110,6 +1112,7 @@ class TextTree {
       }
       theTextCollectionTree.deleteTexts(texts.splice(1));
       theTextEditor.showTextsInEditor(this.getChecked());
+      this.#colorNodes();
       this.#checkEvent = true;
     }
   }
@@ -1278,6 +1281,7 @@ class TextTree {
     this.#treeDiv.jstree().delete_node(node);
     theTextCollectionTree.deleteTexts(node.id);
     this.#checkEvent = true;
+    this.#colorNodes();
   }
 
   /**
@@ -1303,6 +1307,7 @@ class TextTree {
             this.#treeDiv.jstree().delete_node(node);
             theTextEditor.showTextsInEditor(this.getChecked());
             this.#checkEvent = true;
+            this.#colorNodes();
           }
         });
     }
