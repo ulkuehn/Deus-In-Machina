@@ -323,23 +323,23 @@ class StyledText {
    *
    * @returns {String}
    */
-  decoratedName() {
+  decoratedName(simple=false) {
     let result = "";
     let settings = theSettings.effectiveSettings();
     // empty
-    if (this.#characters == 0) {
+    if (!simple &&this.#characters == 0) {
       result += `<i class="fa-solid fa-text-slash" style="opacity:0.5; margin-right:4px;" title="${_(
         "texts_emptyText",
       )}"></i>`;
     }
     // locked
-    if (settings.textTreeLockedIcon && !this.#editable) {
+    if (!simple&&settings.textTreeLockedIcon && !this.#editable) {
       result += `<i class="fa-solid fa-lock" style="opacity:0.5; margin-right:4px;" title="${_(
         "texts_lockedText",
       )}"></i>`;
     }
     // status
-    if (settings.textTreeShowStatus) {
+    if (!simple&&settings.textTreeShowStatus) {
       let status = UUID0;
       let color = "";
       let title = "";
@@ -370,7 +370,7 @@ class StyledText {
       }
     }
     // type
-    if (settings.textTreeShowType) {
+    if (!simple&&settings.textTreeShowType) {
       let type = UUID0;
       let color = "";
       let title = "";
@@ -398,7 +398,7 @@ class StyledText {
       }
     }
     // user
-    if (settings.textTreeShowUser) {
+    if (!simple&&settings.textTreeShowUser) {
       let user = UUID0;
       let color = "";
       let title = "";
@@ -430,7 +430,7 @@ class StyledText {
       result += `<span style="margin-right:4px"></span>`;
     }
     // icon
-    if (this.#decoration.icon) {
+    if (!simple&&this.#decoration.icon) {
       if (
         this.#decoration.stack == undefined ||
         this.#decoration.stack == TreeDecoration.noStack
@@ -456,9 +456,7 @@ class StyledText {
     }
     result += name;
 
-    return `<span style="margin-left:4px" title="${Util.escapeHTML(
-      this.#name,
-    )}">${result}</span>`;
+    return `<span style="margin-left:4px">${result}</span>`;
   }
 
   /**

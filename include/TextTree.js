@@ -19,6 +19,7 @@ class TextTree {
   #dirty; // tree gets dirty iff new node, del node, move node, rename node
   #ready;
   #editMode; // flag to indicate a node is in edit mode (and thus no context menu should be opened on that node until edit is finished)
+  #hoverDiv;
 
   /**
    * class constructor
@@ -38,6 +39,8 @@ class TextTree {
       class: "tree-cm",
       style: "display:none",
     });
+    this.#hoverDiv = $("<div>").attr({ style: `display:none; position:absolute; padding:4px 5px 2px 0px; pointer-events:none;` })
+    $("body").append(this.#hoverDiv);
     this.#treeDiv = $("<div>");
     $("#TT")
       .empty()
@@ -243,6 +246,29 @@ class TextTree {
 
     this.#treeDiv.on('open_all.jstree open_node.jstree close_node.jstree create_node.jstree move_node.jstree copy_node.jstree select_all.jstree deselect_all.jstree select_node.jstree deselect_node.jstree disable_checkbox.jstree enable_checkbox.jstree', (e, data) => {
       this.#colorNodes()
+    });
+
+    this.#treeDiv.on("hover_node.jstree", (e, data) => {
+      let $node = this.#treeDiv.jstree().get_node(data.node.id, true)
+      let walker = document.createTreeWalker($node[0], NodeFilter.SHOW_TEXT, null, false)
+      let textNode = walker.nextNode()
+      let range = document.createRange()
+      range.selectNodeContents(textNode)
+      let rect = range.getBoundingClientRect()
+      let right = rect.left + rect.width - this.#treeDiv.width()
+      if (right > 0) {
+        setTimeout(() => {
+          this.#hoverDiv.css("background",settings.textTreeHoverColor)
+          this.#hoverDiv.css("top", `${Math.floor(rect.top) - 6}px`)
+          this.#hoverDiv.css("left", `${rect.left -4}px`)
+          this.#hoverDiv.css("width", `${rect.width + 9}px`)
+          this.#hoverDiv.html(this.#texts[data.node.id].decoratedName(true))
+          this.#hoverDiv.css("display", "block")
+        }, 100);
+      }
+    })
+    this.#treeDiv.on("dehover_node.jstree", (e, data) => {
+      setTimeout(() => this.#hoverDiv.css("display", "none"), 100)
     });
 
     this.#treeDiv.on("create_node.jstree delete_node.jstree", () => {
