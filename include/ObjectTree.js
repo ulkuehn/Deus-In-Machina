@@ -23,6 +23,7 @@ class ObjectTree {
   #saveSelected;
   #dragTimer;
   #editMode;
+  #hoverDiv;
 
   /**
    * class constructor
@@ -42,6 +43,8 @@ class ObjectTree {
       class: "tree-cm",
       style: "display:none",
     });
+    this.#hoverDiv = $("<div>").attr({ style: `display:none; position:absolute; padding:4px 5px 2px 5px; pointer-events:none;` })
+    $("body").append(this.#hoverDiv);
     this.#treeDiv = $("<div>");
     $("#OT")
       .empty()
@@ -278,6 +281,36 @@ class ObjectTree {
       "display",
       !data || !data.length ? "flex" : "none",
     );
+
+    this.#treeDiv.on("hover_node.jstree", (e, data) => {
+      let $node = this.#treeDiv.jstree().get_node(data.node.id, true)
+      let walker = document.createTreeWalker($node[0], NodeFilter.SHOW_TEXT, null, false)
+      let textNode = walker.nextNode()
+      let range = document.createRange()
+      range.selectNodeContents(textNode)
+      let rect = range.getBoundingClientRect()
+      let right = rect.left + rect.width - this.#treeDiv.offset().left - this.#treeDiv.width()
+      if (right > 0) {
+        setTimeout(() => {
+          let $a = $(`#${data.node.id}_anchor`)
+          $a.find("span").first().css("opacity", "0.5")
+          this.#hoverDiv.css("background", settings.objectTreeHoverColor)
+          this.#hoverDiv.css("color", Util.blackOrWhite(settings.objectTreeHoverColor))
+          this.#hoverDiv.css("top", `${Math.floor(rect.top) - 6}px`)
+          this.#hoverDiv.css("left", `${$a.offset().left - rect.width - 9}px`)
+          this.#hoverDiv.css("width", `${rect.width + 14}px`)
+          this.#hoverDiv.html(this.#objects[data.node.id].decoratedName(true))
+          this.#hoverDiv.css("display", "block")
+        }, 100);
+      }
+    })
+    this.#treeDiv.on("dehover_node.jstree", (e, data) => {
+      setTimeout(() => {
+        this.#hoverDiv.css("display", "none")
+        let $a = $(`#${data.node.id}_anchor`)
+        $a.find("span").first().css("opacity", "unset")
+      }, 100)
+    });
 
     // creating nodes makes the tree dirty
     this.#treeDiv.on("create_node.jstree delete_node.jstree", () => {

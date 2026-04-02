@@ -291,16 +291,16 @@ class StyledObject {
    *
    * @returns {String}
    */
-  decoratedName() {
+  decoratedName(simple=false) {
     let result = "";
     // empty (no texts attached)
-    if (this.textCount == 0) {
+    if (!simple&&this.textCount == 0) {
       result += `<i class="fa-solid fa-link-slash" style="opacity:0.5; margin-right:8px;" title="${_(
         "objects_empty",
       )}"></i>`;
     }
     // icon
-    if (this.#decoration.icon) {
+    if (!simple&&this.#decoration.icon) {
       if (
         this.#decoration.stack == undefined ||
         this.#decoration.stack == TreeDecoration.noStack
@@ -328,9 +328,7 @@ class StyledObject {
     }
     result += name;
 
-    return `<span style="margin-left:4px" title="${Util.escapeHTML(
-      this.#name,
-    )}">${result}</span>`;
+    return `<span style="margin-left:4px">${result}</span>`;
   }
 
   /**

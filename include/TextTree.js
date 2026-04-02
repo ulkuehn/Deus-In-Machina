@@ -258,7 +258,8 @@ class TextTree {
       let right = rect.left + rect.width - this.#treeDiv.width()
       if (right > 0) {
         setTimeout(() => {
-          this.#hoverDiv.css("background",settings.textTreeHoverColor)
+          this.#hoverDiv.css("background", settings.textTreeHoverColor)
+          this.#hoverDiv.css("color", Util.blackOrWhite(settings.textTreeHoverColor))
           this.#hoverDiv.css("top", `${Math.floor(rect.top) - 6}px`)
           this.#hoverDiv.css("left", `${rect.left -4}px`)
           this.#hoverDiv.css("width", `${rect.width + 9}px`)

@@ -383,7 +383,9 @@ class Tests {
       new StyledObject(
         hdgID,
         _("Tests_hdgName"),
-        undefined,
+        {
+          decoration_bold: true, decoration_wide: true, decoration_italic:true
+        },
         {
           text: {
             formats_textColor: "#d4e157",
@@ -785,6 +787,10 @@ class Tests {
         1,
         undefined,
         false,
+        {
+          decoration_underline: true,
+          decoration_wide: true
+        },
       ),
     );
     theTextTree.tree.jstree().create_node(rNode, {
