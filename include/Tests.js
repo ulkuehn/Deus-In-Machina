@@ -317,7 +317,7 @@ class Tests {
             formats_letterSpacing: 0.5,
             formats_underline: true,
           },
-          image: { formats_imageBorder: [true, "#ff0000", "dotted", 5] },
+          image: { formats_imageBorder: ["#ff0000", "dotted", 5] },
         },
         [],
         { [pers1]: { 1: _("Tests_wolfValue0"), 2: "15" } },
