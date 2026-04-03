@@ -43,7 +43,7 @@ class ObjectTree {
       class: "tree-cm",
       style: "display:none",
     });
-    this.#hoverDiv = $("<div>").attr({ style: `display:none; position:absolute; padding:4px 5px 2px 5px; pointer-events:none;` })
+    this.#hoverDiv = $("<div>").attr({ style: `display:none; position:absolute; pointer-events:none;` })
     $("body").append(this.#hoverDiv);
     this.#treeDiv = $("<div>");
     $("#OT")
@@ -215,7 +215,8 @@ class ObjectTree {
       this.#treeDiv.jstree().destroy();
     }
     let plugins = ["dnd", "checkbox"];
-    if (settings.objectTreeWholerow) {
+    // wholerow disabled as it does not comply with extended hover
+    if (false || settings.objectTreeWholerow) {
       plugins.push("wholerow");
     }
 
@@ -295,10 +296,12 @@ class ObjectTree {
           let $a = $(`#${data.node.id}_anchor`)
           $a.find("span").first().css("opacity", "0.5")
           this.#hoverDiv.css("background", settings.objectTreeHoverColor)
+          this.#hoverDiv.css("padding", settings.objectTreeSmall ? "1px" : "4px 5px 2px 5px"); 
           this.#hoverDiv.css("color", Util.blackOrWhite(settings.objectTreeHoverColor))
-          this.#hoverDiv.css("top", `${Math.floor(rect.top) - 6}px`)
+          this.#hoverDiv.css("top", `${Math.floor(rect.top) - (settings.objectTreeSmall ? 0 : 6)}px`)
           this.#hoverDiv.css("left", `${$a.offset().left - rect.width - 9}px`)
           this.#hoverDiv.css("width", `${rect.width + 14}px`)
+          this.#hoverDiv.css("line-height", settings.objectTreeSmall ? "17px" : "unset");
           this.#hoverDiv.html(this.#objects[data.node.id].decoratedName(true))
           this.#hoverDiv.css("display", "block")
         }, 100);
@@ -425,7 +428,8 @@ class ObjectTree {
 
     // color the tree
     let clickedStyle = {};
-    if (settings.objectTreeWholerow) {
+    // wholerow disabled as it does not comply with extended hover
+    if (false || settings.objectTreeWholerow) {
       if (!settings.objectTreeSelectionBorder) {
         clickedStyle.color = Util.blackOrWhite(
           settings.objectTreeSelectionColor,
@@ -447,7 +451,8 @@ class ObjectTree {
     let hoveredStyle = {
       color: Util.blackOrWhite(settings.objectTreeHoverColor),
     };
-    if (settings.objectTreeWholerow) {
+    // wholerow disabled as it does not comply with extended hover
+    if (false || settings.objectTreeWholerow) {
       hoveredStyle.background = "unset";
     } else {
       hoveredStyle.background = settings.objectTreeHoverColor;

@@ -775,11 +775,12 @@ class Settings {
           name: "textTreeDots",
           default: false,
         },
-        {
-          type: "check",
-          name: "textTreeWholerow",
-          default: false,
-        },
+        // wholerow disabled as it does not comply with extended hover
+        // {
+        //   type: "check",
+        //   name: "textTreeWholerow",
+        //   default: false,
+        // },
         {
           type: "color",
           name: "textTreeSelectionColor",
@@ -1040,11 +1041,12 @@ class Settings {
           name: "objectTreeDots",
           default: false,
         },
-        {
-          type: "check",
-          name: "objectTreeWholerow",
-          default: false,
-        },
+        // wholerow disabled as it does not comply with extended hover
+        // {
+        //   type: "check",
+        //   name: "objectTreeWholerow",
+        //   default: false,
+        // },
         {
           type: "color",
           name: "objectTreeSelectionColor",

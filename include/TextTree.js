@@ -39,7 +39,7 @@ class TextTree {
       class: "tree-cm",
       style: "display:none",
     });
-    this.#hoverDiv = $("<div>").attr({ style: `display:none; position:absolute; padding:4px 5px 2px 0px; pointer-events:none;` })
+    this.#hoverDiv = $("<div>").attr({ style: `display:none; position:absolute; pointer-events:none;` })
     $("body").append(this.#hoverDiv);
     this.#treeDiv = $("<div>");
     $("#TT")
@@ -203,7 +203,8 @@ class TextTree {
       this.#treeDiv.jstree().destroy();
     }
     let plugins = ["dnd", "checkbox"];
-    if (settings.textTreeWholerow) {
+    // wholerow disabled as it does not comply with extended hover
+    if (false || settings.textTreeWholerow) {
       plugins.push("wholerow");
     }
 
@@ -259,10 +260,12 @@ class TextTree {
       if (right > 0) {
         setTimeout(() => {
           this.#hoverDiv.css("background", settings.textTreeHoverColor)
+          this.#hoverDiv.css("padding", settings.textTreeSmall ? "1px" : "4px 5px 2px 0px");
           this.#hoverDiv.css("color", Util.blackOrWhite(settings.textTreeHoverColor))
-          this.#hoverDiv.css("top", `${Math.floor(rect.top) - 6}px`)
-          this.#hoverDiv.css("left", `${rect.left -4}px`)
+          this.#hoverDiv.css("top", `${Math.floor(rect.top) - (settings.textTreeSmall ? 0 : 6)}px`)
+          this.#hoverDiv.css("left", `${rect.left - 4}px`)
           this.#hoverDiv.css("width", `${rect.width + 9}px`)
+          this.#hoverDiv.css("line-height", settings.textTreeSmall ? "17px" : "unset");
           this.#hoverDiv.html(this.#texts[data.node.id].decoratedName(true))
           this.#hoverDiv.css("display", "block")
         }, 100);
@@ -377,7 +380,8 @@ class TextTree {
 
     // color the tree
     let clickedStyle = {};
-    if (settings.textTreeWholerow) {
+    // wholerow disabled as it does not comply with extended hover
+    if (false || settings.textTreeWholerow) {
       if (!settings.textTreeSelectionBorder) {
         clickedStyle.color = Util.blackOrWhite(settings.textTreeSelectionColor);
       }
@@ -395,7 +399,8 @@ class TextTree {
     let hoveredStyle = {
       color: Util.blackOrWhite(settings.textTreeHoverColor),
     };
-    if (settings.textTreeWholerow) {
+    // wholerow disabled as it does not comply with extended hover
+    if (false || settings.textTreeWholerow) {
       hoveredStyle.background = "unset";
     } else {
       hoveredStyle.background = settings.textTreeHoverColor;

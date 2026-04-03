@@ -245,7 +245,8 @@ const translationSettingsWindow = {
       "settingsWindow_textTreeLockedIcon": `Kennzeichnung gesperrter Texte <i class="fas fa-lock"></i>`,
       "settingsWindow_textTreeSmall": "kompakte Darstellung",
       "settingsWindow_textTreeDots": "Hilfslinien anzeigen",
-      "settingsWindow_textTreeWholerow": "ganze Zeile hervorheben",
+      // wholerow disabled as it does not comply with extended hover
+      // "settingsWindow_textTreeWholerow": "ganze Zeile hervorheben",
       "settingsWindow_textTreeSelectionColor":
         "Hintergrundfarbe ausgewählter Texte",
       "settingsWindow_textTreeSelectionBorder": "Hintergrund nicht füllen",
@@ -314,7 +315,8 @@ const translationSettingsWindow = {
       "settingsWindow_objectTreeEmptyIcon": `Kennzeichnung von Objekten ohne Textbezug <i class="fa-solid fa-link-slash">`,
       "settingsWindow_objectTreeSmall": "kompakte Darstellung",
       "settingsWindow_objectTreeDots": "Hilfslinien anzeigen",
-      "settingsWindow_objectTreeWholerow": "ganze Zeile hervorheben",
+      // wholerow disabled as it does not comply with extended hover
+      // "settingsWindow_objectTreeWholerow": "ganze Zeile hervorheben",
       "settingsWindow_objectTreeSelectionColor":
         "Hintergrundfarbe ausgewählter Objekte",
       "settingsWindow_objectTreeSelectionBorder": "Hintergrund nicht füllen",
@@ -652,7 +654,8 @@ const translationSettingsWindow = {
       "settingsWindow_textTreeLockedIcon": `Label locked Texts <i class="fas fa-lock"></i>`,
       "settingsWindow_textTreeSmall": "Compact Tree",
       "settingsWindow_textTreeDots": "Show Tree Dots",
-      "settingsWindow_textTreeWholerow": "Highlight whole Row",
+      // wholerow disabled as it does not comply with extended hover
+      // "settingsWindow_textTreeWholerow": "Highlight whole Row",
       "settingsWindow_textTreeSelectionColor":
         "Background Color of selected Texts",
       "settingsWindow_textTreeSelectionBorder": "Non-solid Background",
@@ -716,7 +719,8 @@ const translationSettingsWindow = {
       "settingsWindow_objectTreeEmptyIcon": `Label Objects unrelated to Texts <i class="fa-solid fa-link-slash">`,
       "settingsWindow_objectTreeSmall": "Compact Tree",
       "settingsWindow_objectTreeDots": "Show Tree Dots",
-      "settingsWindow_objectTreeWholerow": "Highlight whole Row",
+      // wholerow disabled as it does not comply with extended hover
+      // "settingsWindow_objectTreeWholerow": "Highlight whole Row",
       "settingsWindow_objectTreeSelectionColor":
         "Background Color of selected Objects",
       "settingsWindow_objectTreeSelectionBorder": "Non-solid Background",

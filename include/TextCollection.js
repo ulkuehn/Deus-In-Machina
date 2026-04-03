@@ -64,9 +64,6 @@ class TextCollection {
     }
     // actually "dnd" is not needed and any node movement is inhibited, but including dnd plugin adds same look and feel as with all other trees
     let plugins = ["dnd", "checkbox"];
-    if (settings.textTreeWholerow) {
-      plugins.push("wholerow");
-    }
 
     this.#treeDiv.jstree({
       core: {
