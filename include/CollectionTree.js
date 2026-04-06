@@ -353,7 +353,7 @@ class CollectionTree {
     });
 
     this.#treeDiv.on("ready.jstree", () => {
-      this.#showTexts();
+      setTimeout(() => this.#showTexts(), 0);
       if (this.#collections) {
         Object.keys(this.#collections).forEach((id) => {
           this.#treeDiv
@@ -625,6 +625,7 @@ class CollectionTree {
     let bgColor =
       theSettings.effectiveSettings().TTBackgroundColor ||
       theSettings.effectiveSettings().generalBackgroundColor;
+    // console.log("CT: showTexts", theTextCollection, checked);
     if (checked.length) {
       // show texts in collection
       theTextTree.tree.css("display", "none");
@@ -644,7 +645,7 @@ class CollectionTree {
       );
       this.#$displayDiv.css(
         "background",
-        `${Util.backgroundColor(this.#collections[checked[0]].decoration.color,true)}, ${bgColor}`
+        `${Util.backgroundColor(this.#collections[checked[0]].decoration.color, true)}, ${bgColor}`
       );
     } else {
       // show whole text tree
