@@ -61,6 +61,17 @@ class Util {
     }
   }
 
+  /**
+   * check if a character can be part of an URL
+   */
+  static isNotValidInURL(c) {
+    if (typeof c != "String" || c.length != 1) return true
+    let code = c.charCodeAt(c)
+    if ((code >= 0x41 && code <= 0x5A) || (code >= 0x61 && code <= 0x7A) || (code >= 0x30 && code <= 0x39)) return false
+    if ("-._~!$&'()*+,;=:/?#[]@%".includes(c)) return false
+    return true
+  }
+
   // tabs related methods
 
   /**

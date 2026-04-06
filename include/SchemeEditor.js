@@ -10,6 +10,7 @@
  */
 class SchemeEditor {
   #editor; // quill object
+  #detectURL = null;
 
   /**
    * class constructor
@@ -369,6 +370,8 @@ class SchemeEditor {
         let items = {};
         let infoPre = `<span class="preWrap" style="font-style:italic">`;
         let infoPost = `</span>`;
+        this.#detectURL = null;
+
         // on image
         if (event.target.nodeName.toLowerCase() == "img") {
           let specs = DIMImage.formats(event.target);
@@ -557,6 +560,47 @@ class SchemeEditor {
               });
           },
         };
+        // detect URL
+        if (!sel.length) {
+          let left = 0
+          let right = quill.getText().length
+          let leftText = quill.getText(0, sel.index)
+          let rightText = quill.getText(sel.index)
+          let m = leftText.match(/(\S*)$/)
+          if (m) {
+            leftText = m[1]
+            left = sel.index - m[1].length
+          }
+          m = rightText.match(/(\S*)/)
+          if (m) {
+            rightText = m[1];
+            right = sel.index + m[1].length
+          }
+          m = (leftText + rightText).match(/(https?:\/\/)?(?:[A-Za-z0-9-]{1,63}\.){2,}[A-Za-z0-9-]{1,63}(?:[\/?#][^\s()<>\[\]{}]*)?/i)
+          if (m && sel.index >= left + m.index && sel.index <= left + m.index + m[0].length) {
+            try {
+              let url = new URL(m[1] ? m[0] : "http://" + m[0])
+              quill.formatText(
+                left + m.index,
+                m[0].length,
+                "url",
+                true,
+              );
+              this.#detectURL = { index: left + m.index, length: m[0].length }
+              items.openURL = {
+                name: _("editorContextMenu_openURL"),
+                callback: () => {
+                  ipcRenderer.invoke(
+                    "mainProcess_openURL",
+                    url.href,
+                  );
+                },
+              }
+            }
+            // catch failing URL() constructor for invalid url
+            catch (_) { }
+          }
+        }
         // web tools part
         if (selText.trim() != "") {
           items.sepWeb = "x";
@@ -589,6 +633,13 @@ class SchemeEditor {
           items: items,
         };
       },
+      events: {
+        hide: () => {
+          if (this.#detectURL)
+            quill.formatText(this.#detectURL.index, this.#detectURL.length, "url", false)
+          return true
+        }
+      }
     });
   }
 

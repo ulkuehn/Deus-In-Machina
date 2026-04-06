@@ -42,6 +42,15 @@ Parchment.register(
   }),
 );
 
+/**
+ * register class to show URL in Editor
+ */
+Parchment.register(
+  new Parchment.Attributor.Class("url", "url", {
+    scope: Parchment.Scope.INLINE,
+  }),
+);
+
 // globals set by "rendererProcess_startup" ipc
 let debugMode = false; // true if started in debug mode
 let theWindowBounds = null; // window geometry

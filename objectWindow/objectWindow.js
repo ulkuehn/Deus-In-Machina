@@ -17,6 +17,15 @@ function _(...x) {
 const rowGap = "15px";
 const colGap = "10px";
 
+/**
+ * register class to show URL in Editor
+ */
+Parchment.register(
+  new Parchment.Attributor.Class("url", "url", {
+    scope: Parchment.Scope.INLINE,
+  }),
+);
+
 let theStyledObject;
 let theParentObjects;
 let theInheritedStyle;

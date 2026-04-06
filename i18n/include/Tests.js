@@ -78,6 +78,7 @@ const translationTests = {
       "Das Haus ist einfach, aber in einem guten Zustand. Das Dach hat Moos angesetzt.\n",
     Tests_text1Name: "Rotkäppchen",
     Tests_text1Insert1: "Rotkäppchen",
+    Tests_text1Insert2:"(Quelle: https://www.projekt-gutenberg.org/grimm/khmaerch/chap028.html)\n\n",
     Tests_text2Name: "Rotkäppchen wird losgeschickt",
     Tests_text2Insert1: "Es war einmal eine ",
     Tests_text2Insert2: "kleine süße Dirne, die hatte jedermann lieb",
@@ -201,6 +202,7 @@ const translationTests = {
       "The house is simple but in a good shape. The roof caught some moss.\n",
     Tests_text1Name: "Red Riding Hood",
     Tests_text1Insert1: "Little Red Riding Hood",
+    Tests_text1Insert2: "(Source: https://www.projekt-gutenberg.org/grimm/khmaerch/chap028.html)\n\n",
     Tests_text2Name: "Red Riding Hood is being sent",
     Tests_text2Insert1: "Once upon a time there was ",
     Tests_text2Insert2:

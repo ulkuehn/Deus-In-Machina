@@ -366,6 +366,12 @@ styles related to editor
   animation-name: expand;
 }
 
+/* styles for showing a detected URL */
+.url-true {
+  background-color: blue !important;
+  color:white !important;
+}
+
 @keyframes expand {
   from,
   to {

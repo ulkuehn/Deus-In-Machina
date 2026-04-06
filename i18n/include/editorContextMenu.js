@@ -30,6 +30,7 @@ const translationEditorContextMenu = {
     editorContextMenu_lock: "Text sperren",
     editorContextMenu_split: "Text teilen",
     editorContextMenu_reveal: "Im Textnavigator selektieren",
+    editorContextMenu_openURL: "URL im Internet-Browser öffnen",
     editorContextMenu_deriveName: "Textname ändern wie ausgewählt",
     editorContextMenu_editObjectsMenu: "Objekte ändern",
     editorContextMenu_addObjects: [
@@ -97,6 +98,7 @@ const translationEditorContextMenu = {
     editorContextMenu_lock: "Lock Text",
     editorContextMenu_split: "Split Text",
     editorContextMenu_reveal: "Select in Text Tree",
+    editorContextMenu_openURL: "open URL in Web Browser",
     editorContextMenu_deriveName: "Rename Text from selection",
     editorContextMenu_editObjectsMenu: "Objects",
     editorContextMenu_addObjects: [

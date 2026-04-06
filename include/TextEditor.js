@@ -142,6 +142,7 @@ class TextEditor {
   #isWheeling = false;
   #isZooming = false;
   #objectStatusTimer = null;
+  #detectURL = null;
 
   /**
    * class constructor
@@ -662,7 +663,7 @@ class TextEditor {
       $("#zoomValue").html(Util.scaledZoom($("#zoomSelector").val()) + "%");
       $(":root").css({
         "--first-line-indent": `${(settings.firstLineIndent *
-            Util.scaledZoom($("#zoomSelector").val())) /
+          Util.scaledZoom($("#zoomSelector").val())) /
           100
           }px`,
       });
@@ -934,8 +935,8 @@ class TextEditor {
     // styles
     let sheetHTML = `.edi + .edi { border-top-color:${settings.textSeparatorColor || Util.blackOrWhite(bgColor)}; border-top-width:${settings.textSeparatorWidth}px; border-top-style:${settings.textSeparatorStyle}; margin-top:${settings.textSeparatorAbove}px; padding-top:${settings.textSeparatorBelow}px }\n`;
     sheetHTML += `.ql-editor[contenteditable="false"] { ${settings.lockedBackgroundColor
-        ? `background-color:${settings.lockedBackgroundColor};`
-        : ""
+      ? `background-color:${settings.lockedBackgroundColor};`
+      : ""
       } opacity:${settings.lockedOpacity / 100} }\n`;
 
     if (settings.spellcheckDecorationColor || settings.spellcheckShadowColor) {
@@ -1180,6 +1181,13 @@ class TextEditor {
                 ? false
                 : this.#contextMenu(textID, e);
             },
+            events: {
+              hide: () => {
+                if (this.#detectURL)
+                  this.#editors[this.#detectURL.text].quill.formatText(this.#detectURL.index, this.#detectURL.length, "url", false)
+                return true
+              }
+            }
           });
         }
       });
@@ -1883,7 +1891,7 @@ class TextEditor {
       $("#zoomValue").html(Util.scaledZoom($("#zoomSelector").val()) + "%");
       $(":root").css({
         "--first-line-indent": `${(theSettings.effectiveSettings().firstLineIndent *
-            Util.scaledZoom($("#zoomSelector").val())) /
+          Util.scaledZoom($("#zoomSelector").val())) /
           100
           }px`,
       });
@@ -2141,6 +2149,7 @@ class TextEditor {
     let citeLen = 15;
     let sep = `<span style="font-weight:bold; padding:0 11px 0 8px; font-size:22px; line-height:0">&#x21cb;</span>`;
     let compact = settings.editorCompactContextMenu;
+    this.#detectURL = null;
 
     // on image
     if (event.target.nodeName.toLowerCase() == "img") {
@@ -2512,6 +2521,47 @@ class TextEditor {
           theTextTree.selectSome(textID, true);
         },
       };
+    }
+    // detect URL
+    if (!sel.length) {
+      let left = 0
+      let right = this.#editors[textID].quill.getText().length
+      let leftText = this.#editors[textID].quill.getText(0, sel.index)
+      let rightText = this.#editors[textID].quill.getText(sel.index)
+      let m = leftText.match(/(\S*)$/)
+      if (m) {
+        leftText = m[1]
+        left = sel.index - m[1].length
+      }
+      m = rightText.match(/(\S*)/)
+      if (m) {
+        rightText = m[1];
+        right = sel.index + m[1].length
+      }
+      m = (leftText + rightText).match(/(https?:\/\/)?(?:[A-Za-z0-9-]{1,63}\.){2,}[A-Za-z0-9-]{1,63}(?:[\/?#][^\s()<>\[\]{}]*)?/i)
+      if (m && sel.index >= left + m.index && sel.index <= left + m.index + m[0].length) {
+        try {
+          let url = new URL(m[1] ? m[0] : "http://" + m[0])
+          this.#editors[textID].quill.formatText(
+            left + m.index,
+            m[0].length,
+            "url",
+            true,
+          );
+          this.#detectURL = { text: textID, index: left + m.index, length: m[0].length }
+          items.openURL = {
+            name: _("editorContextMenu_openURL"),
+            callback: function () {
+              ipcRenderer.invoke(
+                "mainProcess_openURL",
+                url.href,
+              );
+            },
+          }
+        }
+        // catch failing URL() constructor for invalid url
+        catch (_) { }
+      }
     }
     if (selText.trim().length) {
       items.deriveName = {

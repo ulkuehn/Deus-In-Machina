@@ -481,6 +481,9 @@ class Tests {
             insert: "\n",
           },
           {
+            insert: _("Tests_text1Insert2"),
+          },
+          {
             attributes: {
               origwidth: "322px",
               origheight: "640px",
