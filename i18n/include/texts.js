@@ -69,6 +69,7 @@ const translationTexts = {
     texts_contextMenuExpandBranch: "Zweig komplett öffnen",
     texts_contextMenuCollapseBranch: "Zweig schließen",
     texts_contextMenuActivateBranch: "Zweig aktivieren",
+    texts_contextMenuActivateBranchOnly: "Nur diesen Zweig aktivieren",
     texts_contextMenuActivateBranchNonEmpty:
       "Zweig aktivieren (ohne leere Texte)",
     texts_contextMenuDeactivateBranch: "Zweig deaktivieren",
@@ -132,6 +133,7 @@ const translationTexts = {
     texts_contextMenuExpandBranch: "Open Branch completely",
     texts_contextMenuCollapseBranch: "Close branch",
     texts_contextMenuActivateBranch: "Activate Branch",
+    texts_contextMenuActivateBranchOnly: "Activate this Branch Only",
     texts_contextMenuActivateBranchNonEmpty:
       "Activate Branch (w/o empty Texts)",
     texts_contextMenuDeactivateBranch: "Deactivate Branch",

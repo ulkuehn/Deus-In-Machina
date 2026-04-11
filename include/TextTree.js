@@ -1914,6 +1914,16 @@ class TextTree {
           this.#treeDiv.jstree().close_all(node);
         },
       };
+      if (compact) {
+        menuItems.activateMenu = {
+          name: _("texts_contextMenuActivateMenu"),
+          icon: "fa-regular fa-square-check",
+          items: {},
+        };
+        items = menuItems.activateMenu.items;
+      } else {
+        items.sepActivate = "x";
+      }
       items.activate = {
         name: _("texts_contextMenuActivateBranch"),
         callback: () => {
@@ -1925,6 +1935,9 @@ class TextTree {
           this.#checkEvent = true;
         },
       };
+      if (!compact) {
+        items.activate.icon = "fa-regular fa-square-check";
+      }
       // activate non empty texts (only if at least one non empty texts is in branch)
       let nonEmpty = false;
       [node.id, ...node.children_d].map(
@@ -1945,6 +1958,19 @@ class TextTree {
             this.#checkEvent = true;
           },
         };
+      items.activateOnly = {
+        name: _("texts_contextMenuActivateBranchOnly"),
+        callback: () => {
+          this.#checkEvent = false;
+          this.#treeDiv.jstree().close_all();
+          this.#treeDiv.jstree().uncheck_all();
+          this.#treeDiv.jstree().check_node(node);
+          this.#treeDiv.jstree().check_node(node.children_d);
+          this.#treeDiv.jstree().open_all(node);
+          theTextEditor.showTextsInEditor(this.getChecked());
+          this.#checkEvent = true;
+        },
+      };
       items.deactivate = {
         name: _("texts_contextMenuDeactivateBranch"),
         callback: () => {
