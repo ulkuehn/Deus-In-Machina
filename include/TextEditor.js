@@ -128,6 +128,7 @@ class TextEditor {
 
   #editors; // mapping of id -> editor
   #selectedEditor;
+  #currentSelection; // current selection (range) in editor, used to restore selection after content changes
   #textChangeTimers;
   #selectionChangeTimers;
   #ids; // text ids in sequential order
@@ -317,7 +318,8 @@ class TextEditor {
           style: "grid-column:12; align-self:center; justify-self:center",
         })
         .html(
-          `<input type="checkbox" class="btn-check" id="searchRegex"><label class="btn btn-outline-light btn-sm simple-btn" style="padding:0; width:35px; ${settings.searchWithRegex ? "" : "display:none"
+          `<input type="checkbox" class="btn-check" id="searchRegex"><label class="btn btn-outline-light btn-sm simple-btn" style="padding:0; width:35px; ${
+            settings.searchWithRegex ? "" : "display:none"
           }" for="searchRegex" title="${_(
             "search_withRegex",
           )}"><span style="font-size:18px;"><b>.*</b></span></label>`,
@@ -429,7 +431,8 @@ class TextEditor {
         .html(
           `<i class="fa-solid fa-text-height"></i> <span id="zoomValue" style="cursor:pointer" title="${_(
             "editorBars_resetZoomTitle",
-          )}" onclick="$('#zoomSelector').val(${Util.neutralZoomValue
+          )}" onclick="$('#zoomSelector').val(${
+            Util.neutralZoomValue
           });$('#zoomSelector').trigger('input')">${Util.scaledZoom(
             zoomValue,
           )}%</span>`,
@@ -662,10 +665,11 @@ class TextEditor {
       theLayout.zoomValue = $("#zoomSelector").val();
       $("#zoomValue").html(Util.scaledZoom($("#zoomSelector").val()) + "%");
       $(":root").css({
-        "--first-line-indent": `${(settings.firstLineIndent *
-          Util.scaledZoom($("#zoomSelector").val())) /
+        "--first-line-indent": `${
+          (settings.firstLineIndent *
+            Util.scaledZoom($("#zoomSelector").val())) /
           100
-          }px`,
+        }px`,
       });
       theObjectTree.buildObjectSheet();
     });
@@ -786,8 +790,10 @@ class TextEditor {
     // extend contextmenu to handle objects connected with a text selection
     $.contextMenu.types.checkclick = function (item, opt, root) {
       $(
-        `<label><input type="checkbox" ${item.checked ? "checked" : ""
-        } class="form-check-input" style="margin-top:2px; border:1px solid #2f2f2f; box-shadow:none"><span>${item.name
+        `<label><input type="checkbox" ${
+          item.checked ? "checked" : ""
+        } class="form-check-input" style="margin-top:2px; border:1px solid #2f2f2f; box-shadow:none"><span>${
+          item.name
         }</span></label>`,
       ).appendTo(this);
 
@@ -855,9 +861,10 @@ class TextEditor {
       "--background-color": bgColor,
     });
     $(":root").css({
-      "--first-line-indent": `${(settings.firstLineIndent * Util.scaledZoom($("#zoomSelector").val())) /
+      "--first-line-indent": `${
+        (settings.firstLineIndent * Util.scaledZoom($("#zoomSelector").val())) /
         100
-        }px`,
+      }px`,
     });
 
     $("#emptyEditor").empty();
@@ -934,10 +941,11 @@ class TextEditor {
 
     // styles
     let sheetHTML = `.edi + .edi { border-top-color:${settings.textSeparatorColor || Util.blackOrWhite(bgColor)}; border-top-width:${settings.textSeparatorWidth}px; border-top-style:${settings.textSeparatorStyle}; margin-top:${settings.textSeparatorAbove}px; padding-top:${settings.textSeparatorBelow}px }\n`;
-    sheetHTML += `.ql-editor[contenteditable="false"] { ${settings.lockedBackgroundColor
-      ? `background-color:${settings.lockedBackgroundColor};`
-      : ""
-      } opacity:${settings.lockedOpacity / 100} }\n`;
+    sheetHTML += `.ql-editor[contenteditable="false"] { ${
+      settings.lockedBackgroundColor
+        ? `background-color:${settings.lockedBackgroundColor};`
+        : ""
+    } opacity:${settings.lockedOpacity / 100} }\n`;
 
     if (settings.spellcheckDecorationColor || settings.spellcheckShadowColor) {
       sheetHTML += `.edi::spelling-error { `;
@@ -1034,19 +1042,23 @@ class TextEditor {
               length += 1;
             }
           }
-          this.#editors[this.#selectedEditor].quill.formatText(
-            start,
-            length,
-            "whereami",
-            true,
-          );
-          setTimeout(() => {
+          Util.avoidUndo(this.#editors[this.#selectedEditor].quill, () => {
             this.#editors[this.#selectedEditor].quill.formatText(
               start,
               length,
               "whereami",
-              false,
+              true,
             );
+          });
+          setTimeout(() => {
+            Util.avoidUndo(this.#editors[this.#selectedEditor].quill, () => {
+              this.#editors[this.#selectedEditor].quill.formatText(
+                start,
+                length,
+                "whereami",
+                false,
+              );
+            });
             this.#showingWhere = false;
           }, 1000);
         }
@@ -1077,9 +1089,10 @@ class TextEditor {
       })
       .forEach((formatID) => {
         $("#formatSelector").append(
-          `<option ${theSettings.effectiveSettings().previewFormats
-            ? `class="format${formatID}"`
-            : ""
+          `<option ${
+            theSettings.effectiveSettings().previewFormats
+              ? `class="format${formatID}"`
+              : ""
           } value="${formatID}">${Util.escapeHTML(
             formats[formatID].formats_name,
           )}</option>`,
@@ -1115,8 +1128,8 @@ class TextEditor {
 
   /**
    * remove focus from editor provided focus is on a text with given id
-   * 
-   * @param {String} textID 
+   *
+   * @param {String} textID
    */
   unfocus(textID) {
     if (this.#selectedEditor == textID) this.#selectedEditor = null;
@@ -1183,11 +1196,21 @@ class TextEditor {
             },
             events: {
               hide: () => {
-                if (this.#detectURL)
-                  this.#editors[this.#detectURL.text].quill.formatText(this.#detectURL.index, this.#detectURL.length, "url", false)
-                return true
-              }
-            }
+                if (this.#detectURL) {
+                  Util.avoidUndo(this.#editors[textID].quill, () => {
+                    this.#editors[this.#detectURL.text].quill.formatText(
+                      this.#detectURL.index,
+                      this.#detectURL.length,
+                      "url",
+                      false,
+                      "silent",
+                    );
+                  });
+                  this.#detectURL = null;
+                }
+                return true;
+              },
+            },
           });
         }
       });
@@ -1287,8 +1310,8 @@ class TextEditor {
         }
         let scrollTo = Math.round(
           bounds.top +
-          top -
-          verticalShift * ($("#TEE").height() - bounds.height),
+            top -
+            verticalShift * ($("#TEE").height() - bounds.height),
         );
         if (scrollTo < 0) {
           scrollTo = 0;
@@ -1890,10 +1913,11 @@ class TextEditor {
       theLayout.zoomValue = $("#zoomSelector").val();
       $("#zoomValue").html(Util.scaledZoom($("#zoomSelector").val()) + "%");
       $(":root").css({
-        "--first-line-indent": `${(theSettings.effectiveSettings().firstLineIndent *
-          Util.scaledZoom($("#zoomSelector").val())) /
+        "--first-line-indent": `${
+          (theSettings.effectiveSettings().firstLineIndent *
+            Util.scaledZoom($("#zoomSelector").val())) /
           100
-          }px`,
+        }px`,
       });
       theObjectTree.buildObjectSheet();
     }
@@ -1927,60 +1951,6 @@ class TextEditor {
   }
 
   /**
-   *
-   * @param {*} textID
-   * @param {*} sel
-   */
-  #paste(textID, sel) {
-    let settings = theSettings.effectiveSettings();
-    navigator.clipboard.read().then((clipItems) => {
-      for (let clipboardItem of clipItems) {
-        if (
-          clipboardItem.types.includes("image/png") ||
-          clipboardItem.types.includes("image/jpeg")
-        ) {
-          // paste image
-          for (let type of clipboardItem.types) {
-            if (type.startsWith("image/")) {
-              clipboardItem.getType(type).then((image) => {
-                let reader = new FileReader();
-                reader.readAsDataURL(image);
-                reader.onload = () => {
-                  this.#editors[textID].quill.deleteText(sel.index, sel.length);
-                  this.#editors[textID].quill.insertEmbed(
-                    sel.index,
-                    "image",
-                    reader.result +
-                    " " +
-                    settings.imageWidth +
-                    " " +
-                    settings.imageHeight,
-                  );
-                  this.#editors[textID].quill.formatText(sel.index, 1, {
-                    title: "",
-                    alignment: settings.imageAlignment,
-                    shadow: settings.imageShadow,
-                  });
-                };
-              });
-            }
-          }
-        }
-        if (
-          clipboardItem.types.includes("text/plain") ||
-          clipboardItem.types.includes("text/html")
-        ) {
-          // paste text
-          navigator.clipboard.readText().then((clipText) => {
-            this.#editors[textID].quill.deleteText(sel.index, sel.length);
-            this.#editors[textID].quill.insertText(sel.index, clipText);
-          });
-        }
-      }
-    });
-  }
-
-  /**
    * create new quill in editor div with given id
    *
    * @param {String} textID
@@ -1990,93 +1960,99 @@ class TextEditor {
     let quill = new Quill(`#edi${textID}`, QuillConfig.config);
     quill.setContents(theTextTree.getText(textID).delta);
 
-    // DOM dragstart, copy and cut handlers: if we are taking chunks out of the text we must take care of all objects the text chunk is associated with
+    // DOM dragstart, copy and cut handlers: if we are taking chunks out of the text we must take care of all formats and objects the text chunk is associated with
     $(`#edi${textID}`).on("dragstart copy cut", (event) => {
-      let fragment = document.getSelection().getRangeAt(0).cloneContents();
-      let tempDiv = document.createElement("div");
-      tempDiv.appendChild(fragment.cloneNode(true));
-      let html = tempDiv.innerHTML;
-      // if no children we took out text only; but this does not mean the text has no objects associated with, so we need to check carefully and build html explicitly
-      if (fragment.childElementCount == 0) {
-        let classes = [];
-        Object.keys(this.#editors[textID].quill.getFormat()).forEach(
-          (format) => {
-            if (format.startsWith("object")) {
-              classes.push(format + "-true");
-            }
-          },
-        );
-        if (classes.length) {
-          html = `<span class="${classes.join(" ")}">${html}</span>`;
+      if (event.type != "dragstart") event.preventDefault();
+
+      let selection = this.#editors[textID].quill.getSelection();
+      let formats =
+        this.#editors[textID].quill.getFormat(
+          selection.index,
+          selection.length,
+        ) || {};
+      let delta = this.#editors[textID].quill.getContents(
+        selection.index,
+        selection.length,
+      );
+      delta.ops = delta.ops.map((op) => {
+        if (typeof op.insert == "string") {
+          op.attributes = { ...(op.attributes || {}), ...formats };
         }
-      }
-      if (event.type == "dragstart") {
-        // no drag from locked texts
-        if (!theTextTree.getText(textID).editable) {
-          return false;
-        }
-        event.originalEvent.dataTransfer.setData("text/html", html);
-        event.originalEvent.dataTransfer.setData("text/quill", html);
-        // continue standard drag
-        return true;
-      } else {
-        event.originalEvent.clipboardData.setData("text/html", html);
-        event.originalEvent.clipboardData.setData("text/quill", html);
-        event.originalEvent.clipboardData.setData(
-          "text/plain",
-          tempDiv.textContent,
-        );
-        if (event.type == "cut") {
-          document.getSelection().deleteFromDocument();
-        }
-        // no standard copy/cut
-        event.preventDefault();
-      }
+        return op;
+      });
+
+      let dt =
+        event.type == "dragstart"
+          ? event.originalEvent.dataTransfer
+          : event.originalEvent.clipboardData;
+      dt.setData("quill/delta", JSON.stringify(delta));
+      dt.setData("text/html", Exporter.delta2HTML(delta.ops));
+      dt.setData(
+        "text/plain",
+        this.#editors[textID].quill.getText(selection.index, selection.length),
+      );
+      if (event.type == "dragstart") return true;
+      if (event.type == "cut") document.getSelection().deleteFromDocument();
     });
 
-    // DOM drop handler
+    // DOM drop handler (drops from within Quill or from outside)
     $(`#edi${textID}`).on("drop", (event) => {
-      let range = document.caretRangeFromPoint(event.clientX, event.clientY);
-      if (
-        range.startContainer &&
-        range.startContainer.nodeType == Node.TEXT_NODE
-      ) {
-        let splitNode = range.startContainer.splitText(range.startOffset);
-        // if we are not dropping from another quill editor or are requesting unformatted insert by alt key, then insert plain text
-        if (
-          !event.originalEvent.dataTransfer.types.includes("text/quill") ||
-          event.altKey
-        ) {
-          range.startContainer.splitText(range.startOffset);
-          range.startContainer.nodeValue =
-            range.startContainer.nodeValue +
-            event.originalEvent.dataTransfer.getData("text/plain");
-        } else {
-          let spanNode = document.createElement("span");
-          spanNode.insertAdjacentHTML(
-            "afterbegin",
-            event.originalEvent.dataTransfer.getData("text/quill"),
-          );
-          range.startContainer.parentNode.insertBefore(spanNode, splitNode);
-        }
+      event.preventDefault();
+
+      // find Quill index where drop happened
+      const x = event.clientX;
+      const y = event.clientY;
+
+      let range;
+      if (document.caretRangeFromPoint) {
+        range = document.caretRangeFromPoint(x, y);
+      } else if (document.caretPositionFromPoint) {
+        const pos = document.caretPositionFromPoint(x, y);
+        range = document.createRange();
+        range.setStart(pos.offsetNode, pos.offset);
+      }
+      if (!range) return;
+
+      let node = range.startContainer;
+      let offset = range.startOffset;
+
+      // walk up until Parchment knows this node
+      let blot = Parchment.find(node);
+      while (!blot && node && node !== quill.root) {
+        node = node.parentNode;
+        blot = Parchment.find(node);
+      }
+      if (!blot) return;
+      let index = blot.offset(quill.scroll) + offset;
+
+      let formats = quill.getFormat(index);
+      let delta = null;
+      if (event.originalEvent.dataTransfer.types.includes("quill/delta"))
+        delta = new Delta(
+          JSON.parse(event.originalEvent.dataTransfer.getData("quill/delta")),
+        );
+      else if (event.originalEvent.dataTransfer.types.includes("text/html")) {
+        let html = QuillClipboard.stripTags(
+          event.originalEvent.dataTransfer.getData("text/html"),
+        );
+        delta = quill.clipboard.convert(html);
+      } else if (event.originalEvent.dataTransfer.types.includes("text/plain"))
+        delta = new Delta().insert(
+          event.originalEvent.dataTransfer.getData("text/plain"),
+        );
+      if (delta) {
+        // apply current formats to all ops in the pasted delta
+        delta.ops = delta.ops.map((op) => {
+          if (typeof op.insert == "string") {
+            op.attributes = { ...(op.attributes || {}), ...formats };
+          }
+          return op;
+        });
+        quill.updateContents(new Delta().retain(index).concat(delta));
         if (!event.ctrlKey) {
           document.getSelection().deleteFromDocument();
         }
-        event.preventDefault();
-      } else {
-        return true;
-      }
-    });
-
-    // DOM paste handler
-    $(`#edi${textID}`).on("paste", (event) => {
-      // if we are not pasting from within, then insert plain text to avoid pasting unwanted html tags and styles
-      if (!event.originalEvent.clipboardData.types.includes("text/quill")) {
-        event.preventDefault();
-        let range = this.#editors[textID].quill.getSelection(true);
-        if (range) {
-          this.#paste(textID, range);
-        }
+        quill.setSelection(index, delta.length());
       }
     });
 
@@ -2099,6 +2075,7 @@ class TextEditor {
       if (this.#selectionChangeTimers[textID]) {
         clearTimeout(this.#selectionChangeTimers[textID]);
       }
+      this.#currentSelection = range;
       this.#selectionChangeTimers[textID] = setTimeout(
         TextEditor.updateSelection,
         100,
@@ -2110,6 +2087,7 @@ class TextEditor {
 
     // Quill change handler
     quill.on("text-change", (changeDelta, oldDelta, source) => {
+      console.log("text-change", textID, changeDelta);
       if (!theTextTree.getText(textID).editable) {
         console.error("text-change in locked text", textID, changeDelta);
       }
@@ -2371,36 +2349,6 @@ class TextEditor {
     } else {
       items.sepCCP = "x";
     }
-    if (sel.length) {
-      items.copy = {
-        name: _("editorContextMenu_copy"),
-        callback: function () {
-          // execCommand should be avoided
-          document.execCommand("copy");
-        },
-      };
-      if (!compact) {
-        items.copy.icon = "fas fa-clipboard";
-      }
-      items.cut = {
-        name: _("editorContextMenu_cut"),
-        callback: function () {
-          // execCommand should be avoided but clipboard.write fails on delta data (?)
-          document.execCommand("cut");
-          // this.#editors[textID].quill.deleteText(sel.index,sel.length);
-          // navigator.clipboard.write([selDelta]);
-        },
-      };
-    }
-    items.paste = {
-      name: _("editorContextMenu_paste"),
-      callback: () => {
-        this.#paste(textID, sel);
-      },
-    };
-    if (!compact && !sel.length) {
-      items.paste.icon = "fas fa-paste";
-    }
     items.pasteText = {
       name: _("editorContextMenu_pasteText"),
       callback: () => {
@@ -2410,6 +2358,9 @@ class TextEditor {
         });
       },
     };
+    if (!compact) {
+      items.pasteText.icon = "fas fa-clipboard";
+    }
     items.pastePlain = {
       name: _("editorContextMenu_pastePlain"),
       callback: () => {
@@ -2441,10 +2392,10 @@ class TextEditor {
                   sel.index,
                   "image",
                   reader.result +
-                  " " +
-                  settings.imageWidth +
-                  " " +
-                  settings.imageHeight,
+                    " " +
+                    settings.imageWidth +
+                    " " +
+                    settings.imageHeight,
                 );
                 this.#editors[textID].quill.formatText(sel.index, 1, {
                   title: path,
@@ -2524,43 +2475,52 @@ class TextEditor {
     }
     // detect URL
     if (!sel.length) {
-      let left = 0
-      let right = this.#editors[textID].quill.getText().length
-      let leftText = this.#editors[textID].quill.getText(0, sel.index)
-      let rightText = this.#editors[textID].quill.getText(sel.index)
-      let m = leftText.match(/(\S*)$/)
+      let left = 0;
+      let right = this.#editors[textID].quill.getText().length;
+      let leftText = this.#editors[textID].quill.getText(0, sel.index);
+      let rightText = this.#editors[textID].quill.getText(sel.index);
+      let m = leftText.match(/(\S*)$/);
       if (m) {
-        leftText = m[1]
-        left = sel.index - m[1].length
+        leftText = m[1];
+        left = sel.index - m[1].length;
       }
-      m = rightText.match(/(\S*)/)
+      m = rightText.match(/(\S*)/);
       if (m) {
         rightText = m[1];
-        right = sel.index + m[1].length
+        right = sel.index + m[1].length;
       }
-      m = (leftText + rightText).match(/(https?:\/\/)?(?:[A-Za-z0-9-]{1,63}\.){2,}[A-Za-z0-9-]{1,63}(?:[\/?#][^\s()<>\[\]{}]*)?/i)
-      if (m && sel.index >= left + m.index && sel.index <= left + m.index + m[0].length) {
+      m = (leftText + rightText).match(
+        /(https?:\/\/)?(?:[A-Za-z0-9-]{1,63}\.){2,}[A-Za-z0-9-]{1,63}(?:[\/?#][^\s()<>\[\]{}]*)?/i,
+      );
+      if (
+        m &&
+        sel.index >= left + m.index &&
+        sel.index <= left + m.index + m[0].length
+      ) {
         try {
-          let url = new URL(m[1] ? m[0] : "http://" + m[0])
-          this.#editors[textID].quill.formatText(
-            left + m.index,
-            m[0].length,
-            "url",
-            true,
-          );
-          this.#detectURL = { text: textID, index: left + m.index, length: m[0].length }
+          let url = new URL(m[1] ? m[0] : "http://" + m[0]);
+          Util.avoidUndo(this.#editors[textID].quill, () => {
+            this.#editors[textID].quill.formatText(
+              left + m.index,
+              m[0].length,
+              "url",
+              true,
+            );
+          });
+          this.#detectURL = {
+            text: textID,
+            index: left + m.index,
+            length: m[0].length,
+          };
           items.openURL = {
             name: _("editorContextMenu_openURL"),
             callback: function () {
-              ipcRenderer.invoke(
-                "mainProcess_openURL",
-                url.href,
-              );
+              ipcRenderer.invoke("mainProcess_openURL", url.href);
             },
-          }
+          };
+        } catch (_) {
+          // catch failing URL() constructor for invalid url
         }
-        // catch failing URL() constructor for invalid url
-        catch (_) { }
       }
     }
     if (selText.trim().length) {
@@ -2582,14 +2542,15 @@ class TextEditor {
       items.splitSep = "x";
       items.split = {
         isHtmlName: true,
-        name: `${_("editorContextMenu_split")}<br><em>${sel.index > citeLen ? `${ellip} ` : ""
-          }${this.#editors[textID].quill.getText(
-            sel.index > citeLen ? sel.index - citeLen : 0,
-            sel.index > citeLen ? citeLen : sel.index,
-          )}${sep}${this.#editors[textID].quill.getText(
-            sel.index,
-            sel.index < len - citeLen ? citeLen : len - sel.index,
-          )}${sel.index < len - citeLen ? ` ${ellip}` : ""}</em>`,
+        name: `${_("editorContextMenu_split")}<br><em>${
+          sel.index > citeLen ? `${ellip} ` : ""
+        }${this.#editors[textID].quill.getText(
+          sel.index > citeLen ? sel.index - citeLen : 0,
+          sel.index > citeLen ? citeLen : sel.index,
+        )}${sep}${this.#editors[textID].quill.getText(
+          sel.index,
+          sel.index < len - citeLen ? citeLen : len - sel.index,
+        )}${sel.index < len - citeLen ? ` ${ellip}` : ""}</em>`,
         callback: function () {
           theTextEditor.splitText();
         },
@@ -2867,9 +2828,10 @@ class TextEditor {
    */
   #findSearchPositions(searchFor, doCase, doWord, doRegex) {
     let rex = RegExp(
-      `${doWord ? "(^|\\P{L})(" : ""}${doRegex
-        ? Util.escapeRegExpSearch(searchFor)
-        : Util.escapeRegExp(searchFor)
+      `${doWord ? "(^|\\P{L})(" : ""}${
+        doRegex
+          ? Util.escapeRegExpSearch(searchFor)
+          : Util.escapeRegExp(searchFor)
       }${doWord ? ")\\P{L}" : ""}`,
       `udg${doCase ? "" : "i"}`,
     );
@@ -2925,7 +2887,7 @@ class TextEditor {
             selection.index +
             (selection.length ? (overlapSelection ? 1 : selection.length) : 0);
           let ediPos = this.#searchPositions[this.#ids[editorIndex]];
-          for (; i < ediPos.length && ediPos[i].index < selPos; i++) { }
+          for (; i < ediPos.length && ediPos[i].index < selPos; i++) {}
           if (i >= ediPos.length) {
             // next editor
             editorIndex++;
@@ -2941,7 +2903,7 @@ class TextEditor {
         else {
           let ediPos = this.#searchPositions[this.#ids[editorIndex]];
           let i = ediPos.length - 1;
-          for (; i >= 0 && ediPos[i].index >= selection.index; i--) { }
+          for (; i >= 0 && ediPos[i].index >= selection.index; i--) {}
           if (i < 0) {
             // prev editor
             editorIndex--;

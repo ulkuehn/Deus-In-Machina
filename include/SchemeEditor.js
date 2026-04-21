@@ -125,14 +125,16 @@ class SchemeEditor {
       })
       .forEach((formatID) => {
         $formatSelect.append(
-          `<option ${settings.previewFormats ? `class="format${formatID}"` : ""
+          `<option ${
+            settings.previewFormats ? `class="format${formatID}"` : ""
           } value="${formatID}" ${formatID == UUID0 ? "selected" : ""}>${Util.escapeHTML(formats[formatID].formats_name)}</option>`,
         );
         if (settings.previewFormats) {
           $("#formatSheet").append(
-            `${formatID == UUID0
-              ? `#schemeEditorFormat${id} option { `
-              : `#schemeEditorFormat${id} .format${formatID} {`
+            `${
+              formatID == UUID0
+                ? `#schemeEditorFormat${id} option { `
+                : `#schemeEditorFormat${id} .format${formatID} {`
             } ${Formats.toPreviewCSS(formats[formatID])}}\n`,
           );
         }
@@ -243,14 +245,93 @@ class SchemeEditor {
       }
     });
 
-    // paste handler
-    $(`#property${id}`).on("paste", (event) => {
-      if (!event.originalEvent.clipboardData.types.includes("text/quill")) {
-        event.preventDefault();
-        let range = this.#editor.getSelection(true);
-        if (range) {
-          this.#paste(range);
+    // DOM dragstart, copy and cut handlers: if we are taking chunks out of the text we must take care of all objects the text chunk is associated with
+    $(`#property${id}`).on("dragstart copy cut", (event) => {
+      if (event.type != "dragstart") event.preventDefault();
+
+      let selection = this.#editor.getSelection();
+      let formats =
+        this.#editor.getFormat(selection.index, selection.length) || {};
+      let delta = this.#editor.getContents(selection.index, selection.length);
+      delta.ops = delta.ops.map((op) => {
+        if (typeof op.insert == "string") {
+          op.attributes = { ...(op.attributes || {}), ...formats };
         }
+        return op;
+      });
+
+      let dt =
+        event.type == "dragstart"
+          ? event.originalEvent.dataTransfer
+          : event.originalEvent.clipboardData;
+      dt.setData("quill/delta", JSON.stringify(delta));
+      dt.setData("text/html", Exporter.delta2HTML(delta.ops));
+      dt.setData(
+        "text/plain",
+        this.#editor.getText(selection.index, selection.length),
+      );
+      if (event.type == "dragstart") return true;
+      if (event.type == "cut") document.getSelection().deleteFromDocument();
+    });
+
+    // DOM drop handler (drops from within Quill or from outside)
+    $(`#property${id}`).on("drop", (event) => {
+      event.preventDefault();
+
+      // find Quill index where drop happened
+      const x = event.clientX;
+      const y = event.clientY;
+
+      let range;
+      if (document.caretRangeFromPoint) {
+        range = document.caretRangeFromPoint(x, y);
+      } else if (document.caretPositionFromPoint) {
+        const pos = document.caretPositionFromPoint(x, y);
+        range = document.createRange();
+        range.setStart(pos.offsetNode, pos.offset);
+      }
+      if (!range) return;
+
+      let node = range.startContainer;
+      let offset = range.startOffset;
+
+      // walk up until Parchment knows this node
+      let blot = Parchment.find(node);
+      while (!blot && node && node !== quill.root) {
+        node = node.parentNode;
+        blot = Parchment.find(node);
+      }
+      if (!blot) return;
+      let index = blot.offset(quill.scroll) + offset;
+
+      let formats = quill.getFormat(index);
+      let delta = null;
+      if (event.originalEvent.dataTransfer.types.includes("quill/delta"))
+        delta = new Delta(
+          JSON.parse(event.originalEvent.dataTransfer.getData("quill/delta")),
+        );
+      else if (event.originalEvent.dataTransfer.types.includes("text/html")) {
+        let html = QuillClipboard.stripTags(
+          event.originalEvent.dataTransfer.getData("text/html"),
+        );
+        delta = quill.clipboard.convert(html);
+      } else if (event.originalEvent.dataTransfer.types.includes("text/plain"))
+        delta = new Delta().insert(
+          event.originalEvent.dataTransfer.getData("text/plain"),
+        );
+      if (delta) {
+        // apply current formats to all ops in the pasted delta
+        delta.ops = delta.ops.map((op) => {
+          if (typeof op.insert == "string") {
+            op.attributes = { ...(op.attributes || {}), ...formats };
+          }
+          return op;
+        });
+        quill.updateContents(new Delta().retain(index).concat(delta));
+        if (!event.ctrlKey) {
+          document.getSelection().deleteFromDocument();
+        }
+        quill.setSelection(index, delta.length());
       }
     });
 
@@ -305,9 +386,10 @@ class SchemeEditor {
           );
           if (settings.previewFormats) {
             $("#formatSheet").append(
-              `${formatID == UUID0
-                ? `#schemeEditorFormat${id} option { `
-                : `#schemeEditorFormat${id} .format${formatID} {`
+              `${
+                formatID == UUID0
+                  ? `#schemeEditorFormat${id} option { `
+                  : `#schemeEditorFormat${id} .format${formatID} {`
               } ${Formats.toPreviewCSS(format)}}\n`,
             );
           }
@@ -343,17 +425,19 @@ class SchemeEditor {
               );
               if (settings.previewFormats) {
                 $("#formatSheet").append(
-                  `${formatID == UUID0
-                    ? `#schemeEditorFormat${id} option { `
-                    : `#schemeEditorFormat${id} .format${formatID} {`
+                  `${
+                    formatID == UUID0
+                      ? `#schemeEditorFormat${id} option { `
+                      : `#schemeEditorFormat${id} .format${formatID} {`
                   } ${Formats.toPreviewCSS(format)}}\n`,
                 );
               }
             }
             $("#formatSheet").append(`img { zoom:${zoom}% }`);
             $(":root").css({
-              "--first-line-indent": `${(settings.firstLineIndent * zoom) / 100
-                }px`,
+              "--first-line-indent": `${
+                (settings.firstLineIndent * zoom) / 100
+              }px`,
             });
           }
         },
@@ -499,29 +583,23 @@ class SchemeEditor {
           };
           items.sepFormat = "x";
         }
-        // paste etc
-        if (sel.length) {
-          items.copy = {
-            icon: "fas fa-clipboard",
-            name: _("editorContextMenu_copy"),
-            callback: function () {
-              // execCommand should be avoided
-              document.execCommand("copy");
-            },
-          };
-          items.cut = {
-            name: _("editorContextMenu_cut"),
-            callback: function () {
-              // execCommand should be avoided
-              // but clipboard.write fails on delta data (?)
-              document.execCommand("cut");
-            },
-          };
-        }
-        items.paste = {
-          name: _("editorContextMenu_paste"),
+        items.pasteText = {
+          name: _("editorContextMenu_pasteText"),
           callback: () => {
-            this.#paste(sel);
+            navigator.clipboard.readText().then((clipText) => {
+              quill.deleteText(sel.index, sel.length);
+              quill.insertText(sel.index, clipText);
+            });
+          },
+        };
+        items.pastePlain = {
+          name: _("editorContextMenu_pastePlain"),
+          callback: () => {
+            navigator.clipboard.readText().then((clipText) => {
+              quill.deleteText(sel.index, sel.length);
+              quill.insertText(sel.index, clipText);
+              quill.removeFormat(sel.index, clipText.length);
+            });
           },
         };
         items.loadImage = {
@@ -545,10 +623,10 @@ class SchemeEditor {
                       sel.index,
                       "image",
                       reader.result +
-                      " " +
-                      theSettings.imageWidth +
-                      " " +
-                      theSettings.imageHeight,
+                        " " +
+                        theSettings.imageWidth +
+                        " " +
+                        theSettings.imageHeight,
                     );
                     quill.formatText(sel.index, 1, {
                       title: path,
@@ -562,43 +640,43 @@ class SchemeEditor {
         };
         // detect URL
         if (!sel.length) {
-          let left = 0
-          let right = quill.getText().length
-          let leftText = quill.getText(0, sel.index)
-          let rightText = quill.getText(sel.index)
-          let m = leftText.match(/(\S*)$/)
+          let left = 0;
+          let right = quill.getText().length;
+          let leftText = quill.getText(0, sel.index);
+          let rightText = quill.getText(sel.index);
+          let m = leftText.match(/(\S*)$/);
           if (m) {
-            leftText = m[1]
-            left = sel.index - m[1].length
+            leftText = m[1];
+            left = sel.index - m[1].length;
           }
-          m = rightText.match(/(\S*)/)
+          m = rightText.match(/(\S*)/);
           if (m) {
             rightText = m[1];
-            right = sel.index + m[1].length
+            right = sel.index + m[1].length;
           }
-          m = (leftText + rightText).match(/(https?:\/\/)?(?:[A-Za-z0-9-]{1,63}\.){2,}[A-Za-z0-9-]{1,63}(?:[\/?#][^\s()<>\[\]{}]*)?/i)
-          if (m && sel.index >= left + m.index && sel.index <= left + m.index + m[0].length) {
+          m = (leftText + rightText).match(
+            /(https?:\/\/)?(?:[A-Za-z0-9-]{1,63}\.){2,}[A-Za-z0-9-]{1,63}(?:[\/?#][^\s()<>\[\]{}]*)?/i,
+          );
+          if (
+            m &&
+            sel.index >= left + m.index &&
+            sel.index <= left + m.index + m[0].length
+          ) {
             try {
-              let url = new URL(m[1] ? m[0] : "http://" + m[0])
-              quill.formatText(
-                left + m.index,
-                m[0].length,
-                "url",
-                true,
-              );
-              this.#detectURL = { index: left + m.index, length: m[0].length }
+              let url = new URL(m[1] ? m[0] : "http://" + m[0]);
+              Util.avoidUndo(quill, () => {
+                quill.formatText(left + m.index, m[0].length, "url", true);
+              });
+              this.#detectURL = { index: left + m.index, length: m[0].length };
               items.openURL = {
                 name: _("editorContextMenu_openURL"),
                 callback: () => {
-                  ipcRenderer.invoke(
-                    "mainProcess_openURL",
-                    url.href,
-                  );
+                  ipcRenderer.invoke("mainProcess_openURL", url.href);
                 },
-              }
+              };
+            } catch (_) {
+              // catch failing URL() constructor for invalid url
             }
-            // catch failing URL() constructor for invalid url
-            catch (_) { }
           }
         }
         // web tools part
@@ -636,10 +714,17 @@ class SchemeEditor {
       events: {
         hide: () => {
           if (this.#detectURL)
-            quill.formatText(this.#detectURL.index, this.#detectURL.length, "url", false)
-          return true
-        }
-      }
+            Util.avoidUndo(quill, () => {
+              quill.formatText(
+                this.#detectURL.index,
+                this.#detectURL.length,
+                "url",
+                false,
+              );
+            });
+          return true;
+        },
+      },
     });
   }
 
@@ -670,60 +755,6 @@ class SchemeEditor {
       title: title,
       alignment: alignment,
       shadow: shadow,
-    });
-  }
-
-  /**
-   * paste from clipboard, either text or image
-   *
-   * @param {ObjectConstructor} selection current editor selection
-   */
-  #paste(selection) {
-    navigator.clipboard.read().then((clipItems) => {
-      for (let clipboardItem of clipItems) {
-        if (
-          clipboardItem.types.includes("image/png") ||
-          clipboardItem.types.includes("image/jpeg")
-        ) {
-          // paste image
-          for (let type of clipboardItem.types) {
-            if (type.startsWith("image/")) {
-              clipboardItem.getType(type).then((image) => {
-                let reader = new FileReader();
-                reader.readAsDataURL(image);
-                reader.onload = () => {
-                  this.#editor.deleteText(selection.index, selection.length);
-                  this.#editor.insertEmbed(
-                    selection.index,
-                    "image",
-                    reader.result +
-                    " " +
-                    theSettings.imageWidth +
-                    " " +
-                    theSettings.imageHeight,
-                  );
-                  this.#editor.formatText(selection.index, 1, {
-                    title: "",
-                    alignment: theSettings.imageAlignment,
-                    shadow: theSettings.imageShadow,
-                  });
-                };
-              });
-            }
-          }
-        } else {
-          if (
-            clipboardItem.types.includes("text/plain") ||
-            clipboardItem.types.includes("text/html")
-          ) {
-            // paste text
-            navigator.clipboard.readText().then((clipText) => {
-              this.#editor.deleteText(selection.index, selection.length);
-              this.#editor.insertText(selection.index, clipText);
-            });
-          }
-        }
-      }
     });
   }
 }

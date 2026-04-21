@@ -56,7 +56,7 @@ class Util {
     } else {
       return Math.round(
         100 +
-        (400 * (linearValue - Util.neutralZoomValue)) / Util.neutralZoomValue,
+          (400 * (linearValue - Util.neutralZoomValue)) / Util.neutralZoomValue,
       );
     }
   }
@@ -65,11 +65,16 @@ class Util {
    * check if a character can be part of an URL
    */
   static isNotValidInURL(c) {
-    if (typeof c != "String" || c.length != 1) return true
-    let code = c.charCodeAt(c)
-    if ((code >= 0x41 && code <= 0x5A) || (code >= 0x61 && code <= 0x7A) || (code >= 0x30 && code <= 0x39)) return false
-    if ("-._~!$&'()*+,;=:/?#[]@%".includes(c)) return false
-    return true
+    if (typeof c != "String" || c.length != 1) return true;
+    let code = c.charCodeAt(c);
+    if (
+      (code >= 0x41 && code <= 0x5a) ||
+      (code >= 0x61 && code <= 0x7a) ||
+      (code >= 0x30 && code <= 0x39)
+    )
+      return false;
+    if ("-._~!$&'()*+,;=:/?#[]@%".includes(c)) return false;
+    return true;
   }
 
   // tabs related methods
@@ -291,10 +296,10 @@ class Util {
     let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
       ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16),
-      ]
+          parseInt(result[1], 16),
+          parseInt(result[2], 16),
+          parseInt(result[3], 16),
+        ]
       : [0, 0, 0];
   }
 
@@ -546,8 +551,9 @@ class Util {
 
   static backgroundColor(col, pad = false) {
     if (!col) return "unset";
-    return pad ?
-      `linear-gradient(90deg, transparent 0, transparent 6px, ${col} 6px, rgba(${Util.hexToRgb(col).join(",")},0) 90%)` : `linear-gradient(90deg, ${col} 0, rgba(${Util.hexToRgb(col).join(",")},0) 90%)`
+    return pad
+      ? `linear-gradient(90deg, transparent 0, transparent 6px, ${col} 6px, rgba(${Util.hexToRgb(col).join(",")},0) 90%)`
+      : `linear-gradient(90deg, ${col} 0, rgba(${Util.hexToRgb(col).join(",")},0) 90%)`;
   }
 
   // randomizing methods
@@ -609,5 +615,22 @@ class Util {
       cols.push(Math.round(hue));
     }
     return cols.map((x) => Util.#hsv2rgb(x, 1, 1));
+  }
+
+  /**
+   * helper method to execute a function without creating an undo entry in quill history
+   *
+   * @param {Quill} quill
+   * @param {function} fn
+   */
+  static avoidUndo(quill, fn) {
+    let record = quill.history.record;
+    quill.history.record = function () {};
+
+    try {
+      fn();
+    } finally {
+      quill.history.record = record;
+    }
   }
 }

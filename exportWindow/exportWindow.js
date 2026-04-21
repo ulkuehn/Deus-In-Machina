@@ -14,6 +14,15 @@ function _(...x) {
   return __(theLanguage, ...x);
 }
 
+/**
+ * register class to show URL in Editor
+ */
+Parchment.register(
+  new Parchment.Attributor.Class("url", "url", {
+    scope: Parchment.Scope.INLINE,
+  }),
+);
+
 let theProfiles;
 let theProfileID;
 let theFormats;

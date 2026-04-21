@@ -569,12 +569,12 @@ class TextTree {
    * @param {String} id
    * @returns {String[]}
    */
-  getParents(id) {
+  getParents(id, name = true) {
     let node = this.#treeDiv.jstree().get_node(id);
     let parents = [];
     // traverse the hierarchy upwards towards root
     while (node.id != "#" && node.parent) {
-      parents.unshift(this.#texts[node.id].name);
+      parents.unshift(name ? this.#texts[node.id].name : node.id);
       node = this.#treeDiv.jstree().get_node(node.parent);
     }
     return parents;
@@ -1963,10 +1963,13 @@ class TextTree {
         callback: () => {
           this.#checkEvent = false;
           this.#treeDiv.jstree().close_all();
+          this.getParents(node, false).forEach((id) => {
+            this.#treeDiv.jstree().open_node(id);
+          });
+          this.#treeDiv.jstree().open_all(node)
           this.#treeDiv.jstree().uncheck_all();
           this.#treeDiv.jstree().check_node(node);
           this.#treeDiv.jstree().check_node(node.children_d);
-          this.#treeDiv.jstree().open_all(node);
           theTextEditor.showTextsInEditor(this.getChecked());
           this.#checkEvent = true;
         },

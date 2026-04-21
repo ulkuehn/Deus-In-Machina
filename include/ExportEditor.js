@@ -10,6 +10,7 @@
  */
 class ExportEditor {
   #editor;
+  #detectURL = null;
 
   /**
    * class constructor
@@ -68,8 +69,9 @@ class ExportEditor {
 
     let $boldDiv = $("<div>")
       .attr({
-        style: `grid-column:1; align-self:center; visibility:${withFormat ? "visible" : "hidden"
-          }`,
+        style: `grid-column:1; align-self:center; visibility:${
+          withFormat ? "visible" : "hidden"
+        }`,
       })
       .append(
         $boldControl,
@@ -81,8 +83,9 @@ class ExportEditor {
       );
     let $italicDiv = $("<div>")
       .attr({
-        style: `grid-column:2; align-self:center; visibility:${withFormat ? "visible" : "hidden"
-          }`,
+        style: `grid-column:2; align-self:center; visibility:${
+          withFormat ? "visible" : "hidden"
+        }`,
       })
       .append(
         $italicControl,
@@ -94,8 +97,9 @@ class ExportEditor {
       );
     let $underlineDiv = $("<div>")
       .attr({
-        style: `grid-column:3; align-self:center; visibility:${withFormat ? "visible" : "hidden"
-          }`,
+        style: `grid-column:3; align-self:center; visibility:${
+          withFormat ? "visible" : "hidden"
+        }`,
       })
       .append(
         $underlineControl,
@@ -107,8 +111,9 @@ class ExportEditor {
       );
     let $strikeDiv = $("<div>")
       .attr({
-        style: `grid-column:4; align-self:center; visibility:${withFormat ? "visible" : "hidden"
-          }`,
+        style: `grid-column:4; align-self:center; visibility:${
+          withFormat ? "visible" : "hidden"
+        }`,
       })
       .append(
         $strikeControl,
@@ -139,7 +144,8 @@ class ExportEditor {
       })
       .forEach((formatID) => {
         $formatSelect.append(
-          `<option ${settings.previewFormats ? `class="format${formatID}"` : ""
+          `<option ${
+            settings.previewFormats ? `class="format${formatID}"` : ""
           } value="${formatID}" ${formatID == UUID0 ? "selected" : ""}>${Util.escapeHTML(formats[formatID].formats_name)}</option>`,
         );
         $(`#formatSheet${id}`).append(
@@ -153,9 +159,10 @@ class ExportEditor {
         );
         if (settings.previewFormats) {
           $(`#formatSheet${id}`).append(
-            `${formatID == UUID0
-              ? `#format${id} option { `
-              : `#format${id} .format${formatID} {`
+            `${
+              formatID == UUID0
+                ? `#format${id} option { `
+                : `#format${id} .format${formatID} {`
             } ${Formats.toPreviewCSS(formats[formatID])}}\n`,
           );
         }
@@ -170,8 +177,9 @@ class ExportEditor {
       });
     let $formatDiv = $("<div>")
       .attr({
-        style: `grid-column:5; align-self:center; visibility:${withFormat ? "visible" : "hidden"
-          }`,
+        style: `grid-column:5; align-self:center; visibility:${
+          withFormat ? "visible" : "hidden"
+        }`,
       })
       .append($formatSelect);
 
@@ -186,17 +194,19 @@ class ExportEditor {
       );
       placeholders.forEach((placeholder) => {
         $placeholderSelect.append(
-          `<option value="${placeholder}" ${Exporter.placeholders[placeholder].block
-            ? `style="text-align:center;"`
-            : ""
+          `<option value="${placeholder}" ${
+            Exporter.placeholders[placeholder].block
+              ? `style="text-align:center;"`
+              : ""
           }>${_(`placeholders_${placeholder}`)}</option>`,
         );
       });
     }
     let $placeholderDiv = $("<div>")
       .attr({
-        style: `grid-column:6/span ${withZoom ? 1 : 3
-          }; justify-self:stretch; align-self:center;`,
+        style: `grid-column:6/span ${
+          withZoom ? 1 : 3
+        }; justify-self:stretch; align-self:center;`,
       })
       .append($placeholderSelect);
 
@@ -255,6 +265,8 @@ class ExportEditor {
         let items = {};
         let infoPre = `<span class="preWrap" style="font-style:italic">`;
         let infoPost = `</span>`;
+        this.#detectURL = null;
+
         // on image
         if (event.target.nodeName.toLowerCase() == "img") {
           let specs = DIMImage.formats(event.target);
@@ -373,27 +385,23 @@ class ExportEditor {
           items.sepFormat = "x";
         }
         // paste etc
-        if (sel.length) {
-          items.copy = {
-            icon: "fas fa-clipboard",
-            name: _("editorContextMenu_copy"),
-            callback: function () {
-              // execCommand should be avoided
-              document.execCommand("copy");
-            },
-          };
-          items.cut = {
-            name: _("editorContextMenu_cut"),
-            callback: function () {
-              // execCommand should be avoided -- but clipboard.write fails on delta data (?)
-              document.execCommand("cut");
-            },
-          };
-        }
-        items.paste = {
-          name: _("editorContextMenu_paste"),
+        items.pasteText = {
+          name: _("editorContextMenu_pasteText"),
           callback: () => {
-            this.#paste(sel);
+            navigator.clipboard.readText().then((clipText) => {
+              quill.deleteText(sel.index, sel.length);
+              quill.insertText(sel.index, clipText);
+            });
+          },
+        };
+        items.pastePlain = {
+          name: _("editorContextMenu_pastePlain"),
+          callback: () => {
+            navigator.clipboard.readText().then((clipText) => {
+              quill.deleteText(sel.index, sel.length);
+              quill.insertText(sel.index, clipText);
+              quill.removeFormat(sel.index, clipText.length);
+            });
           },
         };
         items.loadImage = {
@@ -417,10 +425,10 @@ class ExportEditor {
                       sel.index,
                       "image",
                       reader.result +
-                      " " +
-                      theSettings.imageWidth +
-                      " " +
-                      theSettings.imageHeight,
+                        " " +
+                        theSettings.imageWidth +
+                        " " +
+                        theSettings.imageHeight,
                     );
                     quill.formatText(sel.index, 1, {
                       title: path,
@@ -432,9 +440,64 @@ class ExportEditor {
               });
           },
         };
+        // detect URL
+        if (!sel.length) {
+          let left = 0;
+          let right = quill.getText().length;
+          let leftText = quill.getText(0, sel.index);
+          let rightText = quill.getText(sel.index);
+          let m = leftText.match(/(\S*)$/);
+          if (m) {
+            leftText = m[1];
+            left = sel.index - m[1].length;
+          }
+          m = rightText.match(/(\S*)/);
+          if (m) {
+            rightText = m[1];
+            right = sel.index + m[1].length;
+          }
+          m = (leftText + rightText).match(
+            /(https?:\/\/)?(?:[A-Za-z0-9-]{1,63}\.){2,}[A-Za-z0-9-]{1,63}(?:[\/?#][^\s()<>\[\]{}]*)?/i,
+          );
+          if (
+            m &&
+            sel.index >= left + m.index &&
+            sel.index <= left + m.index + m[0].length
+          ) {
+            try {
+              let url = new URL(m[1] ? m[0] : "http://" + m[0]);
+              Util.avoidUndo(quill, () => {
+                quill.formatText(left + m.index, m[0].length, "url", true);
+              });
+              this.#detectURL = { index: left + m.index, length: m[0].length };
+              items.openURL = {
+                name: _("editorContextMenu_openURL"),
+                callback: () => {
+                  ipcRenderer.invoke("mainProcess_openURL", url.href);
+                },
+              };
+            } catch (_) {
+              // catch failing URL() constructor for invalid url
+            }
+          }
+        }
         return {
           items: items,
         };
+      },
+      events: {
+        hide: () => {
+          if (this.#detectURL)
+            Util.avoidUndo(quill, () => {
+              quill.formatText(
+                this.#detectURL.index,
+                this.#detectURL.length,
+                "url",
+                false,
+              );
+            });
+          return true;
+        },
       },
     });
 
@@ -461,17 +524,6 @@ class ExportEditor {
         });
         // set new format
         quill.format(`format${$formatSelect.val()}`, true);
-      }
-    });
-
-    // DOM paste handler
-    $(`#${id}`).on("paste", (event) => {
-      if (!event.originalEvent.clipboardData.types.includes("text/quill")) {
-        event.preventDefault();
-        let range = this.#editor.getSelection(true);
-        if (range) {
-          this.#paste(range);
-        }
       }
     });
 
@@ -503,9 +555,10 @@ class ExportEditor {
           );
           if (settings.previewFormats) {
             $(`#formatSheet${id}`).append(
-              `${formatID == UUID0
-                ? `#format${id} option { `
-                : `#format${id} .format${formatID} {`
+              `${
+                formatID == UUID0
+                  ? `#format${id} option { `
+                  : `#format${id} .format${formatID} {`
               } ${Formats.toPreviewCSS(formats[formatID])}}\n`,
             );
           }
@@ -538,9 +591,10 @@ class ExportEditor {
               );
               if (settings.previewFormats) {
                 $(`#formatSheet${id}`).append(
-                  `${formatID == UUID0
-                    ? `#format${id} option { `
-                    : `#format${id} .format${formatID} {`
+                  `${
+                    formatID == UUID0
+                      ? `#format${id} option { `
+                      : `#format${id} .format${formatID} {`
                   } ${Formats.toPreviewCSS(formats[formatID])}}\n`,
                 );
               }
@@ -551,6 +605,96 @@ class ExportEditor {
         { passive: false },
       );
     }
+
+    // DOM dragstart, copy and cut handlers: if we are taking chunks out of the text we must take care of all objects the text chunk is associated with
+    $(`#${id}`).on("dragstart copy cut", (event) => {
+      if (event.type != "dragstart") event.preventDefault();
+
+      let selection = this.#editor.getSelection();
+      let formats =
+        this.#editor.getFormat(selection.index, selection.length) || {};
+      let delta = this.#editor.getContents(selection.index, selection.length);
+      delta.ops = delta.ops.map((op) => {
+        if (typeof op.insert == "string") {
+          op.attributes = { ...(op.attributes || {}), ...formats };
+        }
+        return op;
+      });
+
+      let dt =
+        event.type == "dragstart"
+          ? event.originalEvent.dataTransfer
+          : event.originalEvent.clipboardData;
+      dt.setData("quill/delta", JSON.stringify(delta));
+      dt.setData("text/html", Exporter.delta2HTML(delta.ops));
+      dt.setData(
+        "text/plain",
+        this.#editor.getText(selection.index, selection.length),
+      );
+      if (event.type == "dragstart") return true;
+      if (event.type == "cut") document.getSelection().deleteFromDocument();
+    });
+
+    // DOM drop handler (drops from within Quill or from outside)
+    $(`#${id}`).on("drop", (event) => {
+      event.preventDefault();
+
+      // find Quill index where drop happened
+      const x = event.clientX;
+      const y = event.clientY;
+
+      let range;
+      if (document.caretRangeFromPoint) {
+        range = document.caretRangeFromPoint(x, y);
+      } else if (document.caretPositionFromPoint) {
+        const pos = document.caretPositionFromPoint(x, y);
+        range = document.createRange();
+        range.setStart(pos.offsetNode, pos.offset);
+      }
+      if (!range) return;
+
+      let node = range.startContainer;
+      let offset = range.startOffset;
+
+      // walk up until Parchment knows this node
+      let blot = Parchment.find(node);
+      while (!blot && node && node !== quill.root) {
+        node = node.parentNode;
+        blot = Parchment.find(node);
+      }
+      if (!blot) return;
+      let index = blot.offset(quill.scroll) + offset;
+
+      let formats = quill.getFormat(index);
+      let delta = null;
+      if (event.originalEvent.dataTransfer.types.includes("quill/delta"))
+        delta = new Delta(
+          JSON.parse(event.originalEvent.dataTransfer.getData("quill/delta")),
+        );
+      else if (event.originalEvent.dataTransfer.types.includes("text/html")) {
+        let html = QuillClipboard.stripTags(
+          event.originalEvent.dataTransfer.getData("text/html"),
+        );
+        delta = quill.clipboard.convert(html);
+      } else if (event.originalEvent.dataTransfer.types.includes("text/plain"))
+        delta = new Delta().insert(
+          event.originalEvent.dataTransfer.getData("text/plain"),
+        );
+      if (delta) {
+        // apply current formats to all ops in the pasted delta
+        delta.ops = delta.ops.map((op) => {
+          if (typeof op.insert == "string") {
+            op.attributes = { ...(op.attributes || {}), ...formats };
+          }
+          return op;
+        });
+        quill.updateContents(new Delta().retain(index).concat(delta));
+        if (!event.ctrlKey) {
+          document.getSelection().deleteFromDocument();
+        }
+        quill.setSelection(index, delta.length());
+      }
+    });
 
     // adjust buttons and format selector on select
     quill.on("selection-change", (range, oldRange, source) => {
@@ -619,59 +763,6 @@ class ExportEditor {
       title: title,
       alignment: alignment,
       shadow: shadow,
-    });
-  }
-
-  /**
-   * paste into quill
-   *
-   * @param {Selection} selection
-   */
-  #paste(selection) {
-    navigator.clipboard.read().then((clipItems) => {
-      for (let clipboardItem of clipItems) {
-        if (
-          clipboardItem.types.includes("image/png") ||
-          clipboardItem.types.includes("image/jpeg")
-        ) {
-          // paste image
-          for (let type of clipboardItem.types) {
-            if (type.startsWith("image/")) {
-              clipboardItem.getType(type).then((image) => {
-                let reader = new FileReader();
-                reader.readAsDataURL(image);
-                reader.onload = () => {
-                  this.#editor.deleteText(selection.index, selection.length);
-                  this.#editor.insertEmbed(
-                    selection.index,
-                    "image",
-                    reader.result +
-                    " " +
-                    theSettings.imageWidth +
-                    " " +
-                    theSettings.imageHeight,
-                  );
-                  this.#editor.formatText(selection.index, 1, {
-                    title: "",
-                    alignment: theSettings.imageAlignment,
-                    shadow: theSettings.imageShadow,
-                  });
-                };
-              });
-            }
-          }
-        }
-        if (
-          clipboardItem.types.includes("text/plain") ||
-          clipboardItem.types.includes("text/html")
-        ) {
-          // paste text
-          navigator.clipboard.readText().then((clipText) => {
-            this.#editor.deleteText(selection.index, selection.length);
-            this.#editor.insertText(selection.index, clipText);
-          });
-        }
-      }
     });
   }
 }

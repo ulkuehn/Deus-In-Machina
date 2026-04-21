@@ -14,6 +14,7 @@ class QuillConfig {
    */
   static config = {
     modules: {
+      clipboard: true,
       keyboard: {
         bindings: {
           bold: {

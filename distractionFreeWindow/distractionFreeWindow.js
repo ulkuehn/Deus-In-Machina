@@ -50,7 +50,7 @@ let wheelTimer = null; // id of timer used to manage wheeling/zoom events
 let isWheeling = false;
 let isZooming = false;
 let objectStatusTimer = null;
-let detectURL=null
+let detectURL = null;
 
 /**
  * initialize window
@@ -94,8 +94,10 @@ ipcRenderer.on(
               $(this).remove();
               $("#dfw-inner").css(
                 "background-image",
-                `linear-gradient(to bottom, rgba(255,255,255,${(100 - settings.focusEditorWallpaperOpacity) / 100
-                }) 0%, rgba(255,255,255,${(100 - settings.focusEditorWallpaperOpacity) / 100
+                `linear-gradient(to bottom, rgba(255,255,255,${
+                  (100 - settings.focusEditorWallpaperOpacity) / 100
+                }) 0%, rgba(255,255,255,${
+                  (100 - settings.focusEditorWallpaperOpacity) / 100
                 }) 100%), url(${settings.focusEditorWallpaper})`,
               );
               $("#dfw-inner").css("background-repeat", "repeat");
@@ -115,8 +117,10 @@ ipcRenderer.on(
               $(this).remove();
               $("#editor").css(
                 "background-image",
-                `linear-gradient(to bottom, rgba(255,255,255,${(100 - settings.focusEditorBackgroundOpacity) / 100
-                }) 0%, rgba(255,255,255,${(100 - settings.focusEditorBackgroundOpacity) / 100
+                `linear-gradient(to bottom, rgba(255,255,255,${
+                  (100 - settings.focusEditorBackgroundOpacity) / 100
+                }) 0%, rgba(255,255,255,${
+                  (100 - settings.focusEditorBackgroundOpacity) / 100
                 }) 100%), url(${settings.focusEditorBackground})`,
               );
               $("#editor").css("background-attachment", "local");
@@ -140,16 +144,19 @@ ipcRenderer.on(
 
     let $inner = $("<div>").attr({
       id: "dfw-inner",
-      style: `background-color:${settings.focusEditorWallpaperColor || "#ffffff"
-        }; display:flex; align-items:center; justify-content:center;`,
+      style: `background-color:${
+        settings.focusEditorWallpaperColor || "#ffffff"
+      }; display:flex; align-items:center; justify-content:center;`,
     });
 
     let $editor = $("<div>").attr({
       id: "editor",
       spellcheck: false,
-      style: `background-color:${settings.focusEditorBackgroundColor || "#ffffff"
-        }; height:${settings.focusEditorHeight}%; width:${settings.focusEditorWidth
-        }%; padding:5px; overflow:auto; box-shadow:0px -1px 20px rgba(0,0,0,0.5), 0px 1px 20px rgba(0,0,0,0.7)`,
+      style: `background-color:${
+        settings.focusEditorBackgroundColor || "#ffffff"
+      }; height:${settings.focusEditorHeight}%; width:${
+        settings.focusEditorWidth
+      }%; padding:5px; overflow:auto; box-shadow:0px -1px 20px rgba(0,0,0,0.5), 0px 1px 20px rgba(0,0,0,0.7)`,
     });
 
     // bar separators
@@ -300,7 +307,8 @@ ipcRenderer.on(
           style: "grid-column:11; align-self:center; justify-self:center",
         })
         .html(
-          `<input type="checkbox" class="btn-check" id="searchRegex"><label class="btn btn-outline-light btn-sm simple-btn" style="padding:0; width:35px; ${theSettings.searchWithRegex ? "" : "display:none"
+          `<input type="checkbox" class="btn-check" id="searchRegex"><label class="btn btn-outline-light btn-sm simple-btn" style="padding:0; width:35px; ${
+            theSettings.searchWithRegex ? "" : "display:none"
           }" for="searchRegex" title="${_(
             "search_withRegex",
           )}"><span style="font-size:18px;"><b>.*</b></span></label>`,
@@ -400,8 +408,10 @@ ipcRenderer.on(
         .html(
           `<i class="fa-solid fa-arrows-left-right"></i> <span id="widthValue" title="${_(
             "distractionFreeWindow_resetWidth",
-          )}" onclick="$('#widthSelector').val(${theSettings.focusEditorWidth
-          });$('#widthSelector').trigger('change')">${theSettings.focusEditorWidth
+          )}" onclick="$('#widthSelector').val(${
+            theSettings.focusEditorWidth
+          });$('#widthSelector').trigger('change')">${
+            theSettings.focusEditorWidth
           }%</span>`,
         ),
     );
@@ -430,8 +440,10 @@ ipcRenderer.on(
         .html(
           `<i class="fa-solid fa-arrows-up-down"></i> <span id="heightValue" title="${_(
             "distractionFreeWindow_resetHeight",
-          )}" onclick="$('#heightSelector').val(${theSettings.focusEditorHeight
-          });$('#heightSelector').trigger('change')">${theSettings.focusEditorHeight
+          )}" onclick="$('#heightSelector').val(${
+            theSettings.focusEditorHeight
+          });$('#heightSelector').trigger('change')">${
+            theSettings.focusEditorHeight
           }%</span>`,
         ),
     );
@@ -612,7 +624,8 @@ ipcRenderer.on(
       $("<div>")
         .attr({ style: "grid-column:1/span 2; justify-self:center" })
         .html(
-          `<input type="checkbox" ${settings.focusEditorSoundOn ? "checked" : ""
+          `<input type="checkbox" ${
+            settings.focusEditorSoundOn ? "checked" : ""
           } class="btn-check" id="pauseSounds" onclick="pauseSounds()"><label class="btn btn-lg" for="pauseSounds" title="${_(
             "Sounds_pause",
           )}"><i class="fa-solid fa-volume-high"></i></label>`,
@@ -626,8 +639,10 @@ ipcRenderer.on(
             style: "grid-column:1; justify-self:center",
           })
           .html(
-            `<input type="checkbox" class="btn-check" id="${sound.name
-            }OnOff" onclick="soundOnOff('${sound.name
+            `<input type="checkbox" class="btn-check" id="${
+              sound.name
+            }OnOff" onclick="soundOnOff('${
+              sound.name
             }')"><label class="btn" for="${sound.name}OnOff" title="${_(
               sound.i18n,
             )}"><i class="fa-solid ${sound.icon}"></i></label>`,
@@ -643,7 +658,8 @@ ipcRenderer.on(
               theSettings.focusEditorBarColor,
               "range-light",
               "range-dark",
-            )} form-range" min="5" max="100" step="5" style="width:95px" id="${sound.name
+            )} form-range" min="5" max="100" step="5" style="width:95px" id="${
+              sound.name
             }Volume" disabled onchange="setVolume('${sound.name}')">`,
           ),
       );
@@ -917,17 +933,19 @@ ipcRenderer.on(
     // fill in formats
     for (let [formatID, format] of Object.entries(formats)) {
       $("#formatSelector").append(
-        `<option ${theSettings.previewFormats ? `class="format${formatID}"` : ""
+        `<option ${
+          theSettings.previewFormats ? `class="format${formatID}"` : ""
         } value="${formatID}">${Util.escapeHTML(format.formats_name)}</option>`,
       );
     }
 
     // style sheets
     let sheetHTML = `.edi + .edi { border-top-color:${sepColor}; border-top-width:${settings.textSeparatorWidth}px; border-top-style:${settings.textSeparatorStyle}; margin-top:${settings.textSeparatorAbove}px; padding-top:${settings.textSeparatorBelow}px }\n`;
-    sheetHTML += `.ql-editor[contenteditable="false"] { ${settings.lockedBackgroundColor
+    sheetHTML += `.ql-editor[contenteditable="false"] { ${
+      settings.lockedBackgroundColor
         ? `background-color:${settings.lockedBackgroundColor};`
         : ""
-      } opacity:${settings.lockedOpacity / 100} }`;
+    } opacity:${settings.lockedOpacity / 100} }`;
     $("#editorSheet").html(sheetHTML);
     $(":root").css({
       "--selection-foregroundColor": Util.blackOrWhite(settings.selectionColor),
@@ -1039,10 +1057,11 @@ ipcRenderer.on(
     $("#zoomSelector").on("input", () => {
       $("#zoomValue").html(Util.scaledZoom($("#zoomSelector").val()) + "%");
       $(":root").css({
-        "--first-line-indent": `${(theSettings.firstLineIndent *
+        "--first-line-indent": `${
+          (theSettings.firstLineIndent *
             Util.scaledZoom($("#zoomSelector").val())) /
           100
-          }px`,
+        }px`,
       });
       buildFormatSheet();
       buildObjectSheet();
@@ -1134,92 +1153,99 @@ ipcRenderer.on(
       // DOM dragstart, copy and cut handlers
       // if we are taking chunks out of the text we must take care of all objects the text chunk is associated with
       $(`#edi${text.id}`).on("dragstart copy cut", (event) => {
-        let fragment = document.getSelection().getRangeAt(0).cloneContents();
-        let tempDiv = document.createElement("div");
-        tempDiv.appendChild(fragment.cloneNode(true));
-        let html = tempDiv.innerHTML;
-        // if no children we took out text only
-        // but this does not mean the text has no objects associated with, so we need check carefully and build html explicitly
-        if (fragment.childElementCount == 0) {
-          let classes = [];
-          Object.keys(theEditors[text.id].quill.getFormat()).forEach(
-            (format) => {
-              if (format.startsWith("object")) {
-                classes.push(format + "-true");
-              }
-            },
-          );
-          if (classes.length) {
-            html = `<span class="${classes.join(" ")}">${html}</span>`;
+        if (event.type != "dragstart") event.preventDefault();
+
+        let selection = theEditors[text.id].quill.getSelection();
+        let formats =
+          theEditors[text.id].quill.getFormat(
+            selection.index,
+            selection.length,
+          ) || {};
+        let delta = theEditors[text.id].quill.getContents(
+          selection.index,
+          selection.length,
+        );
+        delta.ops = delta.ops.map((op) => {
+          if (typeof op.insert == "string") {
+            op.attributes = { ...(op.attributes || {}), ...formats };
           }
-        }
-        if (event.type == "dragstart") {
-          // no drag from locked texts
-          if (!theEditors[text.id].editable) {
-            return false;
-          }
-          event.originalEvent.dataTransfer.setData("text/html", html);
-          event.originalEvent.dataTransfer.setData("text/quill", html);
-          // continue standard drag
-          return true;
-        } else {
-          event.originalEvent.clipboardData.setData("text/html", html);
-          event.originalEvent.clipboardData.setData("text/quill", html);
-          event.originalEvent.clipboardData.setData(
-            "text/plain",
-            tempDiv.textContent,
-          );
-          if (event.type == "cut") {
-            document.getSelection().deleteFromDocument();
-          }
-          // no standard copy/cut
-          event.preventDefault();
-        }
+          return op;
+        });
+
+        let dt =
+          event.type == "dragstart"
+            ? event.originalEvent.dataTransfer
+            : event.originalEvent.clipboardData;
+        dt.setData("quill/delta", JSON.stringify(delta));
+        dt.setData("text/html", Exporter.delta2HTML(delta.ops));
+        dt.setData(
+          "text/plain",
+          theEditors[text.id].quill.getText(selection.index, selection.length),
+        );
+        if (event.type == "dragstart") return true;
+        if (event.type == "cut") document.getSelection().deleteFromDocument();
       });
 
       // DOM drop handler
       $(`#edi${text.id}`).on("drop", (event) => {
-        let range = document.caretRangeFromPoint(event.clientX, event.clientY);
-        if (
-          range.startContainer &&
-          range.startContainer.nodeType == Node.TEXT_NODE
-        ) {
-          let splitNode = range.startContainer.splitText(range.startOffset);
-          // if we are not dropping from another quill editor or are requesting plain insert by alt key, then insert plain text
-          if (
-            !event.originalEvent.dataTransfer.types.includes("text/quill") ||
-            event.altKey
-          ) {
-            range.startContainer.splitText(range.startOffset);
-            range.startContainer.nodeValue =
-              range.startContainer.nodeValue +
-              event.originalEvent.dataTransfer.getData("text/plain");
-          } else {
-            let spanNode = document.createElement("span");
-            spanNode.insertAdjacentHTML(
-              "afterbegin",
-              event.originalEvent.dataTransfer.getData("text/quill"),
-            );
-            range.startContainer.parentNode.insertBefore(spanNode, splitNode);
-          }
+        event.preventDefault();
+
+        // find Quill index where drop happened
+        const x = event.clientX;
+        const y = event.clientY;
+
+        let range;
+        if (document.caretRangeFromPoint) {
+          range = document.caretRangeFromPoint(x, y);
+        } else if (document.caretPositionFromPoint) {
+          const pos = document.caretPositionFromPoint(x, y);
+          range = document.createRange();
+          range.setStart(pos.offsetNode, pos.offset);
+        }
+        if (!range) return;
+
+        let node = range.startContainer;
+        let offset = range.startOffset;
+
+        // walk up until Parchment knows this node
+        let blot = Parchment.find(node);
+        while (!blot && node && node !== quill.root) {
+          node = node.parentNode;
+          blot = Parchment.find(node);
+        }
+        if (!blot) return;
+        let index = blot.offset(quill.scroll) + offset;
+
+        let formats = quill.getFormat(index);
+        let delta = null;
+        if (event.originalEvent.dataTransfer.types.includes("quill/delta"))
+          delta = new Delta(
+            JSON.parse(event.originalEvent.dataTransfer.getData("quill/delta")),
+          );
+        else if (event.originalEvent.dataTransfer.types.includes("text/html")) {
+          let html = QuillClipboard.stripTags(
+            event.originalEvent.dataTransfer.getData("text/html"),
+          );
+          delta = quill.clipboard.convert(html);
+        } else if (
+          event.originalEvent.dataTransfer.types.includes("text/plain")
+        )
+          delta = new Delta().insert(
+            event.originalEvent.dataTransfer.getData("text/plain"),
+          );
+        if (delta) {
+          // apply current formats to all ops in the pasted delta
+          delta.ops = delta.ops.map((op) => {
+            if (typeof op.insert == "string") {
+              op.attributes = { ...(op.attributes || {}), ...formats };
+            }
+            return op;
+          });
+          quill.updateContents(new Delta().retain(index).concat(delta));
           if (!event.ctrlKey) {
             document.getSelection().deleteFromDocument();
           }
-          event.preventDefault();
-        } else {
-          return true;
-        }
-      });
-
-      // DOM paste handler
-      $(`#edi${text.id}`).on("paste", (event) => {
-        // if we are not pasting from within, then insert plain text to avoid pasting unwanted html tags and styles
-        if (!event.originalEvent.clipboardData.types.includes("text/quill")) {
-          event.preventDefault();
-          let range = theEditors[text.id].quill.getSelection(true);
-          if (range) {
-            paste(text.id, range);
-          }
+          quill.setSelection(index, delta.length());
         }
       });
 
@@ -1250,8 +1276,10 @@ ipcRenderer.on(
       // context menu type for object selection
       $.contextMenu.types.check = function (item, opt, root) {
         $(
-          `<label><input type="checkbox" ${item.checked ? "checked" : ""
-          } class="form-check-input" style="margin-top:2px; border:1px solid #2f2f2f; box-shadow:none"><span>${item.name
+          `<label><input type="checkbox" ${
+            item.checked ? "checked" : ""
+          } class="form-check-input" style="margin-top:2px; border:1px solid #2f2f2f; box-shadow:none"><span>${
+            item.name
           }</span></label>`,
         ).appendTo(this);
         // (de)activate object
@@ -1275,19 +1303,27 @@ ipcRenderer.on(
         events: {
           hide: () => {
             if (detectURL)
-              theEditors[detectURL.text].quill.formatText(detectURL.index, detectURL.length, "url", false)
-            return true
-          }
-        }
+              Util.avoidUndo(theEditors[detectURL.text].quill, () => {
+                theEditors[detectURL.text].quill.formatText(
+                  detectURL.index,
+                  detectURL.length,
+                  "url",
+                  false,
+                );
+              });
+            return true;
+          },
+        },
       });
     });
 
     $("#editor")[0].onwheel = doZoom;
     $(":root").css({
-      "--first-line-indent": `${(theSettings.firstLineIndent *
+      "--first-line-indent": `${
+        (theSettings.firstLineIndent *
           Util.scaledZoom($("#zoomSelector").val())) /
         100
-        }px`,
+      }px`,
     });
   },
 );
@@ -1582,36 +1618,6 @@ function doContextMenu(textID, event) {
   } else {
     items.sepCCP = "x";
   }
-  if (sel.length) {
-    items.copy = {
-      name: _("editorContextMenu_copy"),
-      callback: function () {
-        // execCommand should be avoided
-        document.execCommand("copy");
-      },
-    };
-    if (!compact) {
-      items.copy.icon = "fas fa-clipboard";
-    }
-    items.cut = {
-      name: _("editorContextMenu_cut"),
-      callback: function () {
-        // execCommand should be avoided - but clipboard.write fails on delta data (?)
-        // this.#editors[textID].quill.deleteText(sel.index,sel.length);
-        // navigator.clipboard.write([selDelta]);
-        document.execCommand("cut");
-      },
-    };
-  }
-  items.paste = {
-    name: _("editorContextMenu_paste"),
-    callback: () => {
-      paste(textID, sel);
-    },
-  };
-  if (!compact && !sel.length) {
-    items.paste.icon = "fas fa-paste";
-  }
   items.pasteText = {
     name: _("editorContextMenu_pasteText"),
     callback: () => {
@@ -1621,6 +1627,9 @@ function doContextMenu(textID, event) {
       });
     },
   };
+  if (!compact) {
+    items.pasteText.icon = "fas fa-clipboard";
+  }
   items.pastePlain = {
     name: _("editorContextMenu_pastePlain"),
     callback: () => {
@@ -1652,10 +1661,10 @@ function doContextMenu(textID, event) {
                 sel.index,
                 "image",
                 reader.result +
-                " " +
-                theSettings.imageWidth +
-                " " +
-                theSettings.imageHeight,
+                  " " +
+                  theSettings.imageWidth +
+                  " " +
+                  theSettings.imageHeight,
               );
               theEditors[textID].quill.formatText(sel.index, 1, {
                 title: path,
@@ -1670,43 +1679,52 @@ function doContextMenu(textID, event) {
 
   // detect URL
   if (!sel.length) {
-    let left = 0
-    let right = theEditors[textID].quill.getText().length
-    let leftText = theEditors[textID].quill.getText(0, sel.index)
-    let rightText = theEditors[textID].quill.getText(sel.index)
-    let m = leftText.match(/(\S*)$/)
+    let left = 0;
+    let right = theEditors[textID].quill.getText().length;
+    let leftText = theEditors[textID].quill.getText(0, sel.index);
+    let rightText = theEditors[textID].quill.getText(sel.index);
+    let m = leftText.match(/(\S*)$/);
     if (m) {
-      leftText = m[1]
-      left = sel.index - m[1].length
+      leftText = m[1];
+      left = sel.index - m[1].length;
     }
-    m = rightText.match(/(\S*)/)
+    m = rightText.match(/(\S*)/);
     if (m) {
       rightText = m[1];
-      right = sel.index + m[1].length
+      right = sel.index + m[1].length;
     }
-    m = (leftText + rightText).match(/(https?:\/\/)?(?:[A-Za-z0-9-]{1,63}\.){2,}[A-Za-z0-9-]{1,63}(?:[\/?#][^\s()<>\[\]{}]*)?/i)
-    if (m && sel.index >= left + m.index && sel.index <= left + m.index + m[0].length) {
+    m = (leftText + rightText).match(
+      /(https?:\/\/)?(?:[A-Za-z0-9-]{1,63}\.){2,}[A-Za-z0-9-]{1,63}(?:[\/?#][^\s()<>\[\]{}]*)?/i,
+    );
+    if (
+      m &&
+      sel.index >= left + m.index &&
+      sel.index <= left + m.index + m[0].length
+    ) {
       try {
-        let url = new URL(m[1] ? m[0] : "http://" + m[0])
-        theEditors[textID].quill.formatText(
-          left + m.index,
-          m[0].length,
-          "url",
-          true,
-        );
-        detectURL = { text: textID, index: left + m.index, length: m[0].length }
+        let url = new URL(m[1] ? m[0] : "http://" + m[0]);
+        Util.avoidUndo(theEditors[textID].quill, () => {
+          theEditors[textID].quill.formatText(
+            left + m.index,
+            m[0].length,
+            "url",
+            true,
+          );
+        });
+        detectURL = {
+          text: textID,
+          index: left + m.index,
+          length: m[0].length,
+        };
         items.openURL = {
           name: _("editorContextMenu_openURL"),
           callback: function () {
-            ipcRenderer.invoke(
-              "mainProcess_openURL",
-              url.href,
-            );
+            ipcRenderer.invoke("mainProcess_openURL", url.href);
           },
-        }
+        };
+      } catch (_) {
+        // catch failing URL() constructor for invalid url
       }
-      // catch failing URL() constructor for invalid url
-      catch (_) { }
     }
   }
 
@@ -1866,19 +1884,23 @@ function showWhere(event) {
               length += 1;
             }
           }
-          theEditors[selectedEditor].quill.formatText(
-            start,
-            length,
-            "whereami",
-            true,
-          );
-          setTimeout(() => {
+          Util.avoidUndo(theEditors[selectedEditor].quill, () => {
             theEditors[selectedEditor].quill.formatText(
               start,
               length,
               "whereami",
-              false,
+              true,
             );
+          });
+          setTimeout(() => {
+            Util.avoidUndo(theEditors[selectedEditor].quill, () => {
+              theEditors[selectedEditor].quill.formatText(
+                start,
+                length,
+                "whereami",
+                false,
+              );
+            });
             showingWhere = false;
           }, 1000);
         }
@@ -1979,59 +2001,6 @@ function allEditorsSavedTimer(resolve) {
 }
 
 /**
- *
- * @param {*} textID
- * @param {*} sel
- */
-function paste(textID, sel) {
-  navigator.clipboard.read().then((clipItems) => {
-    for (let clipboardItem of clipItems) {
-      if (
-        clipboardItem.types.includes("image/png") ||
-        clipboardItem.types.includes("image/jpeg")
-      ) {
-        for (let type of clipboardItem.types) {
-          if (type.startsWith("image/")) {
-            clipboardItem.getType(type).then((image) => {
-              let reader = new FileReader();
-              reader.readAsDataURL(image);
-              reader.onload = () => {
-                theEditors[textID].quill.deleteText(sel.index, sel.length);
-                theEditors[textID].quill.insertEmbed(
-                  sel.index,
-                  "image",
-                  reader.result +
-                  " " +
-                  theSettings.imageWidth +
-                  " " +
-                  theSettings.imageHeight,
-                );
-                theEditors[textID].quill.formatText(sel.index, 1, {
-                  title: "",
-                  alignment: theSettings.imageAlignment,
-                  shadow: theSettings.imageShadow,
-                });
-              };
-            });
-          }
-        }
-      } else {
-        if (
-          clipboardItem.types.includes("text/plain") ||
-          clipboardItem.types.includes("text/html")
-        ) {
-          // document.execCommand("paste");
-          navigator.clipboard.readText().then((clipText) => {
-            theEditors[textID].quill.deleteText(sel.index, sel.length);
-            theEditors[textID].quill.insertText(sel.index, clipText);
-          });
-        }
-      }
-    }
-  });
-}
-
-/**
  * rebuild style sheet for formats to reflect current scaling and given opacity
  *
  * @param {Number} opacity 0...1
@@ -2068,9 +2037,10 @@ function buildFormatSheet(opacity = 1.0) {
     }
     if (theSettings.previewFormats) {
       $("#formatSheet").append(
-        `${formatID == UUID0
-          ? `#formatSelector option { `
-          : `#formatSelector .format${formatID} {`
+        `${
+          formatID == UUID0
+            ? `#formatSelector option { `
+            : `#formatSelector .format${formatID} {`
         } ${Formats.toPreviewCSS(format)}}\n`,
       );
     }
@@ -2186,10 +2156,11 @@ function doZoom(event) {
     $("#zoomSelector").val(scale);
     $("#zoomValue").html(Util.scaledZoom($("#zoomSelector").val()) + "%");
     $(":root").css({
-      "--first-line-indent": `${(theSettings.firstLineIndent *
+      "--first-line-indent": `${
+        (theSettings.firstLineIndent *
           Util.scaledZoom($("#zoomSelector").val())) /
         100
-        }px`,
+      }px`,
     });
     buildFormatSheet();
     buildObjectSheet();
@@ -2446,9 +2417,10 @@ function countSearchPositions(skipLocked = false) {
  */
 function findSearchPositions(searchFor, doCase, doWord, doRegex) {
   let rex = RegExp(
-    `${doWord ? "(^|\\P{L})(" : ""}${doRegex
-      ? Util.escapeRegExpSearch(searchFor)
-      : Util.escapeRegExp(searchFor)
+    `${doWord ? "(^|\\P{L})(" : ""}${
+      doRegex
+        ? Util.escapeRegExpSearch(searchFor)
+        : Util.escapeRegExp(searchFor)
     }${doWord ? ")\\P{L}" : ""}`,
     `udg${doCase ? "" : "i"}`,
   );
@@ -2530,7 +2502,7 @@ function search(goDown = true, overlapSelection = true) {
           selection.index +
           (selection.length ? (overlapSelection ? 1 : selection.length) : 0);
         let ediPos = searchPositions[theIDs[editorIndex]];
-        for (; i < ediPos.length && ediPos[i].index < selPos; i++) { }
+        for (; i < ediPos.length && ediPos[i].index < selPos; i++) {}
         if (i >= ediPos.length) {
           // next editor
           editorIndex++;
@@ -2546,7 +2518,7 @@ function search(goDown = true, overlapSelection = true) {
       else {
         let ediPos = searchPositions[theIDs[editorIndex]];
         let i = ediPos.length - 1;
-        for (; i >= 0 && ediPos[i].index >= selection.index; i--) { }
+        for (; i >= 0 && ediPos[i].index >= selection.index; i--) {}
         if (i < 0) {
           // prev editor
           editorIndex--;
@@ -2722,8 +2694,8 @@ function scrollToSelection(verticalShift = 0.5) {
       }
       let scrollTo = Math.round(
         bounds.top +
-        top -
-        verticalShift * ($("#editor").height() - bounds.height),
+          top -
+          verticalShift * ($("#editor").height() - bounds.height),
       );
       if (scrollTo < 0) {
         scrollTo = 0;

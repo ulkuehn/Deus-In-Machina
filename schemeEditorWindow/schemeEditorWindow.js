@@ -14,6 +14,15 @@ function _(...x) {
   return __(theLanguage, ...x);
 }
 
+/**
+ * register class to show URL in Editor
+ */
+Parchment.register(
+  new Parchment.Attributor.Class("url", "url", {
+    scope: Parchment.Scope.INLINE,
+  }),
+);
+
 let theEditor;
 let theSchemeID;
 let theItemID;
@@ -42,6 +51,7 @@ ipcRenderer.on(
       { formats },
       { fonts },
     ]);
+    theSettings = settings;
     theLanguage = settings.language;
     theSchemeID = schemeID;
     theItemID = itemID;
