@@ -1118,7 +1118,7 @@ function fillForm(globalSettings, projectSettings) {
         });
         Leaflet.control.attribution({ prefix: false }).addTo(globalMap);
         Leaflet.tileLayer(
-          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "https://tile.openstreetmap.de/{z}/{x}/{y}.png",
           {
             maxZoom: 19,
             attribution: "© OpenStreetMap",
@@ -1131,7 +1131,7 @@ function fillForm(globalSettings, projectSettings) {
           });
           Leaflet.control.attribution({ prefix: false }).addTo(projectMap);
           Leaflet.tileLayer(
-            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            "https://tile.openstreetmap.de/{z}/{x}/{y}.png",
             {
               maxZoom: 19,
               attribution: "© OpenStreetMap",
@@ -1392,7 +1392,7 @@ function projectMap(tabID, mapID, switchEl) {
       attributionControl: false,
     });
     Leaflet.control.attribution({ prefix: false }).addTo(projectMap);
-    Leaflet.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    Leaflet.tileLayer("https://tile.openstreetmap.de/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution: "© OpenStreetMap",
     }).addTo(projectMap);

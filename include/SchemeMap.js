@@ -238,7 +238,7 @@ class SchemeMap {
 
     // new map; attribution to layer map only, not leaflet (credited elsewhere)
     let osm = Leaflet.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      "https://tile.openstreetmap.de/{z}/{x}/{y}.png",
       {
         maxZoom: 19,
         attribution: "© OpenStreetMap",

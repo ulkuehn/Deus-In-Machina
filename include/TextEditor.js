@@ -2087,7 +2087,6 @@ class TextEditor {
 
     // Quill change handler
     quill.on("text-change", (changeDelta, oldDelta, source) => {
-      console.log("text-change", textID, changeDelta);
       if (!theTextTree.getText(textID).editable) {
         console.error("text-change in locked text", textID, changeDelta);
       }

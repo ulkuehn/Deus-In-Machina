@@ -2908,7 +2908,7 @@ class Exporter {
         attributionControl: false,
         layers: [
           Leaflet.tileLayer(
-            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            "https://tile.openstreetmap.de/{z}/{x}/{y}.png",
           ),
         ],
         preferCanvas: true,

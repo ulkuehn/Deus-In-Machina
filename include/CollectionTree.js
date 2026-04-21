@@ -625,7 +625,6 @@ class CollectionTree {
     let bgColor =
       theSettings.effectiveSettings().TTBackgroundColor ||
       theSettings.effectiveSettings().generalBackgroundColor;
-    // console.log("CT: showTexts", theTextCollection, checked);
     if (checked.length) {
       // show texts in collection
       theTextTree.tree.css("display", "none");
