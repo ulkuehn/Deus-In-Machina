@@ -12,6 +12,7 @@ class TextCollection {
   #treeDiv; // div to hold the jstree
   #ids; // list of textIDs in the collection
   #checkEvent;
+  #hoverDiv;
 
   /**
    * class constructor
@@ -24,6 +25,10 @@ class TextCollection {
     this.#checkEvent = true;
     this.#ids = ids;
 
+    this.#hoverDiv = $("<div>").attr({
+      style: `display:none; position:absolute; pointer-events:none;`,
+    });
+    $("body").append(this.#hoverDiv);
     this.#treeDiv = $("<div>");
     $containerDiv.append(this.#treeDiv);
     this.setupTree();
@@ -35,15 +40,15 @@ class TextCollection {
       autoHide: true,
       zIndex: 10,
       build: ($trigger, e) => {
-        $trigger.children('a').addClass('jstree-cm');
-        $trigger.children('div').addClass('jstree-wholerow-cm');
+        $trigger.children("a").addClass("jstree-cm");
+        $trigger.children("div").addClass("jstree-wholerow-cm");
         return this.#contextMenu($trigger[0].id);
       },
       events: {
         hide: () => {
-          $('.jstree-cm').removeClass('jstree-cm')
-          $('.jstree-wholerow-cm').removeClass('jstree-wholerow-cm')
-        }
+          $(".jstree-cm").removeClass("jstree-cm");
+          $(".jstree-wholerow-cm").removeClass("jstree-wholerow-cm");
+        },
       },
     });
   }
@@ -116,6 +121,49 @@ class TextCollection {
     );
 
     this.#treeDiv.on("dblclick.jstree", this.#dblClick.bind(this));
+
+    this.#treeDiv.on("hover_node.jstree", (e, data) => {
+      let $node = this.#treeDiv.jstree().get_node(data.node.id, true);
+      let walker = document.createTreeWalker(
+        $node[0],
+        NodeFilter.SHOW_TEXT,
+        null,
+        false,
+      );
+      let textNode = walker.nextNode();
+      let range = document.createRange();
+      range.selectNodeContents(textNode);
+      let rect = range.getBoundingClientRect();
+      let right = rect.left + rect.width - this.#treeDiv.width();
+      if (right > 0) {
+        setTimeout(() => {
+          this.#hoverDiv.css("background", settings.textTreeHoverColor);
+          this.#hoverDiv.css(
+            "padding",
+            settings.textTreeSmall ? "1px" : "4px 5px 2px 0px",
+          );
+          this.#hoverDiv.css(
+            "color",
+            Util.blackOrWhite(settings.textTreeHoverColor),
+          );
+          this.#hoverDiv.css(
+            "top",
+            `${Math.floor(rect.top) - (settings.textTreeSmall ? 0 : 6)}px`,
+          );
+          this.#hoverDiv.css("left", `${rect.left - 4}px`);
+          this.#hoverDiv.css("width", `${rect.width + 9}px`);
+          this.#hoverDiv.css(
+            "line-height",
+            settings.textTreeSmall ? "17px" : "unset",
+          );
+          this.#hoverDiv.html(theTextTree.getText(data.node.id).decoratedName(true));
+          this.#hoverDiv.css("display", "block");
+        }, 100);
+      }
+    });
+    this.#treeDiv.on("dehover_node.jstree", (e, data) => {
+      setTimeout(() => this.#hoverDiv.css("display", "none"), 100);
+    });
 
     this.#treeDiv.on("ready.jstree", () => {
       if (settings.textCollectionTreeAutoActivate) {
