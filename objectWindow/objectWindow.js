@@ -168,7 +168,7 @@ ipcRenderer.on(
       _("objectWindow_propertiesTab"),
       $("<div>").attr({
         id: "propertiesGrid",
-        style: `display:grid; column-gap:${colGap}; row-gap:${rowGap}; grid-template-columns: 1fr 50px 3fr 80px`,
+        style: `display:grid; position:relative; z-index:1; column-gap:${colGap}; row-gap:${rowGap}; grid-template-columns: 1fr 50px 3fr 80px`,
       }),
     );
 
