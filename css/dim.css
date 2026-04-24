@@ -398,9 +398,15 @@ styles related to editor
 }
 
 @keyframes flash-bg {
-  0% { opacity: 0; }
-  50% { opacity: 0.25; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.25;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* decorate empty editor */
@@ -464,6 +470,10 @@ styles related to editor
 /*
 styles related to context menu
 */
+
+.contextMenuInfo:hover {
+  cursor: default !important;
+}
 
 /* make context menus compacter */
 .context-menu-item {

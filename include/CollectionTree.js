@@ -709,6 +709,7 @@ class CollectionTree {
       isHtmlName: true,
       name:
         infoPre + Util.escapeHTML(this.#collections[nodeID].name) + infoPost,
+      className: "contextMenuInfo",
     };
     if (this.#collections[nodeID].search) {
       items.name.icon = "fas fa-magnifying-glass";

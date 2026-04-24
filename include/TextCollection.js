@@ -156,7 +156,9 @@ class TextCollection {
             "line-height",
             settings.textTreeSmall ? "17px" : "unset",
           );
-          this.#hoverDiv.html(theTextTree.getText(data.node.id).decoratedName(true));
+          this.#hoverDiv.html(
+            theTextTree.getText(data.node.id).decoratedName(true),
+          );
           this.#hoverDiv.css("display", "block");
         }, 100);
       }
@@ -212,6 +214,7 @@ class TextCollection {
       isHtmlName: true,
       name:
         infoPre + Util.escapeHTML(theTextTree.getText(node.id).name) + infoPost,
+      className: "contextMenuInfo",
     };
     if (!settings.textTreeCompactContextMenu) {
       items.name.icon = "fas fa-circle-info";
@@ -219,6 +222,7 @@ class TextCollection {
     if (settings.textTreeContextMenuStats) {
       items.stats = {
         isHtmlName: true,
+        className: "contextMenuInfo",
         name: `${infoPre}${_(
           "editorContextMenu_words",
           theTextTree.getText(node.id).words,
@@ -258,6 +262,7 @@ class TextCollection {
             changed: text.changed.toLocalString(settings.dateTimeFormatShort),
           }) +
           infoPost,
+        className: "contextMenuInfo",
       };
     }
     if (settings.textTreeContextMenuTime == "fullTime") {
@@ -271,6 +276,7 @@ class TextCollection {
             relative: text.created.timeToNow(),
           }) +
           infoPost,
+        className: "contextMenuInfo",
       };
       items.changed = {
         isHtmlName: true,
@@ -281,6 +287,7 @@ class TextCollection {
             relative: text.changed.timeToNow(),
           }) +
           infoPost,
+        className: "contextMenuInfo",
       };
     }
 

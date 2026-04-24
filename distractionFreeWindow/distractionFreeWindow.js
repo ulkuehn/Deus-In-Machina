@@ -1406,12 +1406,14 @@ function doContextMenu(textID, event) {
         width: specs.width,
         height: specs.height,
       })}${infoPost}`,
+      icon: "fas fa-circle-info",
+      className: "contextMenuInfo",
     };
-    items.name.icon = "fas fa-circle-info";
     if (specs.title) {
       items.title = {
         isHtmlName: true,
         name: `${infoPre}${Util.escapeHTML(specs.title)}${infoPost}`,
+        className: "contextMenuInfo",
       };
     }
     items.sepInfo = "x";
@@ -1475,6 +1477,7 @@ function doContextMenu(textID, event) {
   items.name = {
     isHtmlName: true,
     name: infoPre + Util.escapeHTML(theEditors[textID].name) + infoPost,
+    className: "contextMenuInfo",
   };
   if (!compact) {
     items.name.icon = "fas fa-circle-info";
@@ -1510,6 +1513,7 @@ function doContextMenu(textID, event) {
           ),
         }) +
         infoPost,
+        className: "contextMenuInfo",
     };
   }
   if (theSettings.editorContextMenuTime == "fullTime") {
@@ -1524,6 +1528,7 @@ function doContextMenu(textID, event) {
           relative: theEditors[textID].created.timeToNow(),
         }) +
         infoPost,
+        className: "contextMenuInfo",
     };
     items.changed = {
       isHtmlName: true,
@@ -1536,6 +1541,7 @@ function doContextMenu(textID, event) {
           relative: theEditors[textID].changed.timeToNow(),
         }) +
         infoPost,
+        className: "contextMenuInfo",
     };
   }
 
@@ -1553,6 +1559,7 @@ function doContextMenu(textID, event) {
       })} &ndash; ${_("editorContextMenu_objects", objects.length, {
         objects: objects.length.toLocaleString(theLanguage),
       })}${infoPost}`,
+      className: "contextMenuInfo",
     };
   }
 

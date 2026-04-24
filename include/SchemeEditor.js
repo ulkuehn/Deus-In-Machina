@@ -465,8 +465,9 @@ class SchemeEditor {
               width: specs.width,
               height: specs.height,
             })}${infoPost}`,
+            icon: "fas fa-circle-info",
+            className: "contextMenuInfo",
           };
-          items.name.icon = "fas fa-circle-info";
           if (specs.title) {
             items.title = {
               isHtmlName: true,
@@ -530,6 +531,7 @@ class SchemeEditor {
             )} &ndash; ${_("editorContextMenu_characters", charCount, {
               characters: charCount.toLocaleString(theLanguage),
             })}${infoPost}`,
+            className: "contextMenuInfo",
           };
           items.sepInfo = "x";
         }

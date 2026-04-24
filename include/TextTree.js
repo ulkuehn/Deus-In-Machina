@@ -39,7 +39,9 @@ class TextTree {
       class: "tree-cm",
       style: "display:none",
     });
-    this.#hoverDiv = $("<div>").attr({ style: `display:none; position:absolute; pointer-events:none;` })
+    this.#hoverDiv = $("<div>").attr({
+      style: `display:none; position:absolute; pointer-events:none;`,
+    });
     $("body").append(this.#hoverDiv);
     this.#treeDiv = $("<div>");
     $("#TT")
@@ -66,15 +68,15 @@ class TextTree {
       autoHide: true,
       zIndex: 10,
       build: ($trigger, e) => {
-        $trigger.children('a').addClass('jstree-cm');
-        $trigger.children('div').addClass('jstree-wholerow-cm');
+        $trigger.children("a").addClass("jstree-cm");
+        $trigger.children("div").addClass("jstree-wholerow-cm");
         return this.#editMode ? false : this.#itemContextMenu($trigger[0].id);
       },
       events: {
         hide: () => {
-          $('.jstree-cm').removeClass('jstree-cm')
-          $('.jstree-wholerow-cm').removeClass('jstree-wholerow-cm')
-        }
+          $(".jstree-cm").removeClass("jstree-cm");
+          $(".jstree-wholerow-cm").removeClass("jstree-wholerow-cm");
+        },
       },
     });
 
@@ -245,34 +247,54 @@ class TextTree {
       !data || !data.length ? "flex" : "none",
     );
 
-    this.#treeDiv.on('open_all.jstree open_node.jstree close_node.jstree create_node.jstree move_node.jstree copy_node.jstree select_all.jstree deselect_all.jstree select_node.jstree deselect_node.jstree disable_checkbox.jstree enable_checkbox.jstree', (e, data) => {
-      this.#colorNodes()
-    });
+    this.#treeDiv.on(
+      "open_all.jstree open_node.jstree close_node.jstree create_node.jstree move_node.jstree copy_node.jstree select_all.jstree deselect_all.jstree select_node.jstree deselect_node.jstree disable_checkbox.jstree enable_checkbox.jstree",
+      (e, data) => {
+        this.#colorNodes();
+      },
+    );
 
     this.#treeDiv.on("hover_node.jstree", (e, data) => {
-      let $node = this.#treeDiv.jstree().get_node(data.node.id, true)
-      let walker = document.createTreeWalker($node[0], NodeFilter.SHOW_TEXT, null, false)
-      let textNode = walker.nextNode()
-      let range = document.createRange()
-      range.selectNodeContents(textNode)
-      let rect = range.getBoundingClientRect()
-      let right = rect.left + rect.width - this.#treeDiv.width()
+      let $node = this.#treeDiv.jstree().get_node(data.node.id, true);
+      let walker = document.createTreeWalker(
+        $node[0],
+        NodeFilter.SHOW_TEXT,
+        null,
+        false,
+      );
+      let textNode = walker.nextNode();
+      let range = document.createRange();
+      range.selectNodeContents(textNode);
+      let rect = range.getBoundingClientRect();
+      let right = rect.left + rect.width - this.#treeDiv.width();
       if (right > 0) {
         setTimeout(() => {
-          this.#hoverDiv.css("background", settings.textTreeHoverColor)
-          this.#hoverDiv.css("padding", settings.textTreeSmall ? "1px" : "4px 5px 2px 0px");
-          this.#hoverDiv.css("color", Util.blackOrWhite(settings.textTreeHoverColor))
-          this.#hoverDiv.css("top", `${Math.floor(rect.top) - (settings.textTreeSmall ? 0 : 6)}px`)
-          this.#hoverDiv.css("left", `${rect.left - 4}px`)
-          this.#hoverDiv.css("width", `${rect.width + 9}px`)
-          this.#hoverDiv.css("line-height", settings.textTreeSmall ? "17px" : "unset");
-          this.#hoverDiv.html(this.#texts[data.node.id].decoratedName(true))
-          this.#hoverDiv.css("display", "block")
+          this.#hoverDiv.css("background", settings.textTreeHoverColor);
+          this.#hoverDiv.css(
+            "padding",
+            settings.textTreeSmall ? "1px" : "4px 5px 2px 0px",
+          );
+          this.#hoverDiv.css(
+            "color",
+            Util.blackOrWhite(settings.textTreeHoverColor),
+          );
+          this.#hoverDiv.css(
+            "top",
+            `${Math.floor(rect.top) - (settings.textTreeSmall ? 0 : 6)}px`,
+          );
+          this.#hoverDiv.css("left", `${rect.left - 4}px`);
+          this.#hoverDiv.css("width", `${rect.width + 9}px`);
+          this.#hoverDiv.css(
+            "line-height",
+            settings.textTreeSmall ? "17px" : "unset",
+          );
+          this.#hoverDiv.html(this.#texts[data.node.id].decoratedName(true));
+          this.#hoverDiv.css("display", "block");
         }, 100);
       }
-    })
+    });
     this.#treeDiv.on("dehover_node.jstree", (e, data) => {
-      setTimeout(() => this.#hoverDiv.css("display", "none"), 100)
+      setTimeout(() => this.#hoverDiv.css("display", "none"), 100);
     });
 
     this.#treeDiv.on("create_node.jstree delete_node.jstree", () => {
@@ -328,7 +350,9 @@ class TextTree {
       this.#treeDiv.jstree().set_id(node, id);
       this.#texts[id] = new StyledText(
         id,
-        theAltKey ? this.#texts[originalNode.id].name : _("texts_textCopy", { name: this.#texts[originalNode.id].name }),
+        theAltKey
+          ? this.#texts[originalNode.id].name
+          : _("texts_textCopy", { name: this.#texts[originalNode.id].name }),
         theAltKey ? [] : this.#texts[originalNode.id].delta,
         theAltKey ? 0 : this.#texts[originalNode.id].characters,
         theAltKey ? 0 : this.#texts[originalNode.id].words,
@@ -373,7 +397,7 @@ class TextTree {
       if (theSettings.effectiveSettings().textTreeDots) {
         this.#treeDiv.jstree().show_dots();
       }
-      this.#colorNodes()
+      this.#colorNodes();
       doUndirty && this.undirty();
       this.#ready = true;
     });
@@ -388,8 +412,9 @@ class TextTree {
     } else {
       if (settings.textTreeSelectionBorder) {
         clickedStyle.background = "unset";
-        clickedStyle["box-shadow"] = `inset 0 0 8px ${settings.textTreeSmall ? 0 : 3
-          }px ${settings.textTreeSelectionColor}`;
+        clickedStyle["box-shadow"] = `inset 0 0 8px ${
+          settings.textTreeSmall ? 0 : 3
+        }px ${settings.textTreeSelectionColor}`;
         clickedStyle["padding-right"] = "12px";
       } else {
         clickedStyle.background = settings.textTreeSelectionColor;
@@ -409,8 +434,9 @@ class TextTree {
     let clickedStyleRow = {};
     if (settings.textTreeSelectionBorder) {
       clickedStyleRow.background = "unset";
-      clickedStyleRow["box-shadow"] = `inset 0 0 8px ${settings.textTreeSmall ? 0 : 3
-        }px ${settings.textTreeSelectionColor}`;
+      clickedStyleRow["box-shadow"] = `inset 0 0 8px ${
+        settings.textTreeSmall ? 0 : 3
+      }px ${settings.textTreeSelectionColor}`;
       clickedStyleRow["padding-right"] = "12px";
     } else {
       clickedStyleRow.background = settings.textTreeSelectionColor;
@@ -428,21 +454,23 @@ class TextTree {
         settings.TTBackgroundColor || settings.generalBackgroundColor,
       )} }
           #TT .jstree-dim .jstree-clicked { ${Object.keys(clickedStyle)
-        .map((k) => `${k}:${clickedStyle[k]}`)
-        .join("; ")} }
-          #TT .jstree-dim .jstree-hovered, #TT .jstree-dim .jstree-cm { ${Object.keys(hoveredStyle)
-        .map((k) => `${k}:${hoveredStyle[k]}`)
-        .join("; ")} }
+            .map((k) => `${k}:${clickedStyle[k]}`)
+            .join("; ")} }
+          #TT .jstree-dim .jstree-hovered, #TT .jstree-dim .jstree-cm { ${Object.keys(
+            hoveredStyle,
+          )
+            .map((k) => `${k}:${hoveredStyle[k]}`)
+            .join("; ")} }
           #TT .jstree-dim .jstree-wholerow-clicked { ${Object.keys(
-          clickedStyleRow,
-        )
-        .map((k) => `${k}:${clickedStyleRow[k]}`)
-        .join("; ")} }
+            clickedStyleRow,
+          )
+            .map((k) => `${k}:${clickedStyleRow[k]}`)
+            .join("; ")} }
           #TT .jstree-dim .jstree-wholerow-hovered, #TT .jstree-dim .jstree-wholerow-cm { ${Object.keys(
-          hoveredStyleRow,
-        )
-        .map((k) => `${k}:${hoveredStyleRow[k]}`)
-        .join("; ")} }
+            hoveredStyleRow,
+          )
+            .map((k) => `${k}:${hoveredStyleRow[k]}`)
+            .join("; ")} }
           `,
     );
   }
@@ -639,7 +667,10 @@ class TextTree {
     this.#treeDiv.jstree().rename_node(id, this.#texts[id].decoratedName());
 
     var $node = this.#treeDiv.jstree().get_node(id, true);
-    $node.css("background", Util.backgroundColor(this.#texts[id].getDecorationValue("color")));
+    $node.css(
+      "background",
+      Util.backgroundColor(this.#texts[id].getDecorationValue("color")),
+    );
   }
 
   /**
@@ -736,7 +767,7 @@ class TextTree {
 
   /**
    * add a new empty text to the tree
-   * 
+   *
    * @param {Boolean} edit if true set to edit mode (user can change name immediately)
    */
   newText(edit = true) {
@@ -947,7 +978,7 @@ class TextTree {
     });
     theTextEditor.showTextsInEditor(this.getChecked());
     this.#checkEvent = true;
-    this.#colorNodes()
+    this.#colorNodes();
   }
 
   /**
@@ -1196,11 +1227,11 @@ class TextTree {
    * get ids of all descendants of a node given by its id
    */
   #getDescendants(nodeID, include = true) {
-    let descendants = include ? [nodeID] : []
+    let descendants = include ? [nodeID] : [];
     let node = this.#treeDiv.jstree().get_node(nodeID);
     node.children.forEach((id) => {
-      descendants.push(id, ...this.#getDescendants(id))
-    })
+      descendants.push(id, ...this.#getDescendants(id));
+    });
     return descendants;
   }
 
@@ -1209,11 +1240,16 @@ class TextTree {
    */
   #colorNodes() {
     setTimeout(() => {
-      this.#getDescendants(this.#treeDiv.jstree().get_node("#"), false).forEach((id) => {
-        var $node = this.#treeDiv.jstree().get_node(id, true);
-        $node.css("background", Util.backgroundColor(this.#texts[id].getDecorationValue("color")));
-      });
-    }, 0)
+      this.#getDescendants(this.#treeDiv.jstree().get_node("#"), false).forEach(
+        (id) => {
+          var $node = this.#treeDiv.jstree().get_node(id, true);
+          $node.css(
+            "background",
+            Util.backgroundColor(this.#texts[id].getDecorationValue("color")),
+          );
+        },
+      );
+    }, 0);
   }
 
   /**
@@ -1233,7 +1269,9 @@ class TextTree {
       this.#treeDiv.jstree().set_id(child, id);
       this.#texts[id] = new StyledText(
         child.id,
-        theAltKey ? this.#texts[originalChild.id].name : _("texts_textCopy", { name: this.#texts[originalChild.id].name }),
+        theAltKey
+          ? this.#texts[originalChild.id].name
+          : _("texts_textCopy", { name: this.#texts[originalChild.id].name }),
         theAltKey ? [] : this.#texts[originalChild.id].delta,
         theAltKey ? 0 : this.#texts[originalChild.id].characters,
         theAltKey ? 0 : this.#texts[originalChild.id].words,
@@ -1495,6 +1533,7 @@ class TextTree {
     items.name = {
       isHtmlName: true,
       name: infoPre + Util.escapeHTML(this.#texts[node.id].name) + infoPost,
+      className: "contextMenuInfo",
     };
     if (!compact) {
       items.name.icon = "fas fa-circle-info";
@@ -1502,6 +1541,7 @@ class TextTree {
     if (settings.textTreeContextMenuStats) {
       items.stats = {
         isHtmlName: true,
+        className: "contextMenuInfo",
         name: `${infoPre}${_(
           "editorContextMenu_words",
           this.#texts[node.id].words,
@@ -1538,6 +1578,7 @@ class TextTree {
         });
         items.branchStats = {
           isHtmlName: true,
+          className: "contextMenuInfo",
           name: `${infoPre}${_("editorContextMenu_words", words, {
             words: words.toLocaleString(theLanguage),
           })} &ndash; ${_("editorContextMenu_characters", chars, {
@@ -1566,6 +1607,7 @@ class TextTree {
             settings.dateTimeFormatShort,
           ) +
           infoPost,
+        className: "contextMenuInfo",
       };
     }
     if (settings.textTreeContextMenuTime == "fullTime") {
@@ -1579,6 +1621,7 @@ class TextTree {
             relative: text.created.timeToNow(),
           }) +
           infoPost,
+        className: "contextMenuInfo",
       };
       items.changed = {
         isHtmlName: true,
@@ -1589,6 +1632,7 @@ class TextTree {
             relative: text.changed.timeToNow(),
           }) +
           infoPost,
+        className: "contextMenuInfo",
       };
     }
 
@@ -1966,7 +2010,7 @@ class TextTree {
           this.getParents(node, false).forEach((id) => {
             this.#treeDiv.jstree().open_node(id);
           });
-          this.#treeDiv.jstree().open_all(node)
+          this.#treeDiv.jstree().open_all(node);
           this.#treeDiv.jstree().uncheck_all();
           this.#treeDiv.jstree().check_node(node);
           this.#treeDiv.jstree().check_node(node.children_d);

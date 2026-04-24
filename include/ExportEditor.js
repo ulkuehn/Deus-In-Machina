@@ -276,12 +276,14 @@ class ExportEditor {
               width: specs.width,
               height: specs.height,
             })}${infoPost}`,
+            icon: "fas fa-circle-info",
+            className: "contextMenuInfo",
           };
-          items.name.icon = "fas fa-circle-info";
           if (specs.title) {
             items.title = {
               isHtmlName: true,
               name: `${infoPre}${Util.escapeHTML(specs.title)}${infoPost}`,
+              className: "contextMenuInfo",
             };
           }
           items.sepInfo = "x";
@@ -340,6 +342,7 @@ class ExportEditor {
             )} &ndash; ${_("editorContextMenu_characters", charCount, {
               characters: charCount.toLocaleString(theLanguage),
             })}${infoPost}`,
+            className: "contextMenuInfo",
           };
           items.sepInfo = "x";
         }

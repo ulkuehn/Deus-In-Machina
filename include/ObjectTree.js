@@ -43,7 +43,9 @@ class ObjectTree {
       class: "tree-cm",
       style: "display:none",
     });
-    this.#hoverDiv = $("<div>").attr({ style: `display:none; position:absolute; pointer-events:none;` })
+    this.#hoverDiv = $("<div>").attr({
+      style: `display:none; position:absolute; pointer-events:none;`,
+    });
     $("body").append(this.#hoverDiv);
     this.#treeDiv = $("<div>");
     $("#OT")
@@ -68,17 +70,17 @@ class ObjectTree {
       autoHide: true,
       zIndex: 10,
       build: ($trigger, e) => {
-        $trigger.children('a').addClass('jstree-cm');
-        $trigger.children('div').addClass('jstree-wholerow-cm');
+        $trigger.children("a").addClass("jstree-cm");
+        $trigger.children("div").addClass("jstree-wholerow-cm");
         return this.#editMode
           ? false
           : this.#itemContextMenu($trigger[0].id, e);
       },
       events: {
         hide: () => {
-          $('.jstree-cm').removeClass('jstree-cm')
-          $('.jstree-wholerow-cm').removeClass('jstree-wholerow-cm')
-        }
+          $(".jstree-cm").removeClass("jstree-cm");
+          $(".jstree-wholerow-cm").removeClass("jstree-wholerow-cm");
+        },
       },
     });
 
@@ -284,35 +286,56 @@ class ObjectTree {
     );
 
     this.#treeDiv.on("hover_node.jstree", (e, data) => {
-      let $node = this.#treeDiv.jstree().get_node(data.node.id, true)
-      let walker = document.createTreeWalker($node[0], NodeFilter.SHOW_TEXT, null, false)
-      let textNode = walker.nextNode()
-      let range = document.createRange()
-      range.selectNodeContents(textNode)
-      let rect = range.getBoundingClientRect()
-      let right = rect.left + rect.width - this.#treeDiv.offset().left - this.#treeDiv.width()
+      let $node = this.#treeDiv.jstree().get_node(data.node.id, true);
+      let walker = document.createTreeWalker(
+        $node[0],
+        NodeFilter.SHOW_TEXT,
+        null,
+        false,
+      );
+      let textNode = walker.nextNode();
+      let range = document.createRange();
+      range.selectNodeContents(textNode);
+      let rect = range.getBoundingClientRect();
+      let right =
+        rect.left +
+        rect.width -
+        this.#treeDiv.offset().left -
+        this.#treeDiv.width();
       if (right > 0) {
         setTimeout(() => {
-          let $a = $(`#${data.node.id}_anchor`)
-          $a.find("span").first().css("opacity", "0.5")
-          this.#hoverDiv.css("background", settings.objectTreeHoverColor)
-          this.#hoverDiv.css("padding", settings.objectTreeSmall ? "1px" : "4px 5px 2px 5px"); 
-          this.#hoverDiv.css("color", Util.blackOrWhite(settings.objectTreeHoverColor))
-          this.#hoverDiv.css("top", `${Math.floor(rect.top) - (settings.objectTreeSmall ? 0 : 6)}px`)
-          this.#hoverDiv.css("left", `${$a.offset().left - rect.width - 9}px`)
-          this.#hoverDiv.css("width", `${rect.width + 14}px`)
-          this.#hoverDiv.css("line-height", settings.objectTreeSmall ? "17px" : "unset");
-          this.#hoverDiv.html(this.#objects[data.node.id].decoratedName(true))
-          this.#hoverDiv.css("display", "block")
+          let $a = $(`#${data.node.id}_anchor`);
+          $a.find("span").first().css("opacity", "0.5");
+          this.#hoverDiv.css("background", settings.objectTreeHoverColor);
+          this.#hoverDiv.css(
+            "padding",
+            settings.objectTreeSmall ? "1px" : "4px 5px 2px 5px",
+          );
+          this.#hoverDiv.css(
+            "color",
+            Util.blackOrWhite(settings.objectTreeHoverColor),
+          );
+          this.#hoverDiv.css(
+            "top",
+            `${Math.floor(rect.top) - (settings.objectTreeSmall ? 0 : 6)}px`,
+          );
+          this.#hoverDiv.css("left", `${$a.offset().left - rect.width - 9}px`);
+          this.#hoverDiv.css("width", `${rect.width + 14}px`);
+          this.#hoverDiv.css(
+            "line-height",
+            settings.objectTreeSmall ? "17px" : "unset",
+          );
+          this.#hoverDiv.html(this.#objects[data.node.id].decoratedName(true));
+          this.#hoverDiv.css("display", "block");
         }, 100);
       }
-    })
+    });
     this.#treeDiv.on("dehover_node.jstree", (e, data) => {
       setTimeout(() => {
-        this.#hoverDiv.css("display", "none")
-        let $a = $(`#${data.node.id}_anchor`)
-        $a.find("span").first().css("opacity", "unset")
-      }, 100)
+        this.#hoverDiv.css("display", "none");
+        let $a = $(`#${data.node.id}_anchor`);
+        $a.find("span").first().css("opacity", "unset");
+      }, 100);
     });
 
     // creating nodes makes the tree dirty
@@ -438,8 +461,9 @@ class ObjectTree {
     } else {
       if (settings.objectTreeSelectionBorder) {
         clickedStyle.background = "unset";
-        clickedStyle["box-shadow"] = `inset 0 0 8px ${settings.objectTreeSmall ? 0 : 3
-          }px ${settings.objectTreeSelectionColor}`;
+        clickedStyle["box-shadow"] = `inset 0 0 8px ${
+          settings.objectTreeSmall ? 0 : 3
+        }px ${settings.objectTreeSelectionColor}`;
         clickedStyle["padding-right"] = "12px";
       } else {
         clickedStyle.background = settings.objectTreeSelectionColor;
@@ -461,8 +485,9 @@ class ObjectTree {
     let clickedStyleRow = {};
     if (settings.objectTreeSelectionBorder) {
       clickedStyleRow.background = "unset";
-      clickedStyleRow["box-shadow"] = `inset 0 0 8px ${settings.objectTreeSmall ? 0 : 3
-        }px ${settings.objectTreeSelectionColor}`;
+      clickedStyleRow["box-shadow"] = `inset 0 0 8px ${
+        settings.objectTreeSmall ? 0 : 3
+      }px ${settings.objectTreeSelectionColor}`;
       clickedStyleRow["padding-right"] = "12px";
     } else {
       clickedStyleRow.background = settings.objectTreeSelectionColor;
@@ -482,13 +507,17 @@ class ObjectTree {
       #OT .jstree-dim .jstree-clicked { ${Object.keys(clickedStyle)
         .map((k) => `${k}:${clickedStyle[k]}`)
         .join("; ")} }
-      #OT .jstree-dim .jstree-hovered, #OT .jstree-dim .jstree-cm { ${Object.keys(hoveredStyle)
+      #OT .jstree-dim .jstree-hovered, #OT .jstree-dim .jstree-cm { ${Object.keys(
+        hoveredStyle,
+      )
         .map((k) => `${k}:${hoveredStyle[k]}`)
         .join("; ")} }
       #OT .jstree-dim .jstree-wholerow-clicked { ${Object.keys(clickedStyleRow)
         .map((k) => `${k}:${clickedStyleRow[k]}`)
         .join("; ")} }
-      #OT .jstree-dim .jstree-wholerow-hovered, #OT .jstree-dim .jstree-wholerow-cm { ${Object.keys(hoveredStyleRow)
+      #OT .jstree-dim .jstree-wholerow-hovered, #OT .jstree-dim .jstree-wholerow-cm { ${Object.keys(
+        hoveredStyleRow,
+      )
         .map((k) => `${k}:${hoveredStyleRow[k]}`)
         .join("; ")} }
       `,
@@ -756,10 +785,8 @@ class ObjectTree {
         ...new Scheme(
           theSettings.effectiveSettings(),
           oID,
-          (oID == currentObject.id
-            ? currentObject
-            : this.#objects[oID]
-          ).properties,
+          (oID == currentObject.id ? currentObject : this.#objects[oID])
+            .properties,
           this.getParents(oID, false)
             .slice(0, -1)
             .map((o) => ({
@@ -1426,9 +1453,11 @@ class ObjectTree {
       }
     });
     if (theAltKey)
-      return new StyledObject(toNode.id,
+      return new StyledObject(
+        toNode.id,
         this.#objects[fromNode.id].name,
-        JSON.parse(JSON.stringify(this.#objects[fromNode.id].decoration)))
+        JSON.parse(JSON.stringify(this.#objects[fromNode.id].decoration)),
+      );
     else
       return new StyledObject(
         toNode.id,
@@ -1558,7 +1587,7 @@ class ObjectTree {
     }
     if (hasItems) {
       items.sep2 = "x";
-      (items.check = {
+      ((items.check = {
         name: _("objectMenu_checkAll"),
         icon: "fa-regular fa-check-double",
         callback: () => this.checkAll(),
@@ -1585,7 +1614,7 @@ class ObjectTree {
               [theSettings.effectiveSettings()],
             ]);
           },
-        });
+        }));
     }
 
     return { items: items };
@@ -1619,6 +1648,7 @@ class ObjectTree {
     items.name = {
       isHtmlName: true,
       name: infoPre + Util.escapeHTML(this.#objects[nodeID].name) + infoPost,
+      className: "contextMenuInfo",
     };
     if (!compact) {
       items.name.icon = "fas fa-circle-info";
@@ -1632,6 +1662,7 @@ class ObjectTree {
             value: this.#objects[nodeID].textCount.toLocaleString(theLanguage),
           }) +
           infoPost,
+        className: "contextMenuInfo",
       };
     }
     if (settings.objectTreeContextMenuTime == "compactTime") {
@@ -1642,6 +1673,7 @@ class ObjectTree {
         )} / ${this.#objects[nodeID].changed.toLocalString(
           settings.dateTimeFormatShort,
         )}${infoPost}`,
+        className: "contextMenuInfo",
       };
     }
     if (settings.objectTreeContextMenuTime == "fullTime") {
@@ -1655,6 +1687,7 @@ class ObjectTree {
             relative: object.created.timeToNow(),
           }) +
           infoPost,
+        className: "contextMenuInfo",
       };
       items.changed = {
         isHtmlName: true,
@@ -1665,6 +1698,7 @@ class ObjectTree {
             relative: object.changed.timeToNow(),
           }) +
           infoPost,
+        className: "contextMenuInfo",
       };
     }
 
@@ -1691,7 +1725,8 @@ class ObjectTree {
         });
         let textSample = settings.objectsTextSample || _("sampleTexts_medium");
         $popup.html(
-          `<span style="display:block; text-align:center">${this.#objects[nodeID].name
+          `<span style="display:block; text-align:center">${
+            this.#objects[nodeID].name
           }</span><br><p style="${Formats.formatToCSS(
             theFormats.formats[UUID0],
           )}"><span style="${effectiveStyle.toCSS()}">${textSample.replace(
