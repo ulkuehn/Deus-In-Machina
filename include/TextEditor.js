@@ -2428,7 +2428,8 @@ class TextEditor {
     }
     items.focus = {
       name: _("editorContextMenu_focusEditor"),
-      callback: () => {
+      callback: (key, opt) => {
+        opt.$menu.trigger("contextmenu:hide");
         ipcRenderer.invoke("mainProcess_distractionFreeMode", [
           settings,
           theLayout.zoomValue,
@@ -2558,7 +2559,8 @@ class TextEditor {
           sel.index,
           sel.index < len - citeLen ? citeLen : len - sel.index,
         )}${sel.index < len - citeLen ? ` ${ellip}` : ""}</em>`,
-        callback: function () {
+        callback: function (key, opt) {
+          opt.$menu.trigger("contextmenu:hide");
           theTextEditor.splitText();
         },
       };
