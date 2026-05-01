@@ -94,8 +94,8 @@ class Exporter {
           type: "text",
           content: theProject.created
             ? theProject.created.toLocalString(
-              theSettings.effectiveSettings().dateTimeFormatLong,
-            )
+                theSettings.effectiveSettings().dateTimeFormatLong,
+              )
             : "---",
         };
       },
@@ -107,8 +107,8 @@ class Exporter {
           type: "text",
           content: theProject.changed
             ? theProject.changed.toLocalString(
-              theSettings.effectiveSettings().dateTimeFormatLong,
-            )
+                theSettings.effectiveSettings().dateTimeFormatLong,
+              )
             : "---",
         };
       },
@@ -774,16 +774,19 @@ class Exporter {
             case "schemeTypes_file":
               return {
                 type: "text",
-                content: `${_("Scheme_fileName")}: ${content && content.filePath ? content.filePath : "---"
-                  }, ${_("Scheme_fileSize")}: ${content && content.id && theFiles[content.id]
+                content: `${_("Scheme_fileName")}: ${
+                  content && content.filePath ? content.filePath : "---"
+                }, ${_("Scheme_fileSize")}: ${
+                  content && content.id && theFiles[content.id]
                     ? Util.formatBytes(theFiles[content.id].size)
                     : "---"
-                  }, ${_("Scheme_fileTime")}: ${content && content.fileModtime
+                }, ${_("Scheme_fileTime")}: ${
+                  content && content.fileModtime
                     ? new Timestamp(content.fileModtime).toLocalString(
-                      theSettings.effectiveSettings().dateTimeFormatLong,
-                    )
+                        theSettings.effectiveSettings().dateTimeFormatLong,
+                      )
                     : "---"
-                  }`,
+                }`,
               };
               break;
           }
@@ -959,9 +962,10 @@ class Exporter {
           name: "exportObjects",
           i18n: "exportWindow_exportObjects",
           type: "select",
-          values: ["allObjects", "checkedObjects", "usedObjects"],
+          values: ["allObjects", "leafObjects", "checkedObjects", "usedObjects"],
           i18nValues: [
             "exportWindow_allObjects",
+            "exportWindow_leafObjects",
             "exportWindow_checkedObjects",
             "exportWindow_usedObjects",
           ],
@@ -1111,14 +1115,14 @@ class Exporter {
     let formatCSS = `<style id="${domID}">\n`;
     Object.keys(formats).forEach(
       (id) =>
-      (formatCSS += Formats.toCSS(
-        id,
-        theFormats.getFormat(id),
-        undefined,
-        undefined,
-        undefined,
-        true,
-      )),
+        (formatCSS += Formats.toCSS(
+          id,
+          theFormats.getFormat(id),
+          undefined,
+          undefined,
+          undefined,
+          true,
+        )),
     );
     return formatCSS + "</style>\n";
   }
@@ -1349,9 +1353,9 @@ class Exporter {
                 id,
                 profile.exportType == "txt" && id == UUID0
                   ? {
-                    formats_fontFamily: "'monospace'",
-                    formats_fontSize: 12,
-                  }
+                      formats_fontFamily: "'monospace'",
+                      formats_fontSize: 12,
+                    }
                   : theFormats.getFormat(id),
               ]),
             ),
@@ -1527,7 +1531,7 @@ class Exporter {
                       });
                       break;
                   }
-                } catch (err) { }
+                } catch (err) {}
               }
             });
           }
@@ -1624,6 +1628,9 @@ class Exporter {
         case "allObjects":
           useObjects = theObjectTree.getObjects();
           break;
+        case "leafObjects":
+          useObjects = theObjectTree.getLeafObjects();
+          break;
         case "checkedObjects":
           useObjects = theObjectTree.getChecked();
           break;
@@ -1644,6 +1651,10 @@ class Exporter {
           });
           break;
       }
+      Object.assign(
+        this.#usedObjects,
+        Object.fromEntries(useObjects.map((id) => [id, true])),
+      );
 
       let documentStatistics = theProject.statistics(useTexts);
 
@@ -1652,6 +1663,7 @@ class Exporter {
       useTexts.forEach((textID) => {
         let [textContents, formats, objects] = Exporter.#textContentPlacegiver(
           theTextTree.getText(textID).delta,
+          profile.objectFormats,
           useTextObjects,
           profile.objectStartEditor.ops,
           profile.objectEndEditor.ops,
@@ -1740,7 +1752,7 @@ class Exporter {
               propertyContents.push(
                 Exporter.#propertyPlaceholders.propertyContentPlaceholder.function(
                   item,
-                  props[oID][item.id],
+                  props && props[oID] ? props[oID][item.id] : null,
                   mapImages,
                 ),
               );
@@ -1989,6 +2001,7 @@ class Exporter {
    * @static
    *
    * @param {Object[]} textDelta text contents
+   * @param {Boolean} doFormatting whether to substitute format attributes with actual values
    * @param {String[]} useObjects ids of objects to use for textObject placeholders
    * @param {Object[]} beforeObjectDelta
    * @param {Object[]} afterObjectDelta
@@ -1996,6 +2009,7 @@ class Exporter {
    */
   static #textContentPlacegiver(
     textDelta,
+    doFormatting,
     useObjects,
     beforeObjectDelta,
     afterObjectDelta,
@@ -2003,6 +2017,12 @@ class Exporter {
     let ops = [];
     textDelta.forEach((op) => {
       let newOp = JSON.parse(JSON.stringify(op));
+      // if object formats should not be exported, remove all object attributes
+      if (!doFormatting && newOp.attributes) {
+        Object.keys(newOp.attributes).forEach((attr) => {
+          if (attr.startsWith("object")) delete newOp.attributes[attr];
+        });
+      }
       let beforeOps = [];
       let afterOps = [];
       if (op.attributes) {
@@ -2271,7 +2291,7 @@ class Exporter {
               for (let i = 0; i < c.width.length - 1; i++) {
                 let w = Math.floor(
                   (c.width[i] / 100) *
-                  theSettings.effectiveSettings().exportTableLineLength,
+                    theSettings.effectiveSettings().exportTableLineLength,
                 );
                 width += w;
                 columns.push({
@@ -2362,7 +2382,8 @@ class Exporter {
                 para += "</tr>";
               }
               para += "</table><p";
-              if (p.format != UUID0) para += ` class="format${p.format}-true">`;
+              if (p.format != UUID0) para += ` class="format${p.format}-true"`;
+              para += ">";
               break;
           }
         });
@@ -2907,9 +2928,7 @@ class Exporter {
       let rasterizeMap = Leaflet.map($rasterizeDiv[0], {
         attributionControl: false,
         layers: [
-          Leaflet.tileLayer(
-            "https://tile.openstreetmap.de/{z}/{x}/{y}.png",
-          ),
+          Leaflet.tileLayer("https://tile.openstreetmap.de/{z}/{x}/{y}.png"),
         ],
         preferCanvas: true,
       });
@@ -2926,7 +2945,7 @@ class Exporter {
           height: height,
         };
         $rasterizeDiv.remove();
-        resolve("ok")
+        resolve("ok");
       });
     });
   }

@@ -1092,6 +1092,17 @@ class ObjectTree {
   }
 
   /**
+   * get the ids of all leaf objects (having no children) in sequential order
+   * @returns {String[]}
+   */
+  getLeafObjects() {
+    return this.#orderNodesDepthFirst(
+      Object.keys(this.#objects).filter((id) => !this.#treeDiv.jstree().get_node(id).children.length)
+    );
+  }
+
+
+  /**
    * open all tree branches recursively
    */
   expandAll() {
