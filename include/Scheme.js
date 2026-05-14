@@ -36,6 +36,7 @@ class Scheme {
     "schemeTypes_dateRange", // calendar (date range)
     "schemeTypes_map", // geographical map
     "schemeTypes_file", // file attachment
+    "schemeTypes_webpage", // pdf copy of web page
   ];
 
   /**
@@ -57,8 +58,16 @@ class Scheme {
     ],
     schemeTypes_editor: [
       {
-        info: "Scheme_editorHeight",
+        info: "Scheme_elementHeight",
         setting: "schemeEditorHeight",
+        type: "number",
+        style: "width:80px; text-align:right",
+      },
+    ],
+    schemeTypes_webpage: [
+      {
+        info: "Scheme_elementHeight",
+        setting: "schemeWebpageHeight",
         type: "number",
         style: "width:80px; text-align:right",
       },
@@ -135,7 +144,7 @@ class Scheme {
     ],
     schemeTypes_map: [
       {
-        info: "Scheme_mapHeight",
+        info: "Scheme_elementHeight",
         type: "number",
         setting: "schemeMapHeight",
         style: "width:80px; text-align:right",
@@ -371,6 +380,7 @@ class Scheme {
           ) {
             value = this.#properties[idScheme.id][item.id];
           }
+          console.log("fillProperties", item.type, value);
 
           // user info
           let info = item.name ? Util.escapeHTML(item.name) : _(item.type);
@@ -382,7 +392,9 @@ class Scheme {
               .attr({
                 style: `grid-column:1/span 1; justify-self:end; align-self:start`,
               })
-              .html(`<label for="active_${idScheme.id}_${item.id}">${info}</label>`),
+              .html(
+                `<label for="active_${idScheme.id}_${item.id}">${info}</label>`,
+              ),
           );
           // activation switch
           $propertiesGrid.append(
@@ -428,6 +440,17 @@ class Scheme {
                   break;
                 case "schemeTypes_editor":
                   this.#properties[idScheme.id][item.id] = { ops: [] };
+                  break;
+                case "schemeTypes_webpage":
+                  this.#properties[idScheme.id][item.id] = {
+                    url: "",
+                    title: "",
+                    date: "", //new Date().getTime(),
+                    content: "",
+                    // "JVBERi0xLjEKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwgL1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDEgPj4KZW5kb2JqCjMgMCBvYmoKPDwgL1R5cGUgL1BhZ2UgL1BhcmVudCAyIDAgUiAvTWVkaWFCb3ggWzAgMCAzMDAgMTQ0XSA+PgplbmRvYmoKeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNTMgMDAwMDAgbiAKMDAwMDAwMDEwMiAwMDAwMCBuIAp0cmFpbGVyCjw8IC9TaXplIDQgL1Jvb3QgMSAwIFIgPj4Kc3RhcnR4cmVmCjE0NwolJUVPRgo=", // minimal PDF as base64 string
+                    // "C:/Users/qqq/Downloads/x.pdf",
+                    // "JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PC9UeXBlIC9DYXRhbG9nL1BhZ2VzIDIgMCBSCj4+CmVuZG9iagoKMiAwIG9iago8PC9UeXBlIC9QYWdlcy9LaWRzIFszIDAgUiA0IDAgUl0KL0NvdW50IDIKPj4KZW5kb2JqCgozIDAgb2JqCjw8L1R5cGUgL1BhZ2UvUGFyZW50IDIgMCBSCi9NZWRpYUJveCBbMCAwIDYxMiA3OTJdCi9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwvVHlwZSAvUGFnZS9QYXJlbnQgMiAwIFIKL01lZGlhQm94IFswIDAgNjEyIDc5Ml0KL0NvbnRlbnRzIDYgMCBSCj4+CmVuZG9iagoKNSAwIG9iago8PC9MZW5ndGggNzQKPj4Kc3RyZWFtCkJUIAovRm9udCA8PC9GMSA3IDAgUj4+Ci9GMSAxMiBUZgovMTAwIDcwMCBUZAooSGVsbG8gV29ybGQgMSkgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKNiAwIG9iago8PC9MZW5ndGggNzQKPj4Kc3RyZWFtCkJUIAovRm9udCA8PC9GMSA3IDAgUj4+Ci9GMSAxMiBUZgovMTAwIDcwMCBUZAooSGVsbG8gV29ybGQgMikgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKNyAwIG9iago8PC9UeXBlIC9Gb250L1N1YnR5cGUgL1R5cGUxL05hbWUgL0YxL0Jhc2VGb250IC9IZWx2ZXRpY2EvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZz4+CmVuZG9iagoKeHJlZgowIDgKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDExIDAwMDAwIG4gCjAwMDAwMDAwNzYgMDAwMDAgbiAKMDAwMDAwMDE1MiAwMDAwMCBuIAowMDAwMDAwMjI4IDAwMDAwIG4gCjAwMDAwMDAzMDQgMDAwMDAgbiAKMDAwMDAwMDM4MCAwMDAwMCBuIAp0cmFpbGVyCjw8L1Jvb3QgMSAwIFIKL1NpemUgOAo+PgpzdGFydHhyZWYKMzk5CiUlRU9G",
+                  };
                   break;
                 case "schemeTypes_map":
                   this.#properties[idScheme.id][item.id] = {
@@ -521,6 +544,55 @@ class Scheme {
                   value,
                 );
                 break;
+              case "schemeTypes_webpage":
+                {
+                  let height = this.#settings.schemeWebpageHeight;
+                  if (item.params[0].match(/^[0-9]+$/)) {
+                    height = item.params[0];
+                  }
+                  this.#webpageControl(
+                    $propertiesGrid,
+                    idScheme.id,
+                    item.id,
+                    value,
+                    `${height}px`,
+                  );
+                  $(`#openurl_${idScheme.id}_${item.id}`).on("click", () => {
+                    ipcRenderer.invoke("mainProcess_openWindow", [
+                      "printfromurl",
+                      true,
+                      true,
+                      0,
+                      0,
+                      value.title ? value.title : value.url,
+                      "./printFromURLWindow/printFromURLWindow.html",
+                      "printFromURLWindow_init",
+                      nodePath.join(
+                        __dirname,
+                        "../printFromURLWindow/preload.js",
+                      ),
+                      [
+                        idScheme.id,
+                        item.id,
+                        Util.unescapeHTML(
+                          $(`#property_${idScheme.id}_${item.id}`).data("url"),
+                        ),
+                        this.#settings,
+                      ],
+                    ]);
+                  });
+                }
+                $(`#detach_${idScheme.id}_${item.id}`).on("click", () => {
+                  console.log(
+                    "detach",
+                    $(`#property_${idScheme.id}_${item.id}`).data("content"),
+                  );
+                  ipcRenderer.invoke(
+                    "mainProcess_openPath",
+                    $(`#property_${idScheme.id}_${item.id}`).data("content"),
+                  );
+                });
+                break;
               case "schemeTypes_editor":
                 {
                   let height = this.#settings.schemeEditorHeight;
@@ -570,7 +642,7 @@ class Scheme {
                           "grid-column:3/span 2; justify-self:end; margin-bottom:-5px",
                       })
                       .html(
-                        `<button class="btn btn-sm simple-btn btn-outline-secondary" style="cursor:pointer" title="${_("Scheme_detach")}" id="detach_${idScheme.id}_${item.id}"><i class="fa-solid fa-arrow-up-right-from-square"></i>`,
+                        `<button class="btn btn-sm simple-btn btn-outline-secondary" style="cursor:pointer" title="${_("Scheme_detach")}" id="detach_${idScheme.id}_${item.id}"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>`,
                       ),
                   );
 
@@ -686,7 +758,8 @@ class Scheme {
           style: "grid-column:3/span 2;",
         })
         .html(
-          `<input class="form-check-input" type="checkbox" id="property_${id}_${item}" data-type="checkbox" ${value ? " checked" : ""
+          `<input class="form-check-input" type="checkbox" id="property_${id}_${item}" data-type="checkbox" ${
+            value ? " checked" : ""
           }>`,
         ),
     );
@@ -709,9 +782,12 @@ class Scheme {
     $openButton.on("click", this.#openSchemeFile.bind(this, id, item));
 
     let $loadButton = $(
-      `<button class="btn btn-outline-secondary btn-sm" id="filebutton_${id}_${item}" data-type="file" ${value ? "" : "disabled"
-      } title="${_("Scheme_loadFile")}" data-time="${value.fileModtime || ""
-      }" data-id="${value.id ?? ""}" data-path="${value && value.filePath ? Util.escapeHTML(value.filePath) : ""
+      `<button class="btn btn-outline-secondary btn-sm" id="filebutton_${id}_${item}" ${
+        typeof value == "object" && "id" in value && value.id ? "" : "disabled"
+      } title="${_("Scheme_loadFile")}" data-time="${
+        value.fileModtime || ""
+      }" data-id="${value.id ?? ""}" data-path="${
+        value && value.filePath ? Util.escapeHTML(value.filePath) : ""
       }" ><i class="fa-solid fa-eye"></i></button>`,
     );
     $loadButton.on("click", this.#loadSchemeFile.bind(this, id, item));
@@ -723,7 +799,7 @@ class Scheme {
         })
         .append(
           $(
-            `<div style="display:grid; column-gap:10px; grid-template-columns:max-content max-content max-content" id="property_${id}_${item}" type="file">`,
+            `<div style="display:grid; column-gap:10px; grid-template-columns:max-content max-content max-content" id="property_${id}_${item}" data-type="file">`,
           ).append(
             $(`<div style="grid-column:1; grid-row:1/span 3"></div>`).append(
               $openButton,
@@ -733,27 +809,30 @@ class Scheme {
             ),
             `<div style="grid-column:3; justify-self:end">${_(
               "Scheme_fileName",
-            )}:</div><div style="grid-column:4;" id="filename_${id}_${item}">${value && value.filePath
-              ? `<i class="fa-solid fa-arrow-up-right-from-square" style="cursor:pointer; margin-right:10px" title="${_(
-                "Scheme_showFile",
-              )}" onclick="Scheme.showFile('${encodeURI(
-                value.filePath,
-              )}')"></i>${Util.escapeHTML(value.filePath)}`
-              : "---"
+            )}:</div><div style="grid-column:4;" id="filename_${id}_${item}">${
+              value && value.filePath
+                ? `<i class="fa-solid fa-arrow-up-right-from-square" style="cursor:pointer; margin-right:10px" title="${_(
+                    "Scheme_showFile",
+                  )}" onclick="Scheme.showFile('${encodeURI(
+                    value.filePath,
+                  )}')"></i>${Util.escapeHTML(value.filePath)}`
+                : "---"
             }</div>`,
             `<div style="grid-column:3; justify-self:end">${_(
               "Scheme_fileSize",
-            )}:</div><div style="grid-column:4" id="filesize_${id}_${item}">${value && value.id && value.id in this.#files
-              ? Util.formatBytes(this.#files[value.id].size)
-              : "---"
+            )}:</div><div style="grid-column:4" id="filesize_${id}_${item}">${
+              value && value.id && value.id in this.#files
+                ? Util.formatBytes(this.#files[value.id].size)
+                : "---"
             }</div>`,
             `<div style="grid-column:3; justify-self:end">${_(
               "Scheme_fileTime",
-            )}:</div><div style="grid-column:4" id="filetime_${id}_${item}">${value && value.fileModtime
-              ? new Timestamp(value.fileModtime).toLocalString(
-                theSettings.dateTimeFormatLong,
-              )
-              : "---"
+            )}:</div><div style="grid-column:4" id="filetime_${id}_${item}">${
+              value && value.fileModtime
+                ? new Timestamp(value.fileModtime).toLocalString(
+                    theSettings.dateTimeFormatLong,
+                  )
+                : "---"
             }</div>`,
           ),
         ),
@@ -769,6 +848,7 @@ class Scheme {
    */
   #openSchemeFile(id, item) {
     ipcRenderer.invoke("mainProcess_openFile", this.#files).then((result) => {
+      if (!result) return;
       if (!(result.fileID in this.#files)) {
         // file identifying values (extension, size, hash) are stored in the global table
         this.#files[result.fileID] = {
@@ -885,7 +965,7 @@ class Scheme {
         })
         .html(
           `<span id="range_${id}_${item}">${value}</span>` +
-          (unit == undefined ? "" : `&nbsp;${Util.escapeHTML(unit)}`),
+            (unit == undefined ? "" : `&nbsp;${Util.escapeHTML(unit)}`),
         ),
     );
   }
@@ -928,11 +1008,13 @@ class Scheme {
   #radioControl($propertiesGrid, id, item, value, options) {
     let html = "";
     options.forEach((radio) => {
-      html += `<div class="form-check${options.length <= 2 ? " form-check-inline" : ""
-        }"><input class="form-check-input" type="radio" name="property_${id}_${item}" value="${Util.escapeHTML(
-          radio,
-        )}" ${radio == value ? "checked" : ""
-        }><label class="form-check-label">${Util.escapeHTML(radio)}</label></div>`;
+      html += `<div class="form-check${
+        options.length <= 2 ? " form-check-inline" : ""
+      }"><input class="form-check-input" type="radio" name="property_${id}_${item}" value="${Util.escapeHTML(
+        radio,
+      )}" ${
+        radio == value ? "checked" : ""
+      }><label class="form-check-label">${Util.escapeHTML(radio)}</label></div>`;
     });
     $propertiesGrid.append(
       $("<div>")
@@ -983,11 +1065,12 @@ class Scheme {
           style: "grid-column:3/span 2;",
         })
         .html(
-          `<input type="text" class="form-control form-control-sm" style="text-align:center; width:fit-content${isRange ? "; display:inline;" : ""
+          `<input type="text" class="form-control form-control-sm" style="text-align:center; width:fit-content${
+            isRange ? "; display:inline;" : ""
           }" id="property_${id}_${item}" data-type="${isRange ? "dateRange" : "date"}"></input>` +
-          (isRange
-            ? `<span style="margin-left:10px"; id="days_${id}_${item}"></span>`
-            : ""),
+            (isRange
+              ? `<span style="margin-left:10px"; id="days_${id}_${item}"></span>`
+              : ""),
         ),
     );
     $(`#property_${id}_${item}`).daterangepicker({
@@ -1085,8 +1168,9 @@ class Scheme {
     let html = "";
     for (let c = 255; c >= 0; c -= 55) {
       let h = ("0" + c.toString(16)).slice(-2);
-      html += `<div style="display:inline-block; vertical-align:top; margin-left:20px; height:40px; width:40px; border:#${h}${h}${h} solid 10px; background-color:${value != "" ? value : "#000"
-        }" id="colorBox_${id}_${item}_${h}"></div>`;
+      html += `<div style="display:inline-block; vertical-align:top; margin-left:20px; height:40px; width:40px; border:#${h}${h}${h} solid 10px; background-color:${
+        value != "" ? value : "#000"
+      }" id="colorBox_${id}_${item}_${h}"></div>`;
     }
     $flex.append($("<div>").attr({ style: "align-self:center" }).html(html));
     $propertiesGrid.append(
@@ -1116,6 +1200,53 @@ class Scheme {
   }
 
   /**
+   * render a webpage preview
+   * @private
+   *
+   * @param {String} id
+   * @param {String} item
+   * @param {Object} value webpage URL and PDF content
+   * @param {Number} height
+   */
+  #webpageControl($propertiesGrid, id, item, value, height) {
+    let $div = $("<div>").attr({
+      "style": "grid-column:3/span 2;",
+      "id": `property_${id}_${item}`,
+      "data-type": "webpage",
+      "data-content": value.content,
+      "data-title": Util.escapeHTML(value.title),
+      "data-url": Util.escapeHTML(value.url),
+      "data-date": value.date,
+      "title": _("Scheme_webpageTitle", {
+        title: Util.escapeHTML(value.title),
+        url: Util.escapeHTML(value.url),
+        date: new Timestamp(value.date).toLocalString(
+          this.#settings.dateTimeFormatLong,
+        ),
+      }),
+    });
+    $propertiesGrid.append($div);
+
+    $div.append(
+      $("<div>")
+        .attr({ style: "display:flex; justify-content: space-between" })
+        .html(
+          `<button class="btn btn-sm simple-btn btn-outline-secondary" style="cursor:pointer" title='${_("Scheme_openurl", { url: value.url ? ' "' + Util.escapeHTML(value.url) + '" ' : " " })}' id="openurl_${id}_${item}"><i class="fa-solid fa-globe"></i></button><button class="btn btn-sm simple-btn btn-outline-secondary" style="cursor:pointer" title="${_("Scheme_detach")}" id="detach_${id}_${item}"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>`,
+        ),
+    );
+    $div.append(
+      $("<embed>").attr({
+        style: `grid-column:3/span 2; height:${height}; width:100%; display:${value.content ? "block" : "none"}`,
+        src: value.content
+          ? `file:///${value.content}?t=${Date.now()}#zoom=page-width&toolbar=0&#navpanes=0`
+          : "",
+        type: "application/pdf",
+        id: `pdf_${id}_${item}`,
+      }),
+    );
+  }
+
+  /**
    * render an editor
    * @private
    *
@@ -1141,7 +1272,7 @@ class Scheme {
       formats,
       Util.blackOrWhite(
         this.#settings.objectBackgroundColor ||
-        this.#settings.generalBackgroundColor,
+          this.#settings.generalBackgroundColor,
         "btn-outline-light",
         "btn-outline-dark",
       ),
@@ -1227,6 +1358,45 @@ class Scheme {
   }
 
   /**
+   * update a web page
+   *
+   * @param {String} id
+   * @param {String} item
+   */
+  updateWebpage(id, item, pdfData, title, url) {
+    console.log("update webpage", id, item, pdfData, title, url);
+    let date = new Date().getTime();
+    $(`#property_${id}_${item}`).data("title", Util.escapeHTML(title));
+    $(`#property_${id}_${item}`).data("url", Util.escapeHTML(url));
+    $(`#property_${id}_${item}`).data("date", date);
+    $(`#property_${id}_${item}`).attr(
+      "title",
+      _("Scheme_webpageTitle", {
+        title: Util.escapeHTML(title),
+        url: Util.escapeHTML(url),
+        date: new Timestamp(date).toLocalString(
+          this.#settings.dateTimeFormatLong,
+        ),
+      }),
+    );
+    $(`#openurl_${id}_${item}`).attr(
+      "title",
+      _("Scheme_openurl", { url: ' "' + Util.escapeHTML(url) + '" ' }),
+    );
+    ipcRenderer
+      .invoke("mainProcess_storeFile", [`${id}_${item}`, ".pdf", pdfData])
+      .then((path) => {
+        $(`#pdf_${id}_${item}`).attr(
+          "src",
+          // `data:application/pdf;base64,${Buffer.from(pdfData).toString("base64")}
+          `file:///${path}?t=${Date.now()}#zoom=page-width&toolbar=0&#navpanes=0`,
+        );
+        $(`#property_${id}_${item}`).data("content", path);
+      });
+    $(`#pdf_${id}_${item}`).show();
+  }
+
+  /**
    * collect all property values
    *
    * @returns {Object} property id -> value
@@ -1241,8 +1411,23 @@ class Scheme {
       if (!(id in that.#properties)) {
         that.#properties[id] = {};
       }
+      console.log("property", id, no, $(this).data("type"));
       switch ($(this).data("type")) {
+        case "webpage":
+          ipcRenderer;
+          that.#properties[id][no] = {
+            url: Util.unescapeHTML($(this).data("url")),
+            title: Util.unescapeHTML($(this).data("title")),
+            date: $(this).data("date"),
+            content: $(this).data("content"),
+          };
+          console.log("save webpage", that.#properties[id][no]);
+          break;
         case "file":
+          console.log(
+            "file button enabled",
+            !$(`#filebutton_${id}_${no}`).prop("disabled"),
+          );
           if (!$(`#filebutton_${id}_${no}`).prop("disabled")) {
             that.#properties[id][no] = {
               id: $(`#filebutton_${id}_${no}`).attr("data-id"),
@@ -1251,6 +1436,7 @@ class Scheme {
               ),
               fileModtime: $(`#filebutton_${id}_${no}`).attr("data-time"),
             };
+            console.log("save file", that.#properties[id][no]);
           }
           break;
         case "date":
@@ -1403,7 +1589,8 @@ class Scheme {
                     style: "grid-column:5/span 1;",
                   })
                   .html(
-                    `<input type="${param.type}" class="form-control form-control-sm" spellcheck="false" disabled style="${param.style
+                    `<input type="${param.type}" class="form-control form-control-sm" spellcheck="false" disabled style="${
+                      param.style
                     }" value="${Util.escapeHTML(scheme.params[i])}">`,
                   ),
               );
@@ -1468,7 +1655,8 @@ class Scheme {
           .html(
             `<input type="text" class="form-control form-control-sm" spellcheck="false" value="${Util.escapeHTML(
               this.#scheme[itemNo].name,
-            )}" id="schemeName_${this.#scheme[itemNo].id
+            )}" id="schemeName_${
+              this.#scheme[itemNo].id
             }_${itemNo}" style="width:100%">`,
           ),
       );
@@ -1512,8 +1700,10 @@ class Scheme {
                 style: "grid-column:5/span 1",
               })
               .html(
-                `<input type="${param.type}" class="form-control form-control-sm" spellcheck="false" style="${param.style
-                }" id="schemeParam_${this.#scheme[itemNo].id
+                `<input type="${param.type}" class="form-control form-control-sm" spellcheck="false" style="${
+                  param.style
+                }" id="schemeParam_${
+                  this.#scheme[itemNo].id
                 }_${itemNo}_${i}" value="${Util.escapeHTML(
                   this.#scheme[itemNo].params[i],
                 )}">`,

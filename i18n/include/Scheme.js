@@ -16,7 +16,7 @@ const translationSchemeValues = {
     Scheme_type: "Typ",
     Scheme_parameters: "Parameter",
     Scheme_relationReverse: `Rückbeziehung <i class="fas fa-info-circle" title='Beschreibung der Beziehung des anderen Objekts zu diesem.\nWenn die Beziehung z.B. "Sohn von" ist, könnte die Rückbeziehung "Mutter/Vater von" lauten.\nWenn hier ein Text eingegeben wird, wird dies bei allen Objekt mit dieser Beziehung berücksichtigt.'></i>`,
-    Scheme_editorHeight: "Höhe in Pixel",
+    Scheme_elementHeight: "Höhe in Pixel",
     Scheme_checkTrue: "ja",
     Scheme_checkFalse: "nein",
     Scheme_rangeMin: "von",
@@ -39,7 +39,6 @@ const translationSchemeValues = {
     Scheme_dateCancel: "Abbrechen",
     Scheme_dateWeek: "W",
     Scheme_dateFirstWeekday: "1", // first day of week, 0=Sun
-    Scheme_mapHeight: "Höhe in Pixel",
     Scheme_overviewMap: "Übersicht",
     Scheme_locationLatLong: "%{lat} Breite, %{lng} Länge",
     Scheme_locationName: "Ort",
@@ -63,6 +62,8 @@ const translationSchemeValues = {
     Scheme_detach: "in eigenem Fenster öffnen",
     Scheme_showObject: "verbundenes Objekt anzeigen",
     Scheme_reverseInfo: `Rückbeziehung "%{relation}"`,
+    Scheme_webpageTitle: "Titel: %{title}\nURL: %{url}\nDatum: %{date}",
+    Scheme_openurl: "Webseite%{url}öffnen",
   },
   // English
   en: {
@@ -74,7 +75,7 @@ const translationSchemeValues = {
     Scheme_type: "Type",
     Scheme_parameters: "Parameter",
     Scheme_relationReverse: `Reverse relation <i class="fas fa-info-circle" title='Description of the other object's relation to this one.\nE.g. if relating to some other object by "son of" the reverse relation might be "mother/father of".\nIf a description is given here any related object is affected automatically.'></i>`,
-    Scheme_editorHeight: "Height in Pixels",
+    Scheme_elementHeight: "Height in Pixels",
     Scheme_checkTrue: "yes",
     Scheme_checkFalse: "no",
     Scheme_rangeMin: "from",
@@ -97,7 +98,6 @@ const translationSchemeValues = {
     Scheme_dateCancel: "Cancel",
     Scheme_dateWeek: "W",
     Scheme_dateFirstWeekday: "0", // first day of week, 0=Sun
-    Scheme_mapHeight: "Height in Pixels",
     Scheme_overviewMap: "Overview",
     Scheme_locationLatLong: "%{lat} Latitude, %{lng} Longitude",
     Scheme_locationName: "Location",
@@ -121,6 +121,8 @@ const translationSchemeValues = {
     Scheme_detach: "open in extra window",
     Scheme_showObject: "show connected object",
     Scheme_reverseInfo: `Reverse relation "%{relation}"`,
+    Scheme_openurl: "open Webpage%{url}",
+    Scheme_webpageTitle: "Title: %{title}\nURL: %{url}\nDate: %{date}",
   },
 };
 

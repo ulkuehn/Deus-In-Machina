@@ -1930,7 +1930,7 @@ class Project {
                   promises.push(
                     ipcRenderer
                       .invoke(
-                        "mainProcess_saveFile",
+                        "mainProcess_readFile",
                         id + theFiles[id].extension,
                       )
                       .then((result) => {

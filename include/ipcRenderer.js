@@ -614,7 +614,7 @@ ipcRenderer.on("rendererProcess_importFromURL", () => {
     true,
     0,
     0,
-    _("windowTitles_importFromURLWindow", { title: "" }),
+   "",
     "./importFromURLWindow/importFromURLWindow.html",
     "importFromURLWindow_init",
     nodePath.join(__dirname, "../importFromURLWindow/preload.js"),

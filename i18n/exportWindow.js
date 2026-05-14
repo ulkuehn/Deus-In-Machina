@@ -65,7 +65,7 @@ const translationExportWindow = {
       exportWindow_objectTextTab: "Objektmarkierungen",
       exportWindow_exportObjectsText: "Objektauswahl",
       exportWindow_allObjects: "alle Objekte berücksichtigen",
-      exportWindow_leafObjects: "alle hierarchisch unteren Objekte berücksichtigen",
+      exportWindow_leafObjects: "alle End-Objekte (unterste Ebene) berücksichtigen",
       exportWindow_checkedObjects: "die aktivierten Objekte berücksichtigen",
       exportWindow_usedObjects: "die verwendeten Objekte berücksichtigen",
       exportWindow_noObjects: "kein Objekt berücksichtigen",

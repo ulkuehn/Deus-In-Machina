@@ -36,6 +36,7 @@ const uuid = () => {
 };
 const UUID0 = "_" + NIL;
 const { htmlToText } = require("html-to-text");
+const { PDFDocument } = require("pdf-lib");
 const { Logger } = require("./include/Logger.js");
 const { Timestamp } = require("./include/Timestamp.js");
 const { Languages } = require("./include/Languages.js");
@@ -181,7 +182,7 @@ app.whenReady().then(() => {
   try {
     settings = JSON.parse(fs.readFileSync(settingsFilePath));
     debugMode = settings.debug;
-  } catch (err) { }
+  } catch (err) {}
   if (debugMode) {
     theLogger.level = "verbose";
   }
@@ -1006,9 +1007,10 @@ function menuList(left, right, bottom) {
             length: Intl.NumberFormat(theLanguage).format(1000),
           }),
           click(item, focusedWindow) {
-            focusedWindow.webContents.send("rendererProcess_insertLorum", [
-              1000,
-            ]);
+            focusedWindow.webContents.send(
+              "rendererProcess_insertLorum",
+              [1000],
+            );
           },
         },
         {
@@ -1016,9 +1018,10 @@ function menuList(left, right, bottom) {
             length: Intl.NumberFormat(theLanguage).format(10000),
           }),
           click(item, focusedWindow) {
-            focusedWindow.webContents.send("rendererProcess_insertLorum", [
-              10000,
-            ]);
+            focusedWindow.webContents.send(
+              "rendererProcess_insertLorum",
+              [10000],
+            );
           },
         },
         {
@@ -1026,9 +1029,10 @@ function menuList(left, right, bottom) {
             length: Intl.NumberFormat(theLanguage).format(100000),
           }),
           click(item, focusedWindow) {
-            focusedWindow.webContents.send("rendererProcess_insertLorum", [
-              100000,
-            ]);
+            focusedWindow.webContents.send(
+              "rendererProcess_insertLorum",
+              [100000],
+            );
           },
         },
         {
@@ -1036,9 +1040,10 @@ function menuList(left, right, bottom) {
             length: Intl.NumberFormat(theLanguage).format(1000000),
           }),
           click(item, focusedWindow) {
-            focusedWindow.webContents.send("rendererProcess_insertLorum", [
-              1000000,
-            ]);
+            focusedWindow.webContents.send(
+              "rendererProcess_insertLorum",
+              [1000000],
+            );
           },
         },
         {
@@ -1342,7 +1347,7 @@ function getGlobalState() {
   theLogger.info("getting global state");
   try {
     theState = JSON.parse(fs.readFileSync(stateFilePath));
-  } catch (err) { }
+  } catch (err) {}
 }
 
 /**
@@ -1352,7 +1357,7 @@ function setGlobalState() {
   theLogger.info("setting global state");
   try {
     fs.writeFileSync(stateFilePath, JSON.stringify(theState, null, 2));
-  } catch (err) { }
+  } catch (err) {}
 }
 
 /*
@@ -1907,7 +1912,7 @@ ipcMain.handle(
           show: false,
           maximizable: true,
           minimizable: true,
-          title: `${theProgramShortName} - ${title}`,
+          title: theProgramShortName + `${title ? ` - ${title}` : ""}`,
           webPreferences: {
             nodeIntegration: preload ? false : true,
             contextIsolation: preload ? true : false,
@@ -1930,6 +1935,16 @@ ipcMain.handle(
         newWindow.once("ready-to-show", () => {
           newWindow.show();
           newWindow.webContents.send(ipcMessage, args);
+          // intercept any navigation attempt (from within embedded PDF viewer for example)
+          newWindow.webContents.on("will-navigate", (event, url) => {
+            event.preventDefault();
+            shell.openExternal(url);
+          });
+          // intercept attempts to open a new window (target="_blank")
+          newWindow.webContents.setWindowOpenHandler(({ url }) => {
+            shell.openExternal(url);
+            return { action: "deny" };
+          });
         });
 
         // close handler to adapt for closing behaviour chosen in settings
@@ -1951,22 +1966,22 @@ ipcMain.handle(
                     // ask for user confirmation if saving is necessary
                     if (changed) {
                       switch (
-                      dialog.showMessageBoxSync(
-                        BrowserWindow.getFocusedWindow(),
-                        {
-                          type: "none",
-                          title: _("mainProcess_windowCloseTitle", {
-                            title: title,
-                          }),
-                          message:
-                            message || _("mainProcess_windowCloseMessage"),
-                          buttons: [
-                            yes || _("mainProcess_windowCloseSave"),
-                            no || _("mainProcess_windowCloseNoSave"),
-                          ],
-                          cancelId: -1,
-                        },
-                      )
+                        dialog.showMessageBoxSync(
+                          BrowserWindow.getFocusedWindow(),
+                          {
+                            type: "none",
+                            title: _("mainProcess_windowCloseTitle", {
+                              title: title,
+                            }),
+                            message:
+                              message || _("mainProcess_windowCloseMessage"),
+                            buttons: [
+                              yes || _("mainProcess_windowCloseSave"),
+                              no || _("mainProcess_windowCloseNoSave"),
+                            ],
+                            cancelId: -1,
+                          },
+                        )
                       ) {
                         // abort message window
                         case -1:
@@ -2073,7 +2088,8 @@ ipcMain.handle("mainProcess_loadImageAsDataURL", () => {
     });
     if (result) {
       resolve(
-        `data:image/${result[0].endsWith("png") ? "png" : "jpeg"
+        `data:image/${
+          result[0].endsWith("png") ? "png" : "jpeg"
         };base64,${fs.readFileSync(result[0], "base64")}`,
       );
     } else {
@@ -2090,61 +2106,69 @@ ipcMain.handle("mainProcess_loadImageAsDataURL", () => {
  * @param {Number} width
  * @param {Number} height
  */
-ipcMain.handle("mainProcess_newBrowser", (event, [x, y, width, height]) => {
-  theLogger.verbose(
-    "mainProcess_newBrowser",
-    { x },
-    { y },
-    { width },
-    { height },
-  );
-  const view = new BrowserView();
-  BrowserWindow.getFocusedWindow().setBrowserView(view);
-  view.setBounds({ x: x, y: y, width: width, height: height });
-
-  view.webContents.once("ready-to-show", () => {
-    view.webContents.setZoomFactor(1);
-  });
-
-  view.webContents.on("did-finish-load", () => {
-    BrowserWindow.getFocusedWindow().webContents.send(
-      "importFromURLWindow_readyToImport",
+ipcMain.handle(
+  "mainProcess_newBrowser",
+  (event, language, [x, y, width, height]) => {
+    theLogger.verbose(
+      "mainProcess_newBrowser",
+      { x },
+      { y },
+      { width },
+      { height },
     );
-  });
+    const view = new BrowserView();
+    BrowserWindow.getFocusedWindow().setBrowserView(view);
+    view.setBounds({ x: x, y: y, width: width, height: height });
+    view.webContents.setAudioMuted(true);
 
-  view.webContents.on("did-navigate", (event, url) => {
-    view.webContents.executeJavaScript("document.title", true).then((title) => {
-      BrowserWindow.getFocusedWindow().setTitle(
-        _("windowTitles_importFromURLWindow", {
-          title: title ? ` - "${title}"` : ` - "${url}"`,
-        }),
+    view.webContents.session.setUserAgent(
+      view.webContents.getUserAgent(),
+      language,
+    );
+
+    view.webContents.once("ready-to-show", () => {
+      view.webContents.setZoomFactor(1);
+    });
+
+    view.webContents.on("did-finish-load", () => {
+      BrowserWindow.getFocusedWindow().webContents.send(
+        "importFromURLWindow_readyToImport",
       );
     });
-    BrowserWindow.getFocusedWindow().webContents.send(
-      "importFromURLWindow_changeURL",
-      url,
-    );
-  });
 
-  // no new windows on top of BrowserView, rather open them in existing BrowserView
-  view.webContents.setWindowOpenHandler(({ url }) => {
-    view.webContents.loadURL(url);
-    return { action: "deny" };
-  });
-});
+    view.webContents.on("did-navigate", (event, url) => {
+      view.webContents
+        .executeJavaScript("document.title", true)
+        .then((title) => {
+          BrowserWindow.getFocusedWindow().setTitle(`${theProgramShortName} - ${title ? title : url}`);
+        });
+      BrowserWindow.getFocusedWindow().webContents.send(
+        "importFromURLWindow_changeURL",
+        url,
+      );
+    });
+
+    // no new windows on top of BrowserView, rather open them in existing BrowserView
+    view.webContents.setWindowOpenHandler(({ url }) => {
+      view.webContents.loadURL(url);
+      return { action: "deny" };
+    });
+  },
+);
 
 /**
- * setup browser window
+ * setup browser window (only import from URL window relevant, as print from URL window is only used for printing a single page and then closed, so no need to update settings there)
  *
  * @param {Object} settings effective settings
  */
 ipcMain.handle("mainProcess_setBrowserWindow", (event, settings) => {
-  theLogger.verbose(
-    "mainProcess_setBrowserWindow",
-    { settings },
-    // { settings },
-  );
+  theLogger.verbose("mainProcess_setBrowserWindow", { settings });
   if ("importfromurl" in openWindows) {
+    let view = openWindows.importfromurl.getBrowserViews()[0];
+    view.webContents.session.setUserAgent(
+      view.webContents.getUserAgent(),
+      settings.language,
+    );
     openWindows.importfromurl.webContents.send(
       "importFromURLWindow_changeSettings",
       settings,
@@ -2160,35 +2184,39 @@ ipcMain.handle("mainProcess_setBrowserWindow", (event, settings) => {
  * @param {Number} width
  * @param {Number} height
  */
-ipcMain.handle("mainProcess_moveBrowser", (event, [x, y, width, height]) => {
-  theLogger.verbose(
-    "mainProcess_moveBrowser",
-    { x },
-    { y },
-    { width },
-    { height },
-  );
-  if ("importfromurl" in openWindows) {
-    openWindows.importfromurl
-      .getBrowserView()
-      .setBounds({ x: x, y: y, width: width, height: height });
-  }
-});
+ipcMain.handle(
+  "mainProcess_moveBrowser",
+  (event, doPrint, [x, y, width, height]) => {
+    theLogger.verbose(
+      "mainProcess_moveBrowser",
+      { doPrint },
+      { x },
+      { y },
+      { width },
+      { height },
+    );
+    let win = doPrint ? "printfromurl" : "importfromurl";
+    if (win in openWindows) {
+      openWindows[win]
+        .getBrowserView()
+        .setBounds({ x: x, y: y, width: width, height: height });
+    }
+  },
+);
 
 /**
- * open URL in browser window
+ * open URL in browser window (for printing or importing, depending on doPrint)
  *
  * @param {String} href url to navigate to
  */
-ipcMain.handle("mainProcess_browserOpenURL", (event, href) => {
-  theLogger.verbose("mainProcess_browserOpenURL", { href });
+ipcMain.handle("mainProcess_browserOpenURL", (event, doPrint, href) => {
+  theLogger.verbose("mainProcess_browserOpenURL", { doPrint }, { href });
   try {
     const url = new URL(href);
     if (url.protocol.startsWith("http")) {
-      if ("importfromurl" in openWindows) {
-        openWindows.importfromurl
-          .getBrowserView()
-          .webContents.loadURL(url.href);
+      let win = doPrint ? "printfromurl" : "importfromurl";
+      if (win in openWindows) {
+        openWindows[win].getBrowserView().webContents.loadURL(url.href);
       }
     }
   } catch (err) {
@@ -2201,69 +2229,94 @@ ipcMain.handle("mainProcess_browserOpenURL", (event, href) => {
  *
  * @param {Number} zoom in percent
  */
-ipcMain.handle("mainProcess_browserZoom", (event, zoom) => {
-  theLogger.verbose("mainProcess_browserZoom", { zoom });
-  if ("importfromurl" in openWindows) {
-    openWindows.importfromurl
-      .getBrowserView()
-      .webContents.setZoomFactor(zoom / 100);
+ipcMain.handle("mainProcess_browserZoom", (event, doPrint, zoom) => {
+  theLogger.verbose("mainProcess_browserZoom", { doPrint }, { zoom });
+  let win = doPrint ? "printfromurl" : "importfromurl";
+  if (win in openWindows) {
+    openWindows[win].getBrowserView().webContents.setZoomFactor(zoom / 100);
   }
 });
 
 /**
  * stop page load in browser window
  */
-ipcMain.handle("mainProcess_browserStop", () => {
-  theLogger.verbose("mainProcess_browserStop");
-  if ("importfromurl" in openWindows) {
-    openWindows.importfromurl.getBrowserView().webContents.stop();
-    openWindows.importfromurl.webContents.send(
-      "importFromURLWindow_readyToImport",
-    );
+ipcMain.handle("mainProcess_browserStop", (event, doPrint) => {
+  theLogger.verbose("mainProcess_browserStop", { doPrint });
+  let win = doPrint ? "printfromurl" : "importfromurl";
+  if (win in openWindows) {
+    openWindows[win].getBrowserView().webContents.stop();
+    openWindows[win].webContents.send("importFromURLWindow_readyToImport");
   }
 });
 
 /**
  * import web content from browser window
  */
-ipcMain.handle("mainProcess_browserContent", () => {
-  theLogger.verbose("mainProcess_browserContent");
+ipcMain.handle("mainProcess_browserImport", () => {
+  theLogger.verbose("mainProcess_browserImport");
   if ("importfromurl" in openWindows) {
-    const view = openWindows.importfromurl.getBrowserView();
+    let view = openWindows.importfromurl.getBrowserView();
     view.webContents
-      .executeJavaScript("document.URL", true)
-      .then((url) => {
-        view.webContents
-          .executeJavaScript("document.title", true)
-          .then((title) => {
-            view.webContents
-              .executeJavaScript("document.body.outerHTML", true)
-              .then((html) => {
-                let text = htmlToText(html, {
-                  wordwrap: null,
-                  selectors: [
-                    {
-                      selector: "a",
-                      options: {
-                        ignoreHref: true,
-                      },
-                    },
-                    {
-                      selector: "img",
-                      format: "skip",
-                    },
-                  ],
-                });
-                mainWindow.webContents.send(
-                  "rendererProcess_importFromBrowser",
-                  [text, title, url],
-                );
-                openWindows.importfromurl.close();
-              });
-          });
+      .executeJavaScript("document.body.outerHTML", true)
+      .then((html) => {
+        let text = htmlToText(html, {
+          wordwrap: null,
+          selectors: [
+            {
+              selector: "a",
+              options: {
+                ignoreHref: true,
+              },
+            },
+            {
+              selector: "img",
+              format: "skip",
+            },
+          ],
+        });
+        mainWindow.webContents.send("rendererProcess_importFromBrowser", [
+          text,
+          view.webContents.getTitle(),
+          view.webContents.getURL(),
+        ]);
+        openWindows.importfromurl.close();
       })
       .catch((error) => {
         openWindows.importfromurl.close();
+      });
+  }
+});
+
+/**
+ * print web content from browser window
+ */
+ipcMain.handle("mainProcess_browserPrint", (event, schemeID, itemID) => {
+  console.log("mainProcess_browserPrint", { schemeID }, { itemID });
+  theLogger.verbose("mainProcess_browserPrint");
+  if ("printfromurl" in openWindows) {
+    let view = openWindows.printfromurl.getBrowserView();
+    view.webContents
+      .printToPDF({
+        printBackground: false,
+        landscape: false,
+        pageSize: "A4",
+      })
+      .then((pdfData) => {
+        openWindows.object.webContents.send(
+          "rendererProcess_printFromBrowser",
+          [
+            schemeID,
+            itemID,
+            pdfData,
+            view.webContents.getTitle(),
+            view.webContents.getURL(),
+          ],
+        );
+        openWindows.printfromurl.close();
+      })
+      .catch((error) => {
+        console.error("error in mainProcess_browserPrint", error);
+        openWindows.printfromurl.close();
       });
   }
 });
@@ -2386,7 +2439,7 @@ ipcMain.handle("mainProcess_getGlobalSettings", () => {
   let settings = null;
   try {
     settings = JSON.parse(fs.readFileSync(settingsFilePath));
-  } catch (err) { }
+  } catch (err) {}
   return settings;
 });
 
@@ -2405,7 +2458,7 @@ ipcMain.handle("mainProcess_storeGlobalSettings", (event, settings) => {
   theLogger.verbose("mainProcess_storeGlobalSettings", { settings });
   try {
     fs.writeFileSync(settingsFilePath, JSON.stringify(settings, null, 2));
-  } catch (err) { }
+  } catch (err) {}
 });
 
 /**
@@ -2734,13 +2787,24 @@ ipcMain.handle("mainProcess_loadFile", (event, args) => {
 });
 
 /**
- * save a file
+ * read a file
  *
  * @param {String} fileName file name
  */
-ipcMain.handle("mainProcess_saveFile", (event, fileName) => {
-  theLogger.verbose("mainProcess_saveFile", { fileName });
+ipcMain.handle("mainProcess_readFile", (event, fileName) => {
+  theLogger.verbose("mainProcess_readFile", { fileName });
   return fs.readFileSync(`${theTmpDir}${path.sep}${fileName}`);
+});
+
+/**
+ * read file from path
+ *
+ * @param {String} path file path
+ */
+ipcMain.handle("mainProcess_readPath", (event, path) => {
+  console.log("read",path)
+  theLogger.verbose("mainProcess_readPath", { path });
+  return fs.readFileSync(path);
 });
 
 /**
@@ -2765,8 +2829,13 @@ ipcMain.handle(
       fs.mkdirSync(theTmpDir);
     }
     let tmpPath = `${theTmpDir}${path.sep}${fileID}${fileExtension}`;
+    try {
+      fs.accessSync(tmpPath, fs.F_OK)
+      fs.rmSync(tmpPath)
+    } catch (err) {}
     fs.writeFileSync(tmpPath, fileContent);
     fs.chmodSync(tmpPath, fs.constants.O_RDONLY);
+    return tmpPath;
   },
 );
 
@@ -2779,7 +2848,7 @@ ipcMain.handle("mainProcess_clearTmpDir", () => {
     fs.readdirSync(theTmpDir).forEach((file) =>
       fs.rmSync(`${theTmpDir}${path.sep}${file}`, { force: true }),
     );
-  } catch (err) { }
+  } catch (err) {}
 });
 
 /**
@@ -2833,13 +2902,13 @@ ipcMain.handle("mainWindow_print2PDF", () => {
                 });
               } else {
                 switch (
-                dialog.showMessageBoxSync(BrowserWindow.getFocusedWindow(), {
-                  type: "none",
-                  title: _("mainWindow_printingDone"),
-                  message: _("mainWindow_printingOpen", { file: file }),
-                  cancelId: -1,
-                  buttons: [_("general_answerYes"), _("general_answerNo")],
-                })
+                  dialog.showMessageBoxSync(BrowserWindow.getFocusedWindow(), {
+                    type: "none",
+                    title: _("mainWindow_printingDone"),
+                    message: _("mainWindow_printingOpen", { file: file }),
+                    cancelId: -1,
+                    buttons: [_("general_answerYes"), _("general_answerNo")],
+                  })
                 ) {
                   case 0:
                     shell.openPath(file).then((error) => {

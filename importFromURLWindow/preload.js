@@ -10,9 +10,15 @@ const { contextBridge, ipcRenderer } = require("electron");
  * provide the API for the renderer
  */
 contextBridge.exposeInMainWorld("api", {
-  // setting the renderer up
+  // set the renderer up
   onInit: (callback) => {
     ipcRenderer.on("importFromURLWindow_init", (event, args) => callback(args));
+  },
+  // change settings
+  onChangeSettings: (callback) => {
+    ipcRenderer.on("importFromURLWindow_changeSettings", (event, args) =>
+      callback(args),
+    );
   },
   // URL change
   onChangeURL: (callback) => {
@@ -24,12 +30,12 @@ contextBridge.exposeInMainWorld("api", {
   onReadyToImport: (callback) => {
     ipcRenderer.on("importFromURLWindow_readyToImport", () => callback());
   },
-  new: (vals) => ipcRenderer.invoke("mainProcess_newBrowser", vals),
-  move: (vals) => ipcRenderer.invoke("mainProcess_moveBrowser", vals),
-  zoom: (zoom) => ipcRenderer.invoke("mainProcess_browserZoom", zoom),
+  new: (language,vals) => ipcRenderer.invoke("mainProcess_newBrowser", language, vals),
+  move: (vals) => ipcRenderer.invoke("mainProcess_moveBrowser", false, vals),
+  zoom: (zoom) => ipcRenderer.invoke("mainProcess_browserZoom", false,zoom),
   open: (url) => {
-    ipcRenderer.invoke("mainProcess_browserOpenURL", url);
+    ipcRenderer.invoke("mainProcess_browserOpenURL", false, url);
   },
-  stop: () => ipcRenderer.invoke("mainProcess_browserStop"),
-  import: () => ipcRenderer.invoke("mainProcess_browserContent"),
+  stop: () => ipcRenderer.invoke("mainProcess_browserStop", false),
+  import: () => ipcRenderer.invoke("mainProcess_browserImport"),
 });

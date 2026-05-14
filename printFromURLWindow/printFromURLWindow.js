@@ -2,7 +2,7 @@
  * DIM - Deus In Machina
  *
  * @author Ulrich Kühn 2024, 2025, 2026
- * @file implementation of web page import window
+ * @file implementation of web page print window
  */
 
 /**
@@ -24,7 +24,7 @@ let theRightURLs;
  *
  * @param {Object} settings effective settings
  */
-window.api.onInit((settings) => {
+window.api.onInit(([schemeID, itemID, url, settings]) => {
   theLanguage = settings.language;
   theSettings = settings;
   theLeftURLs = [];
@@ -44,7 +44,7 @@ window.api.onInit((settings) => {
       })
       .html(
         `<button type="button" class="btn btn-light btn-sm" onclick="backwards()" id="backwards" disabled title="${_(
-          "importFromURLWindow_back",
+          "printFromURLWindow_back",
           { url: theLeftURLs[theLeftURLs.length - 2] },
         )}"><i class="fa-solid fa-arrow-left"></i></button>`,
       ),
@@ -56,7 +56,7 @@ window.api.onInit((settings) => {
       })
       .html(
         `<button type="button" class="btn btn-light btn-sm" onclick="forward()" id="forward" disabled title="${_(
-          "importFromURLWindow_forward",
+          "printFromURLWindow_forward",
           { url: theRightURLs[0] },
         )}"><i class="fa-solid fa-arrow-right"></i></button>`,
       ),
@@ -70,7 +70,7 @@ window.api.onInit((settings) => {
       })
       .html(
         `<button type="button" class="btn btn-light btn-sm" onclick="window.api.stop()" id="stop" disabled title="${_(
-          "importFromURLWindow_stop",
+          "printFromURLWindow_stop",
         )}"><i class="fa-solid fa-x"></i></button>`,
       ),
   );
@@ -81,7 +81,7 @@ window.api.onInit((settings) => {
       })
       .html(
         `<button type="button" class="btn btn-light btn-sm" onclick="loadURL()" id="reload" disabled title="${_(
-          "importFromURLWindow_reload",
+          "printFromURLWindow_reload",
         )}"><i class="fa-solid fa-arrows-rotate"></i></button>`,
       ),
   );
@@ -93,8 +93,8 @@ window.api.onInit((settings) => {
         style: "grid-column:5/span 1; align-self:center",
       })
       .html(
-        `<input type="range" title="${_("importFromURLWindow_zoom")}" class="${Util.blackOrWhite(
-          theSettings.importfromurlBackgroundColor ||
+        `<input type="range" title="${_("printFromURLWindow_zoom")}" class="${Util.blackOrWhite(
+          theSettings.printfromurlBackgroundColor ||
             theSettings.generalBackgroundColor,
           "range-light",
           "range-dark",
@@ -111,14 +111,14 @@ window.api.onInit((settings) => {
       ),
   );
 
-  // url input and import
+  // url input and print
   $grid.append(
     $("<div>")
       .attr({
         style: "grid-column:7/span 1; align-self:center",
       })
       .html(
-        `<input type="text" class="form-control form-control-sm" spellcheck="false" id="url" style="width:100%" onkeypress="urlKeypress(event)">`,
+        `<input type="text" value="${url}" class="form-control form-control-sm" spellcheck="false" id="url" style="width:100%" onkeypress="urlKeypress(event)">`,
       ),
   );
   $grid.append(
@@ -127,8 +127,8 @@ window.api.onInit((settings) => {
         style: "grid-column:8/span 1;",
       })
       .html(
-        `<button type="button" class="btn btn-primary" onclick="window.api.import()" id="import" disabled>${_(
-          "importFromURLWindow_import",
+        `<button type="button" class="btn btn-primary" onclick="window.api.print('${schemeID}', '${itemID}')" id="print" disabled>${_(
+          "printFromURLWindow_save",
         )}</button>`,
       ),
   );
@@ -141,57 +141,35 @@ window.api.onInit((settings) => {
       id: "browserview",
     }),
   );
-
-  $("body").append($grid);
-  setupWindow(settings);
+  $("body *").css({
+    "--scrollbar-width": settings.scrollbarThin ? "thin" : "auto",
+    "--scrollbar-back": Util.scrollbarBack(
+      settings.scrollbarStyle,
+      settings.printfromurlBackgroundColor || settings.generalBackgroundColor,
+    ),
+    "--scrollbar-fore": Util.scrollbarFore(
+      settings.scrollbarStyle,
+      settings.printfromurlBackgroundColor || settings.generalBackgroundColor,
+    ),
+  });
+  $("body")
+    .css({
+      "--foreground-color": Util.blackOrWhite(
+        theSettings.printfromurlBackgroundColor ||
+          theSettings.generalBackgroundColor,
+      ),
+      "--background-color":
+        theSettings.printfromurlBackgroundColor ||
+        theSettings.generalBackgroundColor,
+    })
+    .append($grid);
 
   // change window size
   $(window).on("resize", () => window.api.move(browserViewPos()));
 
   window.api.new(theSettings.language, browserViewPos());
+  if (url) loadURL();
 });
-
-/**
- * change settings
- *
- * @param {Object} settings effective settings
- */
-window.api.onChangeSettings((settings) => {
-  theLanguage = settings.language;
-  theSettings = settings;
-  setupWindow(settings);
-});
-
-function setupWindow(settings) {
-  $("#zoom").attr(
-    "class",
-    `${Util.blackOrWhite(
-      settings.importfromurlBackgroundColor || settings.generalBackgroundColor,
-      "range-light",
-      "range-dark",
-    )} form-range`,
-  );
-  $("body *").css({
-    "--scrollbar-width": settings.scrollbarThin ? "thin" : "auto",
-    "--scrollbar-back": Util.scrollbarBack(
-      settings.scrollbarStyle,
-      settings.importfromurlBackgroundColor || settings.generalBackgroundColor,
-    ),
-    "--scrollbar-fore": Util.scrollbarFore(
-      settings.scrollbarStyle,
-      settings.importfromurlBackgroundColor || settings.generalBackgroundColor,
-    ),
-  });
-  $("body").css({
-    "--foreground-color": Util.blackOrWhite(
-      theSettings.importfromurlBackgroundColor ||
-        theSettings.generalBackgroundColor,
-    ),
-    "--background-color":
-      theSettings.importfromurlBackgroundColor ||
-      theSettings.generalBackgroundColor,
-  });
-}
 
 /**
  * URL has changed, change controls and wait for page to load
@@ -206,30 +184,30 @@ window.api.onChangeURL((url) => {
   }
   $("#backwards").attr(
     "title",
-    _("importFromURLWindow_back", {
+    _("printFromURLWindow_back", {
       url: theLeftURLs.length >= 2 ? theLeftURLs[theLeftURLs.length - 2] : "",
     }),
   );
   $("#forward").attr(
     "title",
-    _("importFromURLWindow_forward", {
+    _("printFromURLWindow_forward", {
       url: theRightURLs.length ? theRightURLs[0] : "",
     }),
   );
   $("#backwards").attr("disabled", theLeftURLs.length <= 1);
   $("#forward").attr("disabled", !theRightURLs.length);
-  $("#import").attr("disabled", true);
+  $("#print").attr("disabled", true);
   $("#zoom").attr("disabled", true);
   $("#zoomValue").attr("title", "");
 });
 
 /**
- * page ist ready and can be imported
+ * page ist ready and can be printed
  */
 window.api.onReadyToImport(() => {
-  $("#import").attr("disabled", false);
+  $("#print").attr("disabled", false);
   $("#zoom").attr("disabled", false);
-  $("#zoomValue").attr("title", _("importFromURLWindow_zoom100"));
+  $("#zoomValue").attr("title", _("printFromURLWindow_zoom100"));
   $("#stop").attr("disabled", true);
   $("#reload").attr("disabled", false);
 });

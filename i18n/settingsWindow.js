@@ -341,10 +341,11 @@ const translationSettingsWindow = {
       // settingTabs_scheme
       "settingsWindow_schemeRelation": "Objektbeziehungen",
       "settingsWindow_relationSortAlpha": "Objekte alphabetisch sortieren",
-      "settingsWindow_schemeEditor": "Editor",
-      "settingsWindow_schemeEditorHeight": "Standardhöhe in Pixel",
+      "settingsWindow_schemeHeight": "Standardhöhen von Elementen",
+      "settingsWindow_schemeEditorHeight": "Editor",
+      "settingsWindow_schemeWebpageHeight": "Webseite",
+      "settingsWindow_schemeMapHeight": "Landkarte",
       "settingsWindow_schemeMap": "Landkarte",
-      "settingsWindow_schemeMapHeight": "Standardhöhe in Pixel",
       "settingsWindow_schemeMapMarkerColor":
         "Standardfarbe der Ortsmarkierungen",
       "settingsWindow_schemeMapMarkerConfirmDelete":
@@ -744,10 +745,11 @@ const translationSettingsWindow = {
       // settingTabs_scheme
       "settingsWindow_schemeRelation": "Object relations",
       "settingsWindow_relationSortAlpha": "order objects alphabetically",
-      "settingsWindow_schemeEditor": "Editor",
-      "settingsWindow_schemeEditorHeight": "Standard Height in Pixels",
+      "settingsWindow_schemeHeight": "Standard Height of Elements",
+      "settingsWindow_schemeEditorHeight": "Editor",
+      "settingsWindow_schemeWebpageHeight": "Webpage",
+      "settingsWindow_schemeMapHeight": "Map",
       "settingsWindow_schemeMap": "Map",
-      "settingsWindow_schemeMapHeight": "Standard Height in Pixels",
       "settingsWindow_schemeMapMarkerColor": "Standard Color of Locations",
       "settingsWindow_schemeMapMarkerConfirmDelete":
         "Confirm deletion of Locations",

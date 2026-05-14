@@ -1139,7 +1139,7 @@ class Settings {
         },
         {
           type: "separator",
-          name: "settingsWindow_schemeEditor",
+          name: "settingsWindow_schemeHeight",
         },
         {
           type: "range",
@@ -1152,8 +1152,14 @@ class Settings {
           default: 300,
         },
         {
-          type: "separator",
-          name: "settingsWindow_schemeMap",
+          type: "range",
+          name: "schemeWebpageHeight",
+          min: 100,
+          max: 1000,
+          step: 10,
+          unit: "px",
+          unitI18n: "units_pixel",
+          default: 300,
         },
         {
           type: "range",
@@ -1164,6 +1170,10 @@ class Settings {
           unit: "px",
           unitI18n: "units_pixel",
           default: 500,
+        },
+        {
+          type: "separator",
+          name: "settingsWindow_schemeMap",
         },
         {
           type: "color",

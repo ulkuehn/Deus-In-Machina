@@ -13,7 +13,7 @@ const translationWindowTitles = {
     windowTitles_exportWindow: "Export",
     windowTitles_formatsWindow: "Absatzformate",
     windowTitles_imageWindow: "Bildeigenschaften",
-    windowTitles_importFromURLWindow: `Textimport von Webseite%{title}`,
+    windowTitles_importFromURLWindow: `Import von Webseite%{title}`,
     windowTitles_importWindow: `Import aus Projekt "%{path}"`,
     windowTitles_objectSearchWindow: "Objekte suchen",
     windowTitles_objectWindow: `Objekteigenschaften "%{name}"`,

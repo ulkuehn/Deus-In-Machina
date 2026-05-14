@@ -1942,3 +1942,13 @@ ipcRenderer.on(
 ipcRenderer.on("objectWindow_saveImage", (event, args) => {
   theScheme.setImage(args);
 });
+
+/**
+ * changes from a browser window
+ *
+ * @param {Object[]} args image properties
+ */
+ipcRenderer.on("rendererProcess_printFromBrowser", (event, [schemeID, itemID, pdfData, title, url]) => {
+  console.log("Received print data from browser window", { schemeID, itemID, pdfData, title, url });
+  theScheme.updateWebpage(schemeID, itemID, pdfData, title, url);
+});

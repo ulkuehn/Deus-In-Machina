@@ -22,6 +22,7 @@ const translationSchemeTypes = {
     schemeTypes_dateRange: "Kalenderbereich",
     schemeTypes_map: "Landkarte",
     schemeTypes_file: "Datei",
+    schemeTypes_webpage: "Webseite",
   },
   // English
   en: {
@@ -39,6 +40,7 @@ const translationSchemeTypes = {
     schemeTypes_dateRange: "Calender range",
     schemeTypes_map: "Map",
     schemeTypes_file: "File",
+    schemeTypes_webpage: "Webpage",
   },
 };
 
