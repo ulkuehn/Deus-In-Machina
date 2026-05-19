@@ -54,6 +54,7 @@ let theStandardFormat;
  * @param {Object} formats all existing paragraph formats
  * @param {String[]} fonts list of font names
  * @param {Object} files mapping of file ids to file properties
+ * @param {String} tmpDir path to temporary directory for file handling
  */
 ipcRenderer.on(
   "objectWindow_init",
@@ -71,6 +72,7 @@ ipcRenderer.on(
       formats,
       fonts,
       files,
+      tmpDir,
     ],
   ) => {
     ipcRenderer.invoke("mainProcess_loggingVerbose", [
@@ -86,10 +88,12 @@ ipcRenderer.on(
       { formats },
       { fonts },
       { files },
+      { tmpDir },
     ]);
     theSettings = settings;
     theLanguage = settings.language;
     theFiles = files;
+    theTmpDir = tmpDir;
     theStandardFormat = formats[UUID0];
     theFonts = new Fonts(fonts);
     theFonts.loadStandardFonts("..");
@@ -209,9 +213,9 @@ ipcRenderer.on(
         `.ql-editor *::selection { color:${Util.blackOrWhite(
           settings.selectionColor,
         )}; background:${settings.selectionColor} }\n` +
-        `.ql-editor img::selection { color:${Util.blackOrWhite(
-          settings.selectionColor,
-        )}; background:${settings.selectionColor}80 }`,
+          `.ql-editor img::selection { color:${Util.blackOrWhite(
+            settings.selectionColor,
+          )}; background:${settings.selectionColor}80 }`,
       ),
     );
     $("body *").css({
@@ -265,12 +269,12 @@ ipcRenderer.on(
               quoteList.push([
                 pre + Util.escapeHTML(text.name) + post,
                 pre +
-                c.parts
-                  .map((part) =>
-                    part.html ? part.content : Util.escapeHTML(part.content),
-                  )
-                  .join("") +
-                post,
+                  c.parts
+                    .map((part) =>
+                      part.html ? part.content : Util.escapeHTML(part.content),
+                    )
+                    .join("") +
+                  post,
                 index,
                 c.pos,
               ]);
@@ -384,6 +388,7 @@ ipcRenderer.on(
       fonts,
       formats,
       files,
+      theTmpDir,
     );
 
     let buttonHTML = `<div style="display:flex; justify-content:flex-end"><div><button type="button" class="btn btn-primary" onclick="saveObject();closeWindow()">${_(
@@ -487,8 +492,9 @@ function infoTab(path) {
   );
   let html = "";
   for (let [mod, tags] of Object.entries(TreeDecoration.modTags)) {
-    html += `<span style="margin-right:20px;"><label><input id="${mod}" class="form-check-input" type="checkbox"${theStyledObject.decoration[mod] ? " checked" : ""
-      }> ${tags[0]}${_(mod)}${tags[1]}</label></span>`;
+    html += `<span style="margin-right:20px;"><label><input id="${mod}" class="form-check-input" type="checkbox"${
+      theStyledObject.decoration[mod] ? " checked" : ""
+    }> ${tags[0]}${_(mod)}${tags[1]}</label></span>`;
   }
   $grid.append(
     $("<div>")
@@ -518,7 +524,8 @@ function infoTab(path) {
         style: `grid-column:3/span 1; place-self:center start; margin-bottom:-${rowGap};`,
       })
       .html(
-        `<div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="iconSwitch" onchange="showIcons();" ${theStyledObject.getDecorationValue("icon") ? "checked" : ""
+        `<div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="iconSwitch" onchange="showIcons();" ${
+          theStyledObject.getDecorationValue("icon") ? "checked" : ""
         }></div>`,
       ),
   );
@@ -526,16 +533,18 @@ function infoTab(path) {
     "decoration_iconOverlay",
   )}</span> <select id="iconStack" class="form-select form-select-sm" style="display:unset; width:unset">`;
   TreeDecoration.stackIcons.forEach((stack) => {
-    html += `<option value="${stack}"${theStyledObject.getDecorationValue("stack") == stack ? " selected" : ""
-      }>${_(stack)}</option>`;
+    html += `<option value="${stack}"${
+      theStyledObject.getDecorationValue("stack") == stack ? " selected" : ""
+    }>${_(stack)}</option>`;
   });
   html += "</select>";
   $grid.append(
     $("<div>")
       .attr({
         id: "iconSpecs",
-        style: `grid-column:4/span 1; place-self:center end; margin-bottom:-${rowGap}; visibility:${theStyledObject.getDecorationValue("icon") ? "visible" : "hidden"
-          }`,
+        style: `grid-column:4/span 1; place-self:center end; margin-bottom:-${rowGap}; visibility:${
+          theStyledObject.getDecorationValue("icon") ? "visible" : "hidden"
+        }`,
       })
       .html(
         `${_(
@@ -543,16 +552,17 @@ function infoTab(path) {
         )} <input class="colorPicker" id="iconColor" value="${theStyledObject.getDecorationValue(
           "iconColor",
         )}">` +
-        html +
-        `<span style="margin-left:30px">${_(
-          "decoration_overlayColor",
-        )}</span> <input class="colorPicker" id="stackColor" value="${theStyledObject.getDecorationValue(
-          "stackColor",
-        )}">`,
+          html +
+          `<span style="margin-left:30px">${_(
+            "decoration_overlayColor",
+          )}</span> <input class="colorPicker" id="stackColor" value="${theStyledObject.getDecorationValue(
+            "stackColor",
+          )}">`,
       ),
   );
-  html = `<div id="icons" style="margin-top:10px; max-height:200px; overflow-y:auto; border:1px dotted; padding:10px; display:${theStyledObject.getDecorationValue("icon") ? "block" : "none"
-    }">`;
+  html = `<div id="icons" style="margin-top:10px; max-height:200px; overflow-y:auto; border:1px dotted; padding:10px; display:${
+    theStyledObject.getDecorationValue("icon") ? "block" : "none"
+  }">`;
   TreeDecoration.treeItemIcons.forEach((icon) => {
     if (!icon) {
       html += "<br>";
@@ -639,11 +649,11 @@ function infoTab(path) {
       })
       .html(
         theStyledObject.created.toLocalString(theSettings.dateTimeFormatLong) +
-        " (" +
-        _("time_timePassed", {
-          time: theStyledObject.created.timeToNow(),
-        }) +
-        ")",
+          " (" +
+          _("time_timePassed", {
+            time: theStyledObject.created.timeToNow(),
+          }) +
+          ")",
       ),
   );
   // changed
@@ -669,11 +679,11 @@ function infoTab(path) {
       })
       .html(
         theStyledObject.changed.toLocalString(theSettings.dateTimeFormatLong) +
-        " (" +
-        _("time_timePassed", {
-          time: theStyledObject.changed.timeToNow(),
-        }) +
-        ")",
+          " (" +
+          _("time_timePassed", {
+            time: theStyledObject.changed.timeToNow(),
+          }) +
+          ")",
       ),
   );
 
@@ -876,11 +886,13 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
                 .html(
                   `<input type="range" class="${Util.blackOrWhite(
                     theSettings.objectBackgroundColor ||
-                    theSettings.generalBackgroundColor,
+                      theSettings.generalBackgroundColor,
                     "range-light",
                     "range-dark",
-                  )} form-range" min="${ctrl.min}" max="${ctrl.max}" step="${ctrl.step
-                  }" id="${ctrl.name}Field" oninput="restyleSample(); $('#${ctrl.name
+                  )} form-range" min="${ctrl.min}" max="${ctrl.max}" step="${
+                    ctrl.step
+                  }" id="${ctrl.name}Field" oninput="restyleSample(); $('#${
+                    ctrl.name
                   }Field_R').html(this.value+'${_(ctrl.unitI18n)}')">`,
                 ),
             );
@@ -942,7 +954,9 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
             .attr({
               style: "grid-column:2/span 1; place-self:center start;",
             })
-            .html(`<label for="${control.name}Switch">${_(control.name)}</label>`),
+            .html(
+              `<label for="${control.name}Switch">${_(control.name)}</label>`,
+            ),
         );
         html = `<select class="form-select form-select-sm" id="${control.name}Field" onchange="restyleSample();">`;
         control.values.forEach((value) => {
@@ -973,15 +987,19 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
             .attr({
               style: "grid-column:2/span 1; place-self:center start;",
             })
-            .html(`<label for="${control.name}Switch">${_(control.name)}</label>`),
+            .html(
+              `<label for="${control.name}Switch">${_(control.name)}</label>`,
+            ),
         );
-        html = `<select class="form-select form-select-sm" id="${control.name
-          }Field" onchange="restyleSample();"><optgroup label="${_(
-            "Fonts_web",
-          )}">`;
+        html = `<select class="form-select form-select-sm" id="${
+          control.name
+        }Field" onchange="restyleSample();"><optgroup label="${_(
+          "Fonts_web",
+        )}">`;
         for (let family of Fonts.standardFamilies) {
-          html += `<option style="font-size:16px;font-family:'${family.class
-            }'" value="'${family.class}'">${_(`Fonts_${family.class}`)}</option>`;
+          html += `<option style="font-size:16px;font-family:'${
+            family.class
+          }'" value="'${family.class}'">${_(`Fonts_${family.class}`)}</option>`;
         }
         html += `</optgroup><optgroup label="${_("Fonts_system")}">`;
         fonts.forEach((font) => {
@@ -1013,7 +1031,9 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
             .attr({
               style: "grid-column:2/span 1; place-self:center start;",
             })
-            .html(`<label for="${control.name}Switch">${_(control.name)}</label>`),
+            .html(
+              `<label for="${control.name}Switch">${_(control.name)}</label>`,
+            ),
         );
         $grid.append(
           $("<div>")
@@ -1034,8 +1054,8 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
             })
             .html(
               '<div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="' +
-              control.name +
-              'Switch" onclick="restyleSample();"></div>',
+                control.name +
+                'Switch" onclick="restyleSample();"></div>',
             ),
         );
         $grid.append(
@@ -1043,7 +1063,9 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
             .attr({
               style: "grid-column:2/span 1; place-self:center start;",
             })
-            .html(`<label for="${control.name}Switch">${_(control.name)}</label>`),
+            .html(
+              `<label for="${control.name}Switch">${_(control.name)}</label>`,
+            ),
         );
         $grid.append(
           $("<div>")
@@ -1054,12 +1076,15 @@ function styleTab(inheritedStyle, effectiveStyle, standardFormat, fonts) {
             .html(
               `<input type="range" class="${Util.blackOrWhite(
                 theSettings.objectBackgroundColor ||
-                theSettings.generalBackgroundColor,
+                  theSettings.generalBackgroundColor,
                 "range-light",
                 "range-dark",
-              )} form-range" min="${control.min}" max="${control.max}" step="${control.step
-              }" id="${control.name
-              }Field" onchange="" oninput="restyleSample(); $('#${control.name
+              )} form-range" min="${control.min}" max="${control.max}" step="${
+                control.step
+              }" id="${
+                control.name
+              }Field" onchange="" oninput="restyleSample(); $('#${
+                control.name
               }Field_R').html(this.value+'${_(control.unitI18n)}')">`,
             ),
         );
@@ -1188,7 +1213,7 @@ function makeOverview(nonSiblings, objects, current, files, depth) {
       .attr({
         style: `display:${id == theStyledObject.id ? "grid" : "none"}; column-gap:5px; row-gap:5px; grid-template-columns:max-content max-content; padding:10px; margin:30px 0 0 ${depth * 25}px; border:${id == theStyledObject.id ? "5" : "3"}px double ${Util.blackOrWhite(
           theSettings.objectBackgroundColor ||
-          theSettings.generalBackgroundColor,
+            theSettings.generalBackgroundColor,
         )}`,
         id: `overview_${id}`,
       })
@@ -1205,6 +1230,7 @@ function makeOverview(nonSiblings, objects, current, files, depth) {
     id,
     JSON.stringify(current.serialize()),
     files,
+    theTmpDir,
   );
   // recursive walk
   Object.values(nonSiblings)[0].forEach((child) => {
@@ -1831,10 +1857,10 @@ function iconPopup(element, icon) {
   if ($("#iconStack").val() == TreeDecoration.noStack) {
     $popup.html(
       '<i class="fa-solid fa-' +
-      icon +
-      ' fa-3x" style="color:' +
-      $("#iconColor").val() +
-      '"></i>',
+        icon +
+        ' fa-3x" style="color:' +
+        $("#iconColor").val() +
+        '"></i>',
     );
   } else {
     let i1 =
@@ -1851,10 +1877,10 @@ function iconPopup(element, icon) {
       '"></i>';
     $popup.html(
       '<span class="fa-stack" style="font-size:2.4em;">' +
-      (TreeDecoration.stackProps[$("#iconStack").val()].background
-        ? i1 + i2
-        : i2 + i1) +
-      "</span> ",
+        (TreeDecoration.stackProps[$("#iconStack").val()].background
+          ? i1 + i2
+          : i2 + i1) +
+        "</span> ",
     );
   }
   $popup.offset({
@@ -1948,7 +1974,9 @@ ipcRenderer.on("objectWindow_saveImage", (event, args) => {
  *
  * @param {Object[]} args image properties
  */
-ipcRenderer.on("rendererProcess_printFromBrowser", (event, [schemeID, itemID, pdfData, title, url]) => {
-  console.log("Received print data from browser window", { schemeID, itemID, pdfData, title, url });
-  theScheme.updateWebpage(schemeID, itemID, pdfData, title, url);
-});
+ipcRenderer.on(
+  "rendererProcess_printFromBrowser",
+  (event, [schemeID, itemID, pdfData, title, url]) => {
+    theScheme.updateWebpage(schemeID, itemID, pdfData, title, url);
+  },
+);

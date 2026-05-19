@@ -208,11 +208,13 @@ class Timestamp {
       (daysPassed >= 3
         ? ""
         : _("time_timeToNowJoin") +
-        _("time_timeToNowHours", hoursPassed, {
-          hours: hoursPassed,
-        }))
+          _("time_timeToNowHours", hoursPassed, {
+            hours: hoursPassed,
+          }))
     );
   }
 }
 
-module.exports = { Timestamp };
+if (typeof module !== "undefined") {
+  module.exports = { Timestamp };
+}

@@ -62,8 +62,11 @@ const translationSchemeValues = {
     Scheme_detach: "in eigenem Fenster öffnen",
     Scheme_showObject: "verbundenes Objekt anzeigen",
     Scheme_reverseInfo: `Rückbeziehung "%{relation}"`,
-    Scheme_webpageTitle: "Titel: %{title}\nURL: %{url}\nDatum: %{date}",
-    Scheme_openurl: "Webseite%{url}öffnen",
+    Scheme_openURL: "Webseite%{url}öffnen",
+    Scheme_showURL: "Inhalt anzeigen",
+    Scheme_webTitle: "Titel",
+    Scheme_webURL: "URL",
+    Scheme_webDate: "Datum",
   },
   // English
   en: {
@@ -121,8 +124,10 @@ const translationSchemeValues = {
     Scheme_detach: "open in extra window",
     Scheme_showObject: "show connected object",
     Scheme_reverseInfo: `Reverse relation "%{relation}"`,
-    Scheme_openurl: "open Webpage%{url}",
-    Scheme_webpageTitle: "Title: %{title}\nURL: %{url}\nDate: %{date}",
+    Scheme_openURL: "open Webpage%{url}",
+    Scheme_webTitle: "Title",
+    Scheme_webURL: "URL",
+    Scheme_webDate: "Date",
   },
 };
 

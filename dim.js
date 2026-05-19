@@ -1360,6 +1360,28 @@ function setGlobalState() {
   } catch (err) {}
 }
 
+/**
+ * substitute header string for pdf printing
+ *
+ * @param {String} t
+ * @param {Object} settings
+ * @param {String} datetimeShort date / time string in short format
+ * @param {String} datetimeLong date / time string in long format
+ * @param {String} name setting name to substitute
+ * @returns
+ */
+function substituteHeader(settings, datetimeShort, datetimeLong, name) {
+  return (
+    settings[name]
+      .replace(/\$d/g, datetimeShort)
+      .replace(/\$D/g, datetimeLong) 
+      .replace(/\$t/g, '<span class="title"></span>')
+      .replace(/\$u/g, '<span class="url"></span>')
+      .replace(/\$p/g, '<span class="pageNumber"></span>')
+      .replace(/\$P/g, '<span class="totalPages"></span>')
+  );
+}
+
 /*
 IPC section
 */
@@ -2140,7 +2162,9 @@ ipcMain.handle(
       view.webContents
         .executeJavaScript("document.title", true)
         .then((title) => {
-          BrowserWindow.getFocusedWindow().setTitle(`${theProgramShortName} - ${title ? title : url}`);
+          BrowserWindow.getFocusedWindow().setTitle(
+            `${theProgramShortName} - ${title ? title : url}`,
+          );
         });
       BrowserWindow.getFocusedWindow().webContents.send(
         "importFromURLWindow_changeURL",
@@ -2290,36 +2314,60 @@ ipcMain.handle("mainProcess_browserImport", () => {
 /**
  * print web content from browser window
  */
-ipcMain.handle("mainProcess_browserPrint", (event, schemeID, itemID) => {
-  console.log("mainProcess_browserPrint", { schemeID }, { itemID });
-  theLogger.verbose("mainProcess_browserPrint");
-  if ("printfromurl" in openWindows) {
-    let view = openWindows.printfromurl.getBrowserView();
-    view.webContents
-      .printToPDF({
-        printBackground: false,
-        landscape: false,
-        pageSize: "A4",
-      })
-      .then((pdfData) => {
-        openWindows.object.webContents.send(
-          "rendererProcess_printFromBrowser",
-          [
-            schemeID,
-            itemID,
-            pdfData,
-            view.webContents.getTitle(),
-            view.webContents.getURL(),
-          ],
-        );
-        openWindows.printfromurl.close();
-      })
-      .catch((error) => {
-        console.error("error in mainProcess_browserPrint", error);
-        openWindows.printfromurl.close();
-      });
-  }
-});
+ipcMain.handle(
+  "mainProcess_browserPrint",
+  (event, settings, schemeID, itemID, dateTimeShort, dateTimeLong) => {
+    theLogger.verbose(
+      "mainProcess_browserPrint",
+      { settings },
+      { schemeID },
+      { itemID },
+      { dateTimeShort },
+      { dateTimeLong },
+    );
+    if ("printfromurl" in openWindows) {
+      let view = openWindows.printfromurl.getBrowserView();
+      view.webContents
+        .printToPDF({
+          printBackground: settings.schemeWebpageBackground,
+          landscape: settings.schemeWebpageLandscape,
+          pageSize: settings.schemeWebpageSize,
+          margins: {
+            top: parseInt(settings.schemeWebpageMarginTop) / 10,
+            bottom: parseInt(settings.schemeWebpageMarginBottom) / 10,
+            left: parseInt(settings.schemeWebpageMarginLeft) / 10,
+            right: parseInt(settings.schemeWebpageMarginRight) / 10,
+          },
+          headerTemplate: `<div style="font-size:10px; width:100%; display:flex; align-items:center; justify-content:space-between; margin-left:${parseInt(settings.schemeWebpageMarginLeft) / 10}in; margin-right:${parseInt(settings.schemeWebpageMarginRight) / 10}in;"><div>${substituteHeader(settings, dateTimeShort, dateTimeLong, "schemeWebpageHeaderLeft")}</div><div position:absolute; left:50%; transform:translateX(-50%)>${substituteHeader(settings, dateTimeShort, dateTimeLong, "schemeWebpageHeaderCenter")}</div><div>${substituteHeader(settings, dateTimeShort, dateTimeLong, "schemeWebpageHeaderRight")}</div></div>`,
+          footerTemplate: `<div style="font-size:10px; width:100%; display:flex; align-items:center; justify-content:space-between; margin-left:${parseInt(settings.schemeWebpageMarginLeft) / 10}in; margin-right:${parseInt(settings.schemeWebpageMarginRight) / 10}in;"><div>${substituteHeader(settings, dateTimeShort, dateTimeLong, "schemeWebpageFooterLeft")}</div><div position:absolute; left:50%; transform:translateX(-50%)>${substituteHeader(settings, dateTimeShort, dateTimeLong, "schemeWebpageFooterCenter")}</div><div>${substituteHeader(settings, dateTimeShort, dateTimeLong, "schemeWebpageFooterRight")}</div></div>`,
+          displayHeaderFooter:
+            settings.schemeWebpageHeaderLeft != "" ||
+            settings.schemeWebpageHeaderCenter != "" ||
+            settings.schemeWebpageHeaderRight != "" ||
+            settings.schemeWebpageFooterLeft != "" ||
+            settings.schemeWebpageFooterCenter != "" ||
+            settings.schemeWebpageFooterRight != "",
+        })
+        .then((pdfData) => {
+          openWindows.object.webContents.send(
+            "rendererProcess_printFromBrowser",
+            [
+              schemeID,
+              itemID,
+              pdfData,
+              view.webContents.getTitle(),
+              view.webContents.getURL(),
+            ],
+          );
+          openWindows.printfromurl.close();
+        })
+        .catch((error) => {
+          console.error("error in mainProcess_browserPrint", error);
+          openWindows.printfromurl.close();
+        });
+    }
+  },
+);
 
 /**
  * close a (modal) window
@@ -2347,18 +2395,20 @@ ipcMain.handle("mainProcess_updateText", (event, args) => {
  */
 ipcMain.handle(
   "mainProcess_objectOverview",
-  (event, oID, currentObject, files) => {
+  (event, oID, currentObject, files, tmpDir) => {
     theLogger.verbose(
       "mainProcess_objectOverview",
       { oID },
       { currentObject },
       { files },
+      { tmpDir },
     );
     mainWindow.webContents.send(
       "rendererProcess_objectOverview",
       oID,
       currentObject,
       files,
+      tmpDir,
     );
   },
 );
@@ -2749,6 +2799,7 @@ ipcMain.handle("mainProcess_openFile", (event, existingFiles) => {
         file.hash == hash
       ) {
         fileID = id;
+        break;
       }
     }
     // new file
@@ -2778,12 +2829,15 @@ ipcMain.handle("mainProcess_openFile", (event, existingFiles) => {
 /**
  * load a file
  */
-ipcMain.handle("mainProcess_loadFile", (event, args) => {
-  theLogger.verbose("mainProcess_loadFile", { args });
-  mainWindow.webContents.send("rendererProcess_loadFile", [
+ipcMain.handle("mainProcess_loadFile", (event, id, ext, open) => {
+  theLogger.verbose("mainProcess_loadFile", { id, ext, open });
+  mainWindow.webContents.send(
+    "rendererProcess_loadFile",
     `${theTmpDir}${path.sep}`,
-    ...args,
-  ]);
+    id,
+    ext,
+    open,
+  );
 });
 
 /**
@@ -2802,9 +2856,50 @@ ipcMain.handle("mainProcess_readFile", (event, fileName) => {
  * @param {String} path file path
  */
 ipcMain.handle("mainProcess_readPath", (event, path) => {
-  console.log("read",path)
   theLogger.verbose("mainProcess_readPath", { path });
   return fs.readFileSync(path);
+});
+
+/**
+ * store PDF data from webpage in local file if needed or return ref to existing entry
+ */
+ipcMain.handle("mainProcess_storePDF", (event, existingFiles, pdfData) => {
+  theLogger.verbose(
+    "mainProcess_storePDF",
+    { existingFiles },
+    { existingFiles: `${existingFiles.length}Bytes` },
+  );
+  let hashSum = crypto.createHash("sha1");
+  hashSum.update(pdfData);
+  let hash = hashSum.digest("hex");
+  let size = pdfData.length;
+  let tmpPath;
+  let fileID = null;
+  for (let [id, file] of Object.entries(existingFiles)) {
+    // existing file
+    if (file.extension == ".pdf" && file.size == size && file.hash == hash) {
+      fileID = id;
+      tmpPath = `${theTmpDir}${path.sep}${fileID}.pdf`;
+      break;
+    }
+  }
+  // new webpage
+  if (!fileID) {
+    try {
+      fs.accessSync(theTmpDir, fs.F_OK);
+    } catch (err) {
+      fs.mkdirSync(theTmpDir);
+    }
+    fileID = uuid();
+    tmpPath = `${theTmpDir}${path.sep}${fileID}.pdf`;
+    fs.writeFileSync(tmpPath, pdfData);
+    fs.chmodSync(tmpPath, fs.constants.O_RDONLY);
+  }
+  return {
+    fileID: fileID,
+    fileHash: hash,
+    filePath: tmpPath,
+  };
 });
 
 /**
@@ -2830,8 +2925,8 @@ ipcMain.handle(
     }
     let tmpPath = `${theTmpDir}${path.sep}${fileID}${fileExtension}`;
     try {
-      fs.accessSync(tmpPath, fs.F_OK)
-      fs.rmSync(tmpPath)
+      fs.accessSync(tmpPath, fs.F_OK);
+      fs.rmSync(tmpPath);
     } catch (err) {}
     fs.writeFileSync(tmpPath, fileContent);
     fs.chmodSync(tmpPath, fs.constants.O_RDONLY);

@@ -1173,6 +1173,113 @@ class Settings {
         },
         {
           type: "separator",
+          name: "settingsWindow_schemeWebpage",
+        },
+        {
+          type: "check",
+          name: "schemeWebpageBackground",
+          default: false,
+        },
+        {
+          type: "select",
+          name: "schemeWebpageSize",
+          values: [
+            "A3",
+            "A4",
+            "A5",
+            "Legal",
+            "Letter",
+            "Tabloid",
+          ],
+          default: "A4",
+        },
+        {
+          type: "check",
+          name: "schemeWebpageLandscape",
+          default: false,
+        },
+        {
+          type: "select",
+          name: "schemeWebpageMarginTop",
+          values: [
+            "0_marginNone",
+            "4_marginSmall", // 0.4 inch, about 1 cm
+            "8_marginMedium", // 0.8 inch, about 2 cm
+            "16_marginLarge", // 1.6 inch, about 4 cm
+          ],
+          default: "8_marginMedium",
+        },
+        {
+          type: "select",
+          name: "schemeWebpageMarginBottom",
+          values: [
+            "0_marginNone",
+            "4_marginSmall",
+            "8_marginMedium",
+            "16_marginLarge",
+          ],
+          default: "8_marginMedium",
+        },
+        {
+          type: "select",
+          name: "schemeWebpageMarginLeft",
+          values: [
+            "0_marginNone",
+            "4_marginSmall",
+            "8_marginMedium",
+            "16_marginLarge",
+          ],
+          default: "4_marginSmall",
+        },
+        {
+          type: "select",
+          name: "schemeWebpageMarginRight",
+          values: [
+            "0_marginNone",
+            "4_marginSmall",
+            "8_marginMedium",
+            "16_marginLarge",
+          ],
+          default: "4_marginSmall",
+        },
+        {
+          type: "text",
+          i18n: true,
+          name: "schemeWebpageHeaderLeft",
+          default: "settingDefaults_schemeWebpageHeaderLeft",
+        },
+        {
+          type: "text",
+          i18n: true,
+          name: "schemeWebpageHeaderCenter",
+          default: "settingDefaults_schemeWebpageHeaderCenter",
+        },
+        {
+          type: "text",
+          i18n: true,
+          name: "schemeWebpageHeaderRight",
+          default: "settingDefaults_schemeWebpageHeaderRight",
+        },
+        {
+          type: "text",
+          i18n: true,
+          name: "schemeWebpageFooterLeft",
+          default: "settingDefaults_schemeWebpageFooterLeft",
+        },
+        {
+          type: "text",
+          i18n: true,
+          name: "schemeWebpageFooterCenter",
+          default: "settingDefaults_schemeWebpageFooterCenter",
+        },
+        {
+          type: "text",
+          i18n: true,
+          name: "schemeWebpageFooterRight",
+          default: "settingDefaults_schemeWebpageFooterRight",
+        },
+        {
+          type: "separator",
           name: "settingsWindow_schemeMap",
         },
         {

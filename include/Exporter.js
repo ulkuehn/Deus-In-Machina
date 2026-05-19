@@ -723,71 +723,148 @@ class Exporter {
               break;
             // map
             case "schemeTypes_map":
-              let r = [];
-              if (mapImages && mapImages[0]) {
-                r.push({
-                  type: "paragraph",
-                  content: [{ type: "text", content: _("Scheme_overviewMap") }],
-                });
-                r.push({
-                  type: "paragraph",
-                  content: [
-                    {
-                      type: "image",
-                      content: mapImages[0].data,
-                      width: mapImages[0].width,
-                      height: mapImages[0].height,
-                    },
-                  ],
-                });
-              }
-              for (let i = 0; i < content.marker.length; i++) {
-                r.push({
-                  type: "paragraph",
-                  content: [
-                    { type: "text", content: content.marker[i].info + ": " },
-                    {
-                      type: "text",
-                      content: _("Scheme_locationLatLong", {
-                        lat: content.marker[i].latLng.lat.toFixed(6),
-                        lng: content.marker[i].latLng.lng.toFixed(6),
-                      }),
-                    },
-                  ],
-                });
-                if (mapImages && mapImages[i + 1])
+              {
+                let r = [];
+                if (mapImages && mapImages[0]) {
+                  r.push({
+                    type: "paragraph",
+                    content: [
+                      { type: "text", content: _("Scheme_overviewMap") },
+                    ],
+                  });
                   r.push({
                     type: "paragraph",
                     content: [
                       {
                         type: "image",
-                        content: mapImages[i + 1].data,
-                        width: mapImages[i + 1].width,
-                        height: mapImages[i + 1].height,
+                        content: mapImages[0].data,
+                        width: mapImages[0].width,
+                        height: mapImages[0].height,
                       },
                     ],
                   });
+                }
+                for (let i = 0; i < content.marker.length; i++) {
+                  r.push({
+                    type: "paragraph",
+                    content: [
+                      { type: "text", content: content.marker[i].info + ": " },
+                      {
+                        type: "text",
+                        content: _("Scheme_locationLatLong", {
+                          lat: content.marker[i].latLng.lat.toFixed(6),
+                          lng: content.marker[i].latLng.lng.toFixed(6),
+                        }),
+                      },
+                    ],
+                  });
+                  if (mapImages && mapImages[i + 1])
+                    r.push({
+                      type: "paragraph",
+                      content: [
+                        {
+                          type: "image",
+                          content: mapImages[i + 1].data,
+                          width: mapImages[i + 1].width,
+                          height: mapImages[i + 1].height,
+                        },
+                      ],
+                    });
+                }
+                return r;
               }
-              return r;
               break;
             // file
             case "schemeTypes_file":
-              return {
-                type: "text",
-                content: `${_("Scheme_fileName")}: ${
-                  content && content.filePath ? content.filePath : "---"
-                }, ${_("Scheme_fileSize")}: ${
-                  content && content.id && theFiles[content.id]
-                    ? Util.formatBytes(theFiles[content.id].size)
-                    : "---"
-                }, ${_("Scheme_fileTime")}: ${
-                  content && content.fileModtime
-                    ? new Timestamp(content.fileModtime).toLocalString(
-                        theSettings.effectiveSettings().dateTimeFormatLong,
-                      )
-                    : "---"
-                }`,
-              };
+              {
+                let r = [];
+                r.push({
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      content: `${_("Scheme_fileName")}: ${
+                        content && content.filePath ? content.filePath : "---"
+                      }`,
+                    },
+                  ],
+                });
+                r.push({
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      content: `${_("Scheme_fileSize")}: ${
+                        content && content.id && theFiles[content.id]
+                          ? Util.formatBytes(theFiles[content.id].size)
+                          : "---"
+                      }`,
+                    },
+                  ],
+                });
+                r.push({
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      content: `${_("Scheme_fileTime")}: ${
+                        content && content.fileModtime
+                          ? new Timestamp(content.fileModtime).toLocalString(
+                              theSettings.effectiveSettings()
+                                .dateTimeFormatLong,
+                            )
+                          : "---"
+                      }`,
+                    },
+                  ],
+                });
+                return r;
+              }
+              break;
+            // webpage
+            case "schemeTypes_webpage":
+              {
+                let r = [];
+                r.push({
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      content: `${_("Scheme_webURL")}: ${
+                        content && content.url ? content.url : "---"
+                      }`,
+                    },
+                  ],
+                });
+                r.push({
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      content: `${_("Scheme_webTitle")}: ${
+                        content && content.title ? content.title : "---"
+                      }`,
+                    },
+                  ],
+                });
+                r.push({
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      content: `${_("Scheme_webDate")}: ${
+                        content && content.date
+                          ? new Timestamp(content.date).toLocalString(
+                              theSettings.effectiveSettings()
+                                .dateTimeFormatLong,
+                            )
+                          : "---"
+                      }`,
+                    },
+                  ],
+                });
+                return r;
+              }
               break;
           }
       },
@@ -962,7 +1039,12 @@ class Exporter {
           name: "exportObjects",
           i18n: "exportWindow_exportObjects",
           type: "select",
-          values: ["allObjects", "leafObjects", "checkedObjects", "usedObjects"],
+          values: [
+            "allObjects",
+            "leafObjects",
+            "checkedObjects",
+            "usedObjects",
+          ],
           i18nValues: [
             "exportWindow_allObjects",
             "exportWindow_leafObjects",

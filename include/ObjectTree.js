@@ -164,6 +164,7 @@ class ObjectTree {
         theFormats.formats,
         theFonts.availableFamilies,
         theFiles,
+        theTmpDir + nodePath.sep,
       ],
     ]);
   }
@@ -730,7 +731,7 @@ class ObjectTree {
    * @param {StyledObject} currentObject StyledObject being edited in objectWindow in its current (yet) unsaved state
    * @returns {Object[]} array of properties {type,name,content} html escaped and i18n'd
    */
-  propertyInformation(id, currentObject, files) {
+  propertyInformation(id, currentObject, files, tmpDir) {
     let result = new Scheme(
       theSettings.effectiveSettings(),
       id,
@@ -747,6 +748,7 @@ class ObjectTree {
       [],
       {},
       files,
+      tmpDir,
     ).directProperties(
       Object.fromEntries(
         Object.keys(this.#objects).map((o) => [o, this.#objects[o].name]),
@@ -1097,10 +1099,11 @@ class ObjectTree {
    */
   getLeafObjects() {
     return this.#orderNodesDepthFirst(
-      Object.keys(this.#objects).filter((id) => !this.#treeDiv.jstree().get_node(id).children.length)
+      Object.keys(this.#objects).filter(
+        (id) => !this.#treeDiv.jstree().get_node(id).children.length,
+      ),
     );
   }
-
 
   /**
    * open all tree branches recursively

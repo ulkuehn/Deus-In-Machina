@@ -11,6 +11,7 @@ const { translationLanguages } = require("./include/languages.js");
 const { translationWindowTitles } = require("./include/windowTitles.js");
 const { translationObjectMenu } = require("./include/objectMenu.js");
 const { translationTextMenu } = require("./include/textMenu.js");
+const { translationTime } = require("./include/time.js");
 
 const translationMainProcess = {
   // German
@@ -21,6 +22,7 @@ const translationMainProcess = {
       ...translationWindowTitles.de,
       ...translationObjectMenu.de,
       ...translationTextMenu.de,
+      ...translationTime.de,
 
       // splash
       mainProcess_version: "Version %{version} (%{scheme})",
@@ -128,6 +130,7 @@ const translationMainProcess = {
       ...translationWindowTitles.en,
       ...translationObjectMenu.en,
       ...translationTextMenu.en,
+      ...translationTime.en,
 
       // splash
       mainProcess_version: "Version %{version} (%{scheme})",

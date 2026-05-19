@@ -77,12 +77,12 @@ class Project {
         )`,
     // files
     `create table files (
-      id text primary key not null,
-      content blob not null,
-      hash text not null,
-      extension text not null,
-      size int not null
-    )`,
+            id text primary key not null,
+            content blob not null,
+            hash text not null,
+            extension text not null,
+            size int not null
+        )`,
     // collections
     `create table collections (
             id text primary key not null,
@@ -1140,7 +1140,7 @@ class Project {
         this.#reset();
         setTimeout(() => theTextTree.newText(false), 500);
       })
-      .catch(() => { })
+      .catch(() => {})
       .finally(() => {
         this.#doAutoSave = true;
       });
@@ -1164,9 +1164,9 @@ class Project {
               new Timestamp().epochSeconds,
             ]);
           })
-          .catch(() => { });
+          .catch(() => {});
       })
-      .catch(() => { })
+      .catch(() => {})
       .finally(() => {
         this.#doAutoSave = true;
       });
@@ -1190,7 +1190,7 @@ class Project {
           }
         }
       })
-      .catch(() => { })
+      .catch(() => {})
       .finally(() => {
         this.#doAutoSave = true;
       });
@@ -1204,7 +1204,7 @@ class Project {
   save(saveAs = false) {
     this.#doAutoSave = false;
     this.#saveProject(saveAs)
-      .then(() => { })
+      .then(() => {})
       .catch((path) => {
         ipcRenderer.invoke("mainProcess_errorMessage", [
           _("project_saveErrorTitle"),
@@ -1384,7 +1384,7 @@ class Project {
             }
           }
         })
-        .catch(() => { });
+        .catch(() => {});
     });
   }
 

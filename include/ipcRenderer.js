@@ -195,25 +195,26 @@ ipcRenderer.on("rendererProcess_endGuidedTour", () => {
  * @param {String} id
  * @param {String} ext
  */
-ipcRenderer.on("rendererProcess_loadFile", (event, [tmpDir, id, ext]) => {
+ipcRenderer.on("rendererProcess_loadFile", (event, tmpDir, id, ext, open) => {
   ipcRenderer.invoke("mainProcess_loggingVerbose", [
     "rendererProcess_loadFile",
     { tmpDir },
     { id },
     { ext },
+    { open },
   ]);
   let tmpPath = tmpDir + id + ext;
   fs.promises
     .access(tmpPath, fs.F_OK)
     .then(() => {
-      shell.openPath(tmpPath);
+      if (open) shell.openPath(tmpPath);
     })
     .catch((err) => {
       let content = theProject.loadFile(id);
       if (content) {
         fs.writeFileSync(tmpPath, content);
         fs.chmodSync(tmpPath, fs.constants.O_RDONLY);
-        shell.openPath(tmpPath);
+        if (open) shell.openPath(tmpPath);
       } else {
         ipcRenderer.invoke("mainProcess_loggingError", [
           "couldn't load content from db",
@@ -614,7 +615,7 @@ ipcRenderer.on("rendererProcess_importFromURL", () => {
     true,
     0,
     0,
-   "",
+    "",
     "./importFromURLWindow/importFromURLWindow.html",
     "importFromURLWindow_init",
     nodePath.join(__dirname, "../importFromURLWindow/preload.js"),
@@ -1337,12 +1338,13 @@ ipcRenderer.on("rendererProcess_openObject", (event, [id]) => {
  */
 ipcRenderer.on(
   "rendererProcess_objectOverview",
-  (event, id, currentObject, files) => {
+  (event, id, currentObject, files, tmpDir) => {
     ipcRenderer.invoke("mainProcess_loggingVerbose", [
       "rendererProcess_objectOverview",
       { id },
       { currentObject },
       { files },
+      { tmpDir },
     ]);
     ipcRenderer.invoke(
       "mainWindow_objectOverviewResult",
@@ -1351,6 +1353,7 @@ ipcRenderer.on(
         id,
         new StyledObject(...JSON.parse(currentObject)),
         files,
+        tmpDir
       ),
     );
   },

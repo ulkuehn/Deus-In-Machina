@@ -176,4 +176,6 @@ const translationTime = {
   },
 };
 
-module.exports = { translationTime };
+if (typeof module != "undefined") {
+  module.exports = { translationTime };
+}

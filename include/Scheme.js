@@ -161,6 +161,7 @@ class Scheme {
   #items; // mapping from ids to complex objects (leaflet map or quill editor)
   #settings; // effective settings
   #fonts; // used fonts
+  #tmpDir; // path to temporary directory
 
   /**
    * class constructor
@@ -174,6 +175,7 @@ class Scheme {
    * @param {String[]} fonts
    * @param {Object} formats
    * @param {Object} files
+   * @param {String} tmpDir path to temporary directory
    */
   constructor(
     settings,
@@ -184,6 +186,7 @@ class Scheme {
     fonts,
     formats,
     files,
+    tmpDir,
   ) {
     this.#settings = settings;
     this.#objectID = objectID;
@@ -194,6 +197,7 @@ class Scheme {
     this.#formats = formats;
     this.#files = files;
     this.#items = {};
+    this.#tmpDir = tmpDir;
   }
 
   // getters and setters
@@ -286,7 +290,7 @@ class Scheme {
             case "schemeTypes_file":
               content =
                 `<div style="display:grid; grid-template-columns:max-content max-content; column-gap:15px">` +
-                `<div style="grid-column:1; grid-row:1/span 3"><button class="btn btn-outline-secondary btn-sm" title="${_("Scheme_loadFile")}" onclick="ipcRenderer.invoke('mainProcess_loadFile', ['${value.id}','${this.#files[value.id].extension}'])"><i class="fa-solid fa-eye"></i></button></div>` +
+                `<div style="grid-column:1; grid-row:1/span 3"><button class="btn btn-outline-secondary btn-sm" title="${_("Scheme_loadFile")}" onclick="ipcRenderer.invoke('mainProcess_loadFile', '${value.id}','${this.#files[value.id].extension}', true)"><i class="fa-solid fa-eye"></i></button></div>` +
                 `<div style="grid-column:2; justify-self:end">${_(
                   "Scheme_fileName",
                 )}:</div>` +
@@ -300,6 +304,21 @@ class Scheme {
                 `<div style="grid-column:2; justify-self:end">${_("Scheme_fileTime")}:</div>` +
                 `<div style="grid-column:3">${new Timestamp(
                   value.fileModtime,
+                ).toLocalString(settings.dateTimeFormatLong)}</div></div>`;
+              break;
+            case "schemeTypes_webpage":
+              content =
+                `<div style="display:grid; grid-template-columns:max-content max-content; column-gap:15px">` +
+                `<div style="grid-column:1; grid-row:1/span 3"><button class="btn btn-outline-secondary btn-sm" title="${_("Scheme_showURL")}" onclick='ipcRenderer.invoke("mainProcess_loadFile","${value.id}",".pdf", true);'><i class="fa-solid fa-arrow-up-right-from-square"></i></button></div>` +
+                `<div style="grid-column:2; justify-self:end">${_(
+                  "Scheme_webURL",
+                )}:</div>` +
+                `<div style="grid-column:3">${Util.escapeHTML(value.url)}</div>` +
+                `<div style="grid-column:2; justify-self:end">${_("Scheme_webTitle")}:</div>` +
+                `<div style="grid-column:3">${Util.escapeHTML(value.title)}</div>` +
+                `<div style="grid-column:2; justify-self:end">${_("Scheme_webDate")}:</div>` +
+                `<div style="grid-column:3">${new Timestamp(
+                  value.date,
                 ).toLocalString(settings.dateTimeFormatLong)}</div></div>`;
               break;
           }
@@ -380,7 +399,6 @@ class Scheme {
           ) {
             value = this.#properties[idScheme.id][item.id];
           }
-          console.log("fillProperties", item.type, value);
 
           // user info
           let info = item.name ? Util.escapeHTML(item.name) : _(item.type);
@@ -445,11 +463,8 @@ class Scheme {
                   this.#properties[idScheme.id][item.id] = {
                     url: "",
                     title: "",
-                    date: "", //new Date().getTime(),
-                    content: "",
-                    // "JVBERi0xLjEKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwgL1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDEgPj4KZW5kb2JqCjMgMCBvYmoKPDwgL1R5cGUgL1BhZ2UgL1BhcmVudCAyIDAgUiAvTWVkaWFCb3ggWzAgMCAzMDAgMTQ0XSA+PgplbmRvYmoKeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNTMgMDAwMDAgbiAKMDAwMDAwMDEwMiAwMDAwMCBuIAp0cmFpbGVyCjw8IC9TaXplIDQgL1Jvb3QgMSAwIFIgPj4Kc3RhcnR4cmVmCjE0NwolJUVPRgo=", // minimal PDF as base64 string
-                    // "C:/Users/qqq/Downloads/x.pdf",
-                    // "JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PC9UeXBlIC9DYXRhbG9nL1BhZ2VzIDIgMCBSCj4+CmVuZG9iagoKMiAwIG9iago8PC9UeXBlIC9QYWdlcy9LaWRzIFszIDAgUiA0IDAgUl0KL0NvdW50IDIKPj4KZW5kb2JqCgozIDAgb2JqCjw8L1R5cGUgL1BhZ2UvUGFyZW50IDIgMCBSCi9NZWRpYUJveCBbMCAwIDYxMiA3OTJdCi9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwvVHlwZSAvUGFnZS9QYXJlbnQgMiAwIFIKL01lZGlhQm94IFswIDAgNjEyIDc5Ml0KL0NvbnRlbnRzIDYgMCBSCj4+CmVuZG9iagoKNSAwIG9iago8PC9MZW5ndGggNzQKPj4Kc3RyZWFtCkJUIAovRm9udCA8PC9GMSA3IDAgUj4+Ci9GMSAxMiBUZgovMTAwIDcwMCBUZAooSGVsbG8gV29ybGQgMSkgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKNiAwIG9iago8PC9MZW5ndGggNzQKPj4Kc3RyZWFtCkJUIAovRm9udCA8PC9GMSA3IDAgUj4+Ci9GMSAxMiBUZgovMTAwIDcwMCBUZAooSGVsbG8gV29ybGQgMikgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKNyAwIG9iago8PC9UeXBlIC9Gb250L1N1YnR5cGUgL1R5cGUxL05hbWUgL0YxL0Jhc2VGb250IC9IZWx2ZXRpY2EvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZz4+CmVuZG9iagoKeHJlZgowIDgKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDExIDAwMDAwIG4gCjAwMDAwMDAwNzYgMDAwMDAgbiAKMDAwMDAwMDE1MiAwMDAwMCBuIAowMDAwMDAwMjI4IDAwMDAwIG4gCjAwMDAwMDAzMDQgMDAwMDAgbiAKMDAwMDAwMDM4MCAwMDAwMCBuIAp0cmFpbGVyCjw8L1Jvb3QgMSAwIFIKL1NpemUgOAo+PgpzdGFydHhyZWYKMzk5CiUlRU9G",
+                    date: "",
+                    path: "",
                   };
                   break;
                 case "schemeTypes_map":
@@ -557,39 +572,42 @@ class Scheme {
                     value,
                     `${height}px`,
                   );
-                  $(`#openurl_${idScheme.id}_${item.id}`).on("click", () => {
-                    ipcRenderer.invoke("mainProcess_openWindow", [
-                      "printfromurl",
-                      true,
-                      true,
-                      0,
-                      0,
-                      value.title ? value.title : value.url,
-                      "./printFromURLWindow/printFromURLWindow.html",
-                      "printFromURLWindow_init",
-                      nodePath.join(
-                        __dirname,
-                        "../printFromURLWindow/preload.js",
-                      ),
-                      [
-                        idScheme.id,
-                        item.id,
-                        Util.unescapeHTML(
-                          $(`#property_${idScheme.id}_${item.id}`).data("url"),
+                  $(`#openWebpage_${idScheme.id}_${item.id}`).on(
+                    "click",
+                    () => {
+                      ipcRenderer.invoke("mainProcess_openWindow", [
+                        "printfromurl",
+                        true,
+                        true,
+                        0,
+                        0,
+                        value.title ? value.title : value.url,
+                        "./printFromURLWindow/printFromURLWindow.html",
+                        "printFromURLWindow_init",
+                        nodePath.join(
+                          __dirname,
+                          "../printFromURLWindow/preload.js",
                         ),
-                        this.#settings,
-                      ],
-                    ]);
-                  });
-                }
-                $(`#detach_${idScheme.id}_${item.id}`).on("click", () => {
-                  console.log(
-                    "detach",
-                    $(`#property_${idScheme.id}_${item.id}`).data("content"),
+                        [
+                          idScheme.id,
+                          item.id,
+                          Util.unescapeHTML(
+                            $(`#property_${idScheme.id}_${item.id}`).data(
+                              "url",
+                            ),
+                          ),
+                          this.#settings,
+                        ],
+                      ]);
+                    },
                   );
+                }
+                $(`#showWebpage_${idScheme.id}_${item.id}`).on("click", () => {
                   ipcRenderer.invoke(
-                    "mainProcess_openPath",
-                    $(`#property_${idScheme.id}_${item.id}`).data("content"),
+                    "mainProcess_loadFile",
+                    $(`#property_${idScheme.id}_${item.id}`).data("id"),
+                    ".pdf",
+                    true,
                   );
                 });
                 break;
@@ -774,6 +792,7 @@ class Scheme {
    * @param {*} value
    */
   #fileControl($propertiesGrid, id, item, value) {
+    let active = typeof value == "object" && "id" in value && value.id;
     let $openButton = $(
       `<button class="btn btn-outline-secondary btn-sm" title="${_(
         "Scheme_openFile",
@@ -783,7 +802,7 @@ class Scheme {
 
     let $loadButton = $(
       `<button class="btn btn-outline-secondary btn-sm" id="filebutton_${id}_${item}" ${
-        typeof value == "object" && "id" in value && value.id ? "" : "disabled"
+        active ? "" : "disabled"
       } title="${_("Scheme_loadFile")}" data-time="${
         value.fileModtime || ""
       }" data-id="${value.id ?? ""}" data-path="${
@@ -889,10 +908,12 @@ class Scheme {
    * @param {String} item
    */
   #loadSchemeFile(id, item) {
-    ipcRenderer.invoke("mainProcess_loadFile", [
+    ipcRenderer.invoke(
+      "mainProcess_loadFile",
       $(`#filebutton_${id}_${item}`).attr("data-id"),
       this.#files[$(`#filebutton_${id}_${item}`).attr("data-id")].extension,
-    ]);
+      true,
+    );
   }
 
   /**
@@ -1209,40 +1230,68 @@ class Scheme {
    * @param {Number} height
    */
   #webpageControl($propertiesGrid, id, item, value, height) {
+    let active = typeof value == "object" && "id" in value && value.id;
+    if (active) {
+      ipcRenderer.invoke("mainProcess_loadFile", value.id, ".pdf", false);
+      value.path = this.#tmpDir + value.id + ".pdf";
+    }
+
     let $div = $("<div>").attr({
-      "style": "grid-column:3/span 2;",
-      "id": `property_${id}_${item}`,
-      "data-type": "webpage",
-      "data-content": value.content,
-      "data-title": Util.escapeHTML(value.title),
-      "data-url": Util.escapeHTML(value.url),
-      "data-date": value.date,
-      "title": _("Scheme_webpageTitle", {
-        title: Util.escapeHTML(value.title),
-        url: Util.escapeHTML(value.url),
-        date: new Timestamp(value.date).toLocalString(
-          this.#settings.dateTimeFormatLong,
-        ),
-      }),
+      style:
+        "display:grid; column-gap:10px; grid-template-columns:max-content max-content max-content",
     });
-    $propertiesGrid.append($div);
+    $div.append(
+      $(`<div style="grid-column:1; grid-row:1/span 3"></div>`).html(
+        `<button class="btn btn-sm simple-btn btn-outline-secondary" style="cursor:pointer" title='${_("Scheme_openURL", { url: value.url ? ' "' + Util.escapeHTML(value.url) + '" ' : " " })}' id="openWebpage_${id}_${item}"><i class="fa-solid fa-globe"></i></button>`,
+      ),
+      $(`<div style="grid-column:2; grid-row:1/span 3">`).append(
+        `<button class="btn btn-sm simple-btn btn-outline-secondary" ${active ? "" : "disabled"} style="cursor:pointer" title="${_("Scheme_showURL")}" id="showWebpage_${id}_${item}"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>`,
+      ),
+      `<div style="grid-column:3; justify-self:end">${_(
+        "Scheme_webURL",
+      )}:</div><div style="grid-column:4;" id="webURL_${id}_${item}">${
+        value && value.url ? Util.escapeHTML(value.url) : "---"
+      }</div>`,
+      `<div style="grid-column:3; justify-self:end">${_(
+        "Scheme_webTitle",
+      )}:</div><div style="grid-column:4" id="webTitle_${id}_${item}">${
+        value && value.title ? Util.escapeHTML(value.title) : "---"
+      }</div>`,
+      `<div style="grid-column:3; justify-self:end">${_(
+        "Scheme_webDate",
+      )}:</div><div style="grid-column:4" id="webDate_${id}_${item}">${
+        value && value.date
+          ? new Timestamp(value.date).toLocalString(
+              theSettings.dateTimeFormatLong,
+            )
+          : "---"
+      }</div>`,
+    );
 
     $div.append(
-      $("<div>")
-        .attr({ style: "display:flex; justify-content: space-between" })
-        .html(
-          `<button class="btn btn-sm simple-btn btn-outline-secondary" style="cursor:pointer" title='${_("Scheme_openurl", { url: value.url ? ' "' + Util.escapeHTML(value.url) + '" ' : " " })}' id="openurl_${id}_${item}"><i class="fa-solid fa-globe"></i></button><button class="btn btn-sm simple-btn btn-outline-secondary" style="cursor:pointer" title="${_("Scheme_detach")}" id="detach_${id}_${item}"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>`,
-        ),
-    );
-    $div.append(
       $("<embed>").attr({
-        style: `grid-column:3/span 2; height:${height}; width:100%; display:${value.content ? "block" : "none"}`,
-        src: value.content
-          ? `file:///${value.content}?t=${Date.now()}#zoom=page-width&toolbar=0&#navpanes=0`
+        style: `grid-column:1/span 4; height:${height}; width:100%; display:${active ? "block" : "none"}`,
+        src: active
+          ? `file:///${value.path}#zoom=page-width&toolbar=0&#navpanes=0`
           : "",
         type: "application/pdf",
-        id: `pdf_${id}_${item}`,
+        id: `embedWebpage_${id}_${item}`,
       }),
+    );
+
+    $propertiesGrid.append(
+      $("<div>")
+        .attr({
+          "style": "grid-column:3/span 2;",
+          "id": `property_${id}_${item}`,
+          "data-type": "webpage",
+          "data-id": value.id,
+          "data-path": Util.escapeHTML(value.path),
+          "data-title": Util.escapeHTML(value.title),
+          "data-url": Util.escapeHTML(value.url),
+          "data-date": value.date,
+        })
+        .append($div),
     );
   }
 
@@ -1364,36 +1413,40 @@ class Scheme {
    * @param {String} item
    */
   updateWebpage(id, item, pdfData, title, url) {
-    console.log("update webpage", id, item, pdfData, title, url);
-    let date = new Date().getTime();
-    $(`#property_${id}_${item}`).data("title", Util.escapeHTML(title));
-    $(`#property_${id}_${item}`).data("url", Util.escapeHTML(url));
-    $(`#property_${id}_${item}`).data("date", date);
-    $(`#property_${id}_${item}`).attr(
-      "title",
-      _("Scheme_webpageTitle", {
-        title: Util.escapeHTML(title),
-        url: Util.escapeHTML(url),
-        date: new Timestamp(date).toLocalString(
-          this.#settings.dateTimeFormatLong,
-        ),
-      }),
-    );
-    $(`#openurl_${id}_${item}`).attr(
-      "title",
-      _("Scheme_openurl", { url: ' "' + Util.escapeHTML(url) + '" ' }),
-    );
     ipcRenderer
-      .invoke("mainProcess_storeFile", [`${id}_${item}`, ".pdf", pdfData])
-      .then((path) => {
-        $(`#pdf_${id}_${item}`).attr(
+      .invoke("mainProcess_storePDF", this.#files, pdfData)
+      .then((result) => {
+        if (!(result.fileID in this.#files)) {
+          // file identifying values (extension, size, hash) are stored in the global table
+          this.#files[result.fileID] = {
+            extension: ".pdf",
+            size: pdfData.length,
+            hash: result.fileHash,
+          };
+        }
+        let date = new Date().getTime();
+        $(`#property_${id}_${item}`).data("id", Util.escapeHTML(result.fileID));
+        $(`#property_${id}_${item}`).data("id", result.fileID);
+        $(`#property_${id}_${item}`).data("path", result.filePath);
+        $(`#property_${id}_${item}`).data("title", Util.escapeHTML(title));
+        $(`#property_${id}_${item}`).data("url", Util.escapeHTML(url));
+        $(`#property_${id}_${item}`).data("date", date);
+        $(`#webURL_${id}_${item}`).html(Util.escapeHTML(url));
+        $(`#webTitle_${id}_${item}`).html(Util.escapeHTML(title));
+        ($(`#webDate_${id}_${item}`).html(
+          new Timestamp(date).toLocalString(this.#settings.dateTimeFormatLong),
+        ),
+          $(`#openWebpage_${id}_${item}`).attr(
+            "title",
+            _("Scheme_openURL", { url: ' "' + Util.escapeHTML(url) + '" ' }),
+          ));
+        $(`#embedWebpage_${id}_${item}`).attr(
           "src",
-          // `data:application/pdf;base64,${Buffer.from(pdfData).toString("base64")}
-          `file:///${path}?t=${Date.now()}#zoom=page-width&toolbar=0&#navpanes=0`,
+          `file:///${result.filePath}#zoom=page-width&toolbar=0&#navpanes=0`,
         );
-        $(`#property_${id}_${item}`).data("content", path);
+        $(`#embedWebpage_${id}_${item}`).show();
+        $(`#showWebpage_${id}_${item}`).prop("disabled", false);
       });
-    $(`#pdf_${id}_${item}`).show();
   }
 
   /**
@@ -1411,23 +1464,19 @@ class Scheme {
       if (!(id in that.#properties)) {
         that.#properties[id] = {};
       }
-      console.log("property", id, no, $(this).data("type"));
       switch ($(this).data("type")) {
         case "webpage":
-          ipcRenderer;
-          that.#properties[id][no] = {
-            url: Util.unescapeHTML($(this).data("url")),
-            title: Util.unescapeHTML($(this).data("title")),
-            date: $(this).data("date"),
-            content: $(this).data("content"),
-          };
-          console.log("save webpage", that.#properties[id][no]);
+          if (!$(`#showWebpage_${id}_${no}`).prop("disabled")) {
+            that.#properties[id][no] = {
+              id: Util.unescapeHTML($(this).data("id")),
+              url: Util.unescapeHTML($(this).data("url")),
+              title: Util.unescapeHTML($(this).data("title")),
+              date: $(this).data("date"),
+              path: Util.unescapeHTML($(this).data("path")),
+            };
+          }
           break;
         case "file":
-          console.log(
-            "file button enabled",
-            !$(`#filebutton_${id}_${no}`).prop("disabled"),
-          );
           if (!$(`#filebutton_${id}_${no}`).prop("disabled")) {
             that.#properties[id][no] = {
               id: $(`#filebutton_${id}_${no}`).attr("data-id"),
@@ -1436,7 +1485,6 @@ class Scheme {
               ),
               fileModtime: $(`#filebutton_${id}_${no}`).attr("data-time"),
             };
-            console.log("save file", that.#properties[id][no]);
           }
           break;
         case "date":

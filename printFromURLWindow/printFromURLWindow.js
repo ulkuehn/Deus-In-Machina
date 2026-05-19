@@ -127,7 +127,7 @@ window.api.onInit(([schemeID, itemID, url, settings]) => {
         style: "grid-column:8/span 1;",
       })
       .html(
-        `<button type="button" class="btn btn-primary" onclick="window.api.print('${schemeID}', '${itemID}')" id="print" disabled>${_(
+        `<button type="button" class="btn btn-primary" id="print" disabled>${_(
           "printFromURLWindow_save",
         )}</button>`,
       ),
@@ -163,6 +163,17 @@ window.api.onInit(([schemeID, itemID, url, settings]) => {
         theSettings.generalBackgroundColor,
     })
     .append($grid);
+
+  $("#print").on("click", () => {
+    let date = new Date();
+    window.api.print(
+      theSettings,
+      schemeID,
+      itemID,
+      new Timestamp(date).toLocalString(theSettings.dateTimeFormatShort),
+      new Timestamp(date).toLocalString(theSettings.dateTimeFormatLong),
+    );
+  });
 
   // change window size
   $(window).on("resize", () => window.api.move(browserViewPos()));

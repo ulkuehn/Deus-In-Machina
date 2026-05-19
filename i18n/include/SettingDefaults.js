@@ -20,6 +20,12 @@ const translationSettingDefaults = {
     settingDefaults_dateTimeFormatShort: "[ D ].[ M ].[ YY ], [ h ]:[ mm ]",
     settingDefaults_dateTimeFormatLong:
       "[ DDDD ], [ DD ].[ MM ].[ YYYY ], [ hh ]:[ mm ]:[ ss ]",
+    settingDefaults_schemeWebpageHeaderLeft: "$t",
+    settingDefaults_schemeWebpageHeaderCenter: "",
+    settingDefaults_schemeWebpageHeaderRight: "$u",
+    settingDefaults_schemeWebpageFooterLeft: "$D",
+    settingDefaults_schemeWebpageFooterCenter: "",
+    settingDefaults_schemeWebpageFooterRight: "Seite $p von $P",
   },
   // English
   en: {
@@ -35,6 +41,12 @@ const translationSettingDefaults = {
       "[ M ]/[ D ]/[ YY ], [ h12 ]:[ mm ][ ap ]",
     settingDefaults_dateTimeFormatLong:
       "[ DDDD ], [ MM ]/[ DD ]/[ YYYY ], [ h12 ]:[ mm ]:[ ss ][ ap ]",
+    settingDefaults_schemeWebpageHeaderLeft: "$t",
+    settingDefaults_schemeWebpageHeaderCenter: "",
+    settingDefaults_schemeWebpageHeaderRight: "$u",
+    settingDefaults_schemeWebpageFooterLeft: "$D",
+    settingDefaults_schemeWebpageFooterCenter: "",
+    settingDefaults_schemeWebpageFooterRight: "Page $p of $P",
   },
 };
 

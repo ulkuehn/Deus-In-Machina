@@ -9,6 +9,8 @@ const translationPrintFromURLWindow = {
   // German
   de: i18n.create({
     values: {
+      ...translationGeneral.de,
+      ...translationTime.de,
       printFromURLWindow_back: `eine Seite zurück (%{url})`,
       printFromURLWindow_forward: `eine Seite vor (%{url}`,
       printFromURLWindow_zoom: "Zoom",
@@ -21,6 +23,8 @@ const translationPrintFromURLWindow = {
   // English
   en: i18n.create({
     values: {
+      ...translationGeneral.en,
+      ...translationTime.en,
       printFromURLWindow_back: "page back (%{url})",
       printFromURLWindow_forward: "page forward (%{url})",
       printFromURLWindow_zoom: "Zoom",

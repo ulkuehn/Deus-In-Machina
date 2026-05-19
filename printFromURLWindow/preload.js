@@ -26,13 +26,22 @@ contextBridge.exposeInMainWorld("api", {
   onReadyToImport: (callback) => {
     ipcRenderer.on("importFromURLWindow_readyToImport", () => callback());
   },
-  new: (language, vals) => ipcRenderer.invoke("mainProcess_newBrowser", language, vals),
+  new: (language, vals) =>
+    ipcRenderer.invoke("mainProcess_newBrowser", language, vals),
   move: (vals) => ipcRenderer.invoke("mainProcess_moveBrowser", true, vals),
   zoom: (zoom) => ipcRenderer.invoke("mainProcess_browserZoom", true, zoom),
   open: (url) => {
     ipcRenderer.invoke("mainProcess_browserOpenURL", true, url);
   },
   stop: () => ipcRenderer.invoke("mainProcess_browserStop", true),
-  print: (schemeID, itemID) =>
-    ipcRenderer.invoke("mainProcess_browserPrint", schemeID, itemID),
+  print: (settings, schemeID, itemID, dateTimeShort, dateTimeLong) => {
+    ipcRenderer.invoke(
+      "mainProcess_browserPrint",
+      settings,
+      schemeID,
+      itemID,
+      dateTimeShort,
+      dateTimeLong
+    );
+  },
 });
