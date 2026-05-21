@@ -75,7 +75,7 @@ class Project {
             properties text not null,
             texts text not null
         )`,
-    // files
+    // files (also covering pdf prints of webpages)
     `create table files (
             id text primary key not null,
             content blob not null,
@@ -1373,6 +1373,7 @@ class Project {
               // optionally encrypt the file using the current password
               db.pragma(`key="${password}"`);
             }
+
             this.#database = db;
             this.#filePath = path;
             this.#cryptoPassword = password;
@@ -1963,6 +1964,7 @@ class Project {
                 resolve(true);
               });
             } catch (err) {
+              console.error("error while saving data", err);
               reject();
             }
           } else {

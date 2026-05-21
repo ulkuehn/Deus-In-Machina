@@ -36,11 +36,13 @@ const uuid = () => {
 };
 const UUID0 = "_" + NIL;
 const { htmlToText } = require("html-to-text");
-const { PDFDocument } = require("pdf-lib");
 const { Logger } = require("./include/Logger.js");
 const { Timestamp } = require("./include/Timestamp.js");
 const { Languages } = require("./include/Languages.js");
 const log = require("electron-log/main");
+
+// size limit in MB for file blobs in sqlite (and PDF prints of webpages)
+const maxBlobSize = 500;
 
 // the program's name
 const theProgramShortName = "DIM";
@@ -1371,15 +1373,13 @@ function setGlobalState() {
  * @returns
  */
 function substituteHeader(settings, datetimeShort, datetimeLong, name) {
-  return (
-    settings[name]
-      .replace(/\$d/g, datetimeShort)
-      .replace(/\$D/g, datetimeLong) 
-      .replace(/\$t/g, '<span class="title"></span>')
-      .replace(/\$u/g, '<span class="url"></span>')
-      .replace(/\$p/g, '<span class="pageNumber"></span>')
-      .replace(/\$P/g, '<span class="totalPages"></span>')
-  );
+  return settings[name]
+    .replace(/\$d/g, datetimeShort)
+    .replace(/\$D/g, datetimeLong)
+    .replace(/\$t/g, '<span class="title"></span>')
+    .replace(/\$u/g, '<span class="url"></span>')
+    .replace(/\$p/g, '<span class="pageNumber"></span>')
+    .replace(/\$P/g, '<span class="totalPages"></span>');
 }
 
 /*
@@ -2349,16 +2349,26 @@ ipcMain.handle(
             settings.schemeWebpageFooterRight != "",
         })
         .then((pdfData) => {
-          openWindows.object.webContents.send(
-            "rendererProcess_printFromBrowser",
-            [
-              schemeID,
-              itemID,
-              pdfData,
-              view.webContents.getTitle(),
-              view.webContents.getURL(),
-            ],
-          );
+          if (pdfData.length > maxBlobSize * 1_000_000) {
+            dialog.showMessageBoxSync(BrowserWindow.getFocusedWindow(), {
+              type: "none",
+              title: _("rendererProcess_PDFTooLargeTitle"),
+              message: _("rendererProcess_PDFTooLargeMessage", {
+                size: maxBlobSize,
+              }),
+            });
+          } else {
+            openWindows.object.webContents.send(
+              "rendererProcess_printFromBrowser",
+              [
+                schemeID,
+                itemID,
+                pdfData,
+                view.webContents.getTitle(),
+                view.webContents.getURL(),
+              ],
+            );
+          }
           openWindows.printfromurl.close();
         })
         .catch((error) => {
@@ -2785,6 +2795,17 @@ ipcMain.handle("mainProcess_openFile", (event, existingFiles) => {
     let fileParse = path.parse(filePath);
     let fileExtension = fileParse.ext.toLowerCase();
     let stat = fs.statSync(filePath);
+    if (stat.size > maxBlobSize * 1_000_000) {
+      dialog.showMessageBoxSync(BrowserWindow.getFocusedWindow(), {
+        type: "none",
+        title: _("mainProcess_fileTooLargeTitle"),
+        message: _("mainProcess_fileTooLargeMessage", {
+          path: filePath,
+          size: maxBlobSize,
+        }),
+      });
+      return null;
+    }
     // we need to calc the crytpohash in any case -- either for comparison or for reference if no matching file in existingFiles
     let hashSum = crypto.createHash("sha1");
     hashSum.update(fs.readFileSync(filePath));
