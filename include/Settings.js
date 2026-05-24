@@ -600,7 +600,7 @@ class Settings {
           type: "select",
           name: "editorContextMenuTime",
           values: ["noTime", "compactTime", "fullTime"],
-          default: "compactTime",
+          default: "fullTime",
         },
         {
           type: "check",
@@ -811,15 +811,10 @@ class Settings {
           default: true,
         },
         {
-          type: "check",
-          name: "textTreeContextMenuBranchStats",
-          default: true,
-        },
-        {
           type: "select",
           name: "textTreeContextMenuTime",
           values: ["noTime", "compactTime", "fullTime"],
-          default: "compactTime",
+          default: "fullTime",
         },
         {
           type: "range",
@@ -1009,7 +1004,7 @@ class Settings {
           type: "select",
           name: "textCollectionTreeContextMenuTime",
           values: ["noTime", "compactTime", "fullTime"],
-          default: "compactTime",
+          default: "fullTime",
         },
       ],
     },
@@ -1080,7 +1075,7 @@ class Settings {
           type: "select",
           name: "objectTreeContextMenuTime",
           values: ["noTime", "compactTime", "fullTime"],
-          default: "compactTime",
+          default: "fullTime",
         },
         {
           type: "separator",
@@ -1183,14 +1178,7 @@ class Settings {
         {
           type: "select",
           name: "schemeWebpageSize",
-          values: [
-            "A3",
-            "A4",
-            "A5",
-            "Legal",
-            "Letter",
-            "Tabloid",
-          ],
+          values: ["A3", "A4", "A5", "Legal", "Letter", "Tabloid"],
           default: "A4",
         },
         {

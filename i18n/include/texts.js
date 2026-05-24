@@ -23,7 +23,11 @@ const translationTexts = {
       [1, 1, '"%{name1}" wirklich löschen?'],
       [2, 2, '"%{name1}" und "%{name2}" wirklich löschen?'],
       [3, 3, '"%{name1}", "%{name2}" und "%{name3}" wirklich löschen?'],
-      [4, null, '"%{name1}", "%{name2}" und %{texts} weitere Texte wirklich löschen?'],
+      [
+        4,
+        null,
+        '"%{name1}", "%{name2}" und %{texts} weitere Texte wirklich löschen?',
+      ],
     ],
     texts_deleteBranchTitle: "Zweig löschen",
     texts_deleteBranchMessage:
@@ -65,10 +69,11 @@ const translationTexts = {
     texts_contextMenuDeleteText: "Text löschen",
     texts_contextMenuDeleteBranch: "Zweig löschen",
     //
-    texts_contextMenuBranchMenu: "Zweig",
+    texts_contextMenuBranchMenu: "Zweig anzeigen",
     texts_contextMenuExpandBranch: "Zweig komplett öffnen",
     texts_contextMenuCollapseBranch: "Zweig schließen",
-    texts_contextMenuActivateBranch: "Zweig aktivieren",
+    texts_contextMenuActivateMenu: "Zweig aktivieren",
+    texts_contextMenuActivateBranch: "Diesen Zweig aktivieren",
     texts_contextMenuActivateBranchOnly: "Nur diesen Zweig aktivieren",
     texts_contextMenuActivateBranchNonEmpty:
       "Zweig aktivieren (ohne leere Texte)",
@@ -129,9 +134,10 @@ const translationTexts = {
     texts_contextMenuDeleteText: "Delete Text",
     texts_contextMenuDeleteBranch: "Delete Branch",
     //
-    texts_contextMenuBranchMenu: "Branch",
+    texts_contextMenuBranchMenu: "Branch display",
     texts_contextMenuExpandBranch: "Open Branch completely",
     texts_contextMenuCollapseBranch: "Close branch",
+    texts_contextMenuActivateMenu: "Branch activation",
     texts_contextMenuActivateBranch: "Activate Branch",
     texts_contextMenuActivateBranchOnly: "Activate this Branch Only",
     texts_contextMenuActivateBranchNonEmpty:

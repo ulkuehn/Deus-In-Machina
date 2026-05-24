@@ -1564,19 +1564,93 @@ class TextTree {
           },
         )}${infoPost}`,
       };
-      if (
-        settings.textTreeContextMenuBranchStats &&
-        this.#treeDiv.jstree().is_parent(nodeID)
-      ) {
-        let chars = this.#texts[node.id].characters;
-        let words = this.#texts[node.id].words;
-        let objs = this.#texts[node.id].objects;
-        this.#allNodesDepthFirst(nodeID).forEach((id) => {
-          chars += this.#texts[id].characters;
-          words += this.#texts[id].words;
-          Object.assign(objs, this.#texts[id].objects);
-        });
-        items.branchStats = {
+    }
+
+    if (settings.textTreeContextMenuTime != "noTime") {
+      let text = this.#texts[nodeID];
+      if (settings.textTreeContextMenuTime == "compactTime") {
+        items.time = {
+          isHtmlName: true,
+          name:
+            infoPre +
+            _("editorContextMenu_timestamps", {
+              created: text.created.toLocalString(settings.dateTimeFormatShort),
+              changed: text.changed.toLocalString(settings.dateTimeFormatShort),
+            }) +
+            infoPost,
+          className: "contextMenuInfo",
+        };
+      }
+      if (settings.textTreeContextMenuTime == "fullTime") {
+        items.created = {
+          isHtmlName: true,
+          name:
+            infoPre +
+            _("editorContextMenu_created", {
+              created: text.created.toLocalString(settings.dateTimeFormatShort),
+              relative: text.created.timeToNow(),
+            }) +
+            infoPost,
+          className: "contextMenuInfo",
+        };
+        items.changed = {
+          isHtmlName: true,
+          name:
+            infoPre +
+            _("editorContextMenu_changed", {
+              changed: text.changed.toLocalString(settings.dateTimeFormatShort),
+              relative: text.changed.timeToNow(),
+            }) +
+            infoPost,
+          className: "contextMenuInfo",
+        };
+      }
+    }
+
+    // branch info part (if it is a branch, i.e. has children)
+    if (
+      this.#treeDiv.jstree().is_parent(nodeID)
+    ) {
+      let text = this.#texts[nodeID];
+      // the count includes the node itself to cover the whole subtree
+      let texts = 1;
+      let chars = text.characters;
+      let words = text.words;
+      let objs = text.objects;
+      let minCreated = text.created;
+      let maxCreated = text.created;
+      let minChanged = text.changed;
+      let maxChanged = text.changed;
+      this.#allNodesDepthFirst(nodeID).forEach((id) => {
+        let text = this.#texts[id];
+        texts++;
+        chars += text.characters;
+        words += text.words;
+        Object.assign(objs, text.objects);
+        if (text.created < minCreated) {
+          minCreated = text.created;
+        }
+        if (text.created > maxCreated) {
+          maxCreated = text.created;
+        }
+        if (text.changed < minChanged) {
+          minChanged = text.changed;
+        }
+        if (text.changed > maxChanged) {
+          maxChanged = text.changed;
+        }
+      });
+
+      let branchStatItems = {};
+      branchStatItems.branch = {
+        isHtmlName: true,
+        name: `${infoPre}${_("editorContextMenu_texts", texts, {
+          texts: texts.toLocaleString(theLanguage),
+        })}${infoPost}`,
+        className: "contextMenuInfo",
+      };
+      if (settings.textTreeContextMenuStats) {
+        branchStatItems.branchStats = {
           isHtmlName: true,
           className: "contextMenuInfo",
           name: `${infoPre}${_("editorContextMenu_words", words, {
@@ -1592,48 +1666,70 @@ class TextTree {
           )}${infoPost}`,
         };
       }
-    }
-
-    if (settings.textTreeContextMenuTime == "compactTime") {
-      items.time = {
-        isHtmlName: true,
-        name:
-          infoPre +
-          this.#texts[node.id].created.toLocalString(
-            settings.dateTimeFormatShort,
-          ) +
-          " / " +
-          this.#texts[node.id].changed.toLocalString(
-            settings.dateTimeFormatShort,
-          ) +
-          infoPost,
-        className: "contextMenuInfo",
-      };
-    }
-    if (settings.textTreeContextMenuTime == "fullTime") {
-      let text = this.#texts[node.id];
-      items.created = {
-        isHtmlName: true,
-        name:
-          infoPre +
-          _("editorContextMenu_created", {
-            created: text.created.toLocalString(settings.dateTimeFormatShort),
-            relative: text.created.timeToNow(),
-          }) +
-          infoPost,
-        className: "contextMenuInfo",
-      };
-      items.changed = {
-        isHtmlName: true,
-        name:
-          infoPre +
-          _("editorContextMenu_changed", {
-            changed: text.changed.toLocalString(settings.dateTimeFormatShort),
-            relative: text.changed.timeToNow(),
-          }) +
-          infoPost,
-        className: "contextMenuInfo",
-      };
+      if (settings.textTreeContextMenuTime != "noTime") {
+        let text = this.#texts[nodeID];
+        if (settings.textTreeContextMenuTime == "compactTime") {
+          branchStatItems.time = {
+            isHtmlName: true,
+            name:
+              infoPre +
+              _("editorContextMenu_branchTimestamps", {
+                minCreated: minCreated.toLocalString(
+                  settings.dateTimeFormatShort,
+                ),
+                maxCreated: maxCreated.toLocalString(
+                  settings.dateTimeFormatShort,
+                ),
+                minChanged: minChanged.toLocalString(
+                  settings.dateTimeFormatShort,
+                ),
+                maxChanged: maxChanged.toLocalString(
+                  settings.dateTimeFormatShort,
+                ),
+              }) +
+              infoPost,
+            className: "contextMenuInfo",
+          };
+        }
+        if (settings.textTreeContextMenuTime == "fullTime") {
+          branchStatItems.created = {
+            isHtmlName: true,
+            name:
+              infoPre +
+              _("editorContextMenu_branchCreated", {
+                minCreated: minCreated.toLocalString(
+                  settings.dateTimeFormatShort,
+                ),
+                maxCreated: maxCreated.toLocalString(
+                  settings.dateTimeFormatShort,
+                ),
+                minRelative: minCreated.timeToNow(),
+                maxRelative: maxCreated.timeToNow(),
+              }) +
+              infoPost,
+            className: "contextMenuInfo",
+          };
+          branchStatItems.changed = {
+            isHtmlName: true,
+            name:
+              infoPre +
+              _("editorContextMenu_branchChanged", {
+                minChanged: minChanged.toLocalString(
+                  settings.dateTimeFormatShort,
+                ),
+                maxChanged: maxChanged.toLocalString(
+                  settings.dateTimeFormatShort,
+                ),
+                minRelative: minChanged.timeToNow(),
+                maxRelative: maxChanged.timeToNow(),
+                relative: maxChanged.timeToNow(),
+              }) +
+              infoPost,
+            className: "contextMenuInfo",
+          };
+        }
+      }
+      items.name.items = branchStatItems;
     }
 
     // edit meta data part

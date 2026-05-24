@@ -483,6 +483,9 @@ styles related to context menu
 /* no wrapping in context menus */
 ul.context-menu-list {
   white-space: nowrap;
+  width: auto !important;
+  min-width: max-content !important;
+  max-width: none !important;
 }
 
 /* color the context menu (almost) black */

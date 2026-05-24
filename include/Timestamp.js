@@ -99,6 +99,15 @@ class Timestamp {
   }
 
   /**
+   * needed for comparison of Timestamps and for using Timestamps as keys in Maps
+   * 
+   * @returns Unix time value in milliseconds
+   */
+  valueOf() {
+    return this.#now;
+  }
+
+  /**
    * Provide a i18n human readable value of a Timestamp taking account of the Timezone
    * @param {String} format
    * @returns {String} formatted Timestamp

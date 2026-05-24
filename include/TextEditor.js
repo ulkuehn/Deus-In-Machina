@@ -1203,7 +1203,6 @@ class TextEditor {
                       this.#detectURL.length,
                       "url",
                       false,
-                      "silent",
                     );
                   });
                   this.#detectURL = null;

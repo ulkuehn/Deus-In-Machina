@@ -68,8 +68,14 @@ const translationEditorContextMenu = {
       [2, null, "%{texts} Texte"],
     ],
     editorContextMenu_timestamps: "%{created} / %{changed}",
+    editorContextMenu_branchTimestamps:
+      "%{minCreated} ... %{maxCreated} / %{minChanged} ... %{maxChanged}",
     editorContextMenu_created: "angelegt: %{created} (vor %{relative})",
     editorContextMenu_changed: "verändert: %{changed} (vor %{relative})",
+    editorContextMenu_branchCreated:
+      "angelegt zwischen %{minCreated} (vor %{minRelative}) und %{maxCreated} (vor %{maxRelative})",
+    editorContextMenu_branchChanged:
+      "verändert zwischen %{minChanged} (vor %{minRelative}) und %{maxChanged} (vor %{maxRelative})",
   },
   // English
   en: {
@@ -134,8 +140,14 @@ const translationEditorContextMenu = {
       [2, null, "%{texts} Texts"],
     ],
     editorContextMenu_timestamps: "%{created} / %{changed}",
+    editorContextMenu_branchTimestamps:
+      "%{minCreated} ... %{maxCreated} / %{minChanged} ... %{maxChanged}",
     editorContextMenu_created: "Created: %{created} (%{relative} ago)",
-    editorContextMenu_changed: "Last changed: %{changed} (%{relative} ago)",
+    editorContextMenu_changed: "Changed: %{changed} (%{relative} ago)",
+    editorContextMenu_branchCreated:
+      "Created between %{minCreated} (%{minRelative} ago) and %{maxCreated} (%{maxRelative} ago)",
+    editorContextMenu_branchChanged:
+      "Changed between %{minChanged} (%{minRelative} ago) and %{maxChanged} (%{maxRelative} ago)",
   },
 };
 

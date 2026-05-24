@@ -254,7 +254,6 @@ const translationSettingsWindow = {
       "settingsWindow_textTreeContextMenu": "Kontextmenü",
       "settingsWindow_textTreeCompactContextMenu": "verwende Untermenüs",
       "settingsWindow_textTreeContextMenuStats": "Textgröße anzeigen",
-      "settingsWindow_textTreeContextMenuBranchStats": `auch Größensummen anzeigen <i class="fas fa-info-circle" title="bei Zweigen"></i>`,
       "settingsWindow_textTreeContextMenuTime":
         "Zeitpunkte anzeigen (erzeugt, verändert)",
       "settingsWindow_textTreeNameWords":
@@ -688,7 +687,6 @@ const translationSettingsWindow = {
       "settingsWindow_textTreeContextMenu": "Context Menu",
       "settingsWindow_textTreeCompactContextMenu": "use Submenus",
       "settingsWindow_textTreeContextMenuStats": "show Text Sizes",
-      "settingsWindow_textTreeContextMenuBranchStats": `show added Sizes <i class="fas fa-info-circle" title="on Branches"></i>`,
       "settingsWindow_textTreeContextMenuTime":
         "Show Timestamps (created, last changed)",
       "settingsWindow_textTreeNameWords": "Number of Words for Name Generation",
