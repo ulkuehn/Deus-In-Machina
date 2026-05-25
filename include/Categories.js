@@ -714,7 +714,7 @@ class Categories {
     let cols = color.colors ?? Util.randomColors(color.random);
     for (let i = 0; i < cols.length; i++) {
       if (!this.#lists[list.name][i]) {
-        this.#lists[list.name][i] = {};
+        this.#lists[list.name][i] = { id: uuid() };
       }
       list.properties.forEach((prop) => {
         if (prop.type == "color") {

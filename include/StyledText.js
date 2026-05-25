@@ -323,23 +323,23 @@ class StyledText {
    *
    * @returns {String}
    */
-  decoratedName(simple=false) {
+  decoratedName(simple = false) {
     let result = "";
     let settings = theSettings.effectiveSettings();
     // empty
-    if (!simple &&this.#characters == 0) {
+    if (!simple && this.#characters == 0) {
       result += `<i class="fa-solid fa-text-slash" style="opacity:0.5; margin-right:4px;" title="${_(
         "texts_emptyText",
       )}"></i>`;
     }
     // locked
-    if (!simple&&settings.textTreeLockedIcon && !this.#editable) {
+    if (!simple && settings.textTreeLockedIcon && !this.#editable) {
       result += `<i class="fa-solid fa-lock" style="opacity:0.5; margin-right:4px;" title="${_(
         "texts_lockedText",
       )}"></i>`;
     }
     // status
-    if (!simple&&settings.textTreeShowStatus) {
+    if (!simple && settings.textTreeShowStatus) {
       let status = UUID0;
       let color = "";
       let title = "";
@@ -353,24 +353,28 @@ class StyledText {
           color =
             theProperties.categories.categories_status[i]
               .categories_statusColor;
-          title = Util.escapeHTML(
-            theProperties.categories.categories_status[i].categories_statusName,
-          );
+          title =
+            Util.escapeHTML(
+              theProperties.categories.categories_status[i]
+                .categories_statusName,
+            ) || _("categories_status") + " " + (i + 1);
           break;
         }
       }
       if (status != UUID0) {
-        result += `<i style="color:${color}; margin-right:4px;" class="fa-solid fa-${settings.textTreeShowStatusForm
-          }" title="${_("texts_status", { text: title })}"></i> `;
+        result += `<i style="color:${color}; margin-right:4px;" class="fa-solid fa-${
+          settings.textTreeShowStatusForm
+        }" title="${_("texts_status", { text: title })}"></i> `;
       } else if (settings.textTreeShowNoStatus) {
-        result += `<i style="color:#808080; margin-right:4px" class="fa-regular fa-${settings.textTreeShowStatusForm
-          }" title="${_("texts_status", {
-            text: _("categories_noStatus"),
-          })}"></i> `;
+        result += `<i style="color:#808080; margin-right:4px" class="fa-regular fa-${
+          settings.textTreeShowStatusForm
+        }" title="${_("texts_status", {
+          text: _("categories_noStatus"),
+        })}"></i> `;
       }
     }
     // type
-    if (!simple&&settings.textTreeShowType) {
+    if (!simple && settings.textTreeShowType) {
       let type = UUID0;
       let color = "";
       let title = "";
@@ -383,22 +387,25 @@ class StyledText {
           type = this.#type;
           color =
             theProperties.categories.categories_type[i].categories_typeColor;
-          title = Util.escapeHTML(
-            theProperties.categories.categories_type[i].categories_typeName,
-          );
+          title =
+            Util.escapeHTML(
+              theProperties.categories.categories_type[i].categories_typeName,
+            ) || _("categories_type") + " " + (i + 1);
           break;
         }
       }
       if (type != UUID0) {
-        result += `<i style="color:${color}; margin-right:4px" class="fa-solid fa-${settings.textTreeShowTypeForm
-          }" title="${_("texts_type", { text: title })}"></i> `;
+        result += `<i style="color:${color}; margin-right:4px" class="fa-solid fa-${
+          settings.textTreeShowTypeForm
+        }" title="${_("texts_type", { text: title })}"></i> `;
       } else if (settings.textTreeShowNoType) {
-        result += `<i style="color:#808080; margin-right:4px" class="fa-regular fa-${settings.textTreeShowTypeForm
-          }" title="${_("texts_type", { text: _("categories_noType") })}"></i> `;
+        result += `<i style="color:#808080; margin-right:4px" class="fa-regular fa-${
+          settings.textTreeShowTypeForm
+        }" title="${_("texts_type", { text: _("categories_noType") })}"></i> `;
       }
     }
     // user
-    if (!simple&&settings.textTreeShowUser) {
+    if (!simple && settings.textTreeShowUser) {
       let user = UUID0;
       let color = "";
       let title = "";
@@ -418,11 +425,13 @@ class StyledText {
         }
       }
       if (user != UUID0) {
-        result += `<i style="color:${color}; margin-right:4px" class="fa-solid fa-${settings.textTreeShowUserForm
-          }" title="${_("texts_user", { text: title })}"></i> `;
+        result += `<i style="color:${color}; margin-right:4px" class="fa-solid fa-${
+          settings.textTreeShowUserForm
+        }" title="${_("texts_user", { text: title })}"></i> `;
       } else if (settings.textTreeShowNoUser) {
-        result += `<i style="color:#808080; margin-right:4px" class="fa-regular fa-${settings.textTreeShowUserForm
-          }" title="${_("texts_user", { text: _("categories_noUser") })}"></i> `;
+        result += `<i style="color:#808080; margin-right:4px" class="fa-regular fa-${
+          settings.textTreeShowUserForm
+        }" title="${_("texts_user", { text: _("categories_noUser") })}"></i> `;
       }
     }
     // add some extra space to the right
@@ -430,21 +439,24 @@ class StyledText {
       result += `<span style="margin-right:4px"></span>`;
     }
     // icon
-    if (!simple&&this.#decoration.icon) {
+    if (!simple && this.#decoration.icon) {
       if (
         this.#decoration.stack == undefined ||
         this.#decoration.stack == TreeDecoration.noStack
       ) {
         result += `<i class="fa-solid fa-${this.#decoration.iconName}" style="color:${this.#decoration.iconColor}; margin-right:8px;"></i>`;
       } else {
-        let i1 = `<i class="${TreeDecoration.stackProps[this.#decoration.stack].class
-          } fa-stack-1x" style="color:${this.#decoration.stackColor}"></i>`;
+        let i1 = `<i class="${
+          TreeDecoration.stackProps[this.#decoration.stack].class
+        } fa-stack-1x" style="color:${this.#decoration.stackColor}"></i>`;
         let i2 = `<i class="fa-solid fa-${this.#decoration.iconName} fa-stack-1x" style="color:${this.#decoration.iconColor}"></i>`;
-        result += `<span class="fa-stack" style="vertical-align:top; ${settings.textTreeSmall ? "line-height:1.2em;" : ""
-          } width:1em; margin-right:8px;">${TreeDecoration.stackProps[this.#decoration.stack].background
+        result += `<span class="fa-stack" style="vertical-align:top; ${
+          settings.textTreeSmall ? "line-height:1.2em;" : ""
+        } width:1em; margin-right:8px;">${
+          TreeDecoration.stackProps[this.#decoration.stack].background
             ? i1 + i2
             : i2 + i1
-          }</span>`;
+        }</span>`;
       }
     }
     // name
@@ -470,9 +482,10 @@ class StyledText {
    */
   find(searchFor, doCase = false, doWord = false, doRegex = false) {
     let rex = RegExp(
-      `${doWord ? "(^|\\P{L})(" : ""}${doRegex
-        ? Util.escapeRegExpSearch(searchFor)
-        : Util.escapeRegExp(searchFor)
+      `${doWord ? "(^|\\P{L})(" : ""}${
+        doRegex
+          ? Util.escapeRegExpSearch(searchFor)
+          : Util.escapeRegExp(searchFor)
       }${doWord ? ")\\P{L}" : ""}`,
       `udg${doCase ? "" : "i"}`,
     );
