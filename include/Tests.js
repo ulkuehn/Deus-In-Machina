@@ -194,6 +194,9 @@ class Tests {
     theObjectTree.objects = {};
 
     let pers1 = uuid();
+    let pers1prop1 = uuid();
+    let pers1prop2 = uuid();
+    let pers1prop4 = uuid();
     theObjectTree.setObject(
       pers1,
       new StyledObject(
@@ -208,29 +211,29 @@ class Tests {
         undefined,
         [
           {
-            id: 0,
+            id: uuid(),
             name: _("Tests_pers1prop0Name"),
             type: "schemeTypes_header",
           },
           {
-            id: 1,
+            id: pers1prop1,
             name: _("Tests_pers1prop1Name"),
             type: "schemeTypes_radio",
             params: [_("Tests_pers1prop1Params")],
           },
           {
-            id: 2,
+            id: pers1prop2,
             name: _("Tests_pers1prop2Name"),
             type: "schemeTypes_range",
             params: ["0", "100", "1", _("Tests_pers1prop2Params")],
           },
           {
-            id: 3,
+            id: uuid(),
             name: _("Tests_pers1prop3Name"),
             type: "schemeTypes_header",
           },
           {
-            id: 4,
+            id: pers1prop4,
             name: _("Tests_pers1prop4Name"),
             type: "schemeTypes_relation",
             params: [_("Tests_pers1prop4Params")],
@@ -244,6 +247,8 @@ class Tests {
     });
 
     let rotID = uuid();
+    let rotProp1 = uuid();
+    let gmID = uuid();
     theObjectTree.setObject(
       rotID,
       new StyledObject(
@@ -259,16 +264,16 @@ class Tests {
         },
         [
           {
-            id: 1,
+            id: rotProp1,
             name: _("Tests_rotProp1Name"),
             type: "schemeTypes_editor",
             params: ["300"],
           },
         ],
         {
-          [pers1]: { 1: _("Tests_rotValue0"), 2: "8" },
+          [pers1]: { [pers1prop1]: _("Tests_rotValue0"), [pers1prop2]: "8", [pers1prop4]: [gmID] },
           [rotID]: {
-            1: {
+            [rotProp1]: {
               ops: [
                 { insert: _("Tests_rotValue1") },
                 {
@@ -320,7 +325,7 @@ class Tests {
           image: { formats_imageBorder: ["#ff0000", "dotted", 5] },
         },
         [],
-        { [pers1]: { 1: _("Tests_wolfValue0"), 2: "15" } },
+        { [pers1]: { [pers1prop1]: _("Tests_wolfValue0"), [pers1prop2]: "15" } },
       ),
     );
     theObjectTree.tree.jstree().create_node(pers1Node, {
@@ -338,7 +343,6 @@ class Tests {
       text: theObjectTree.objects[pers2].decoratedName(),
     });
 
-    let gmID = uuid();
     theObjectTree.setObject(
       gmID,
       new StyledObject(gmID, _("Tests_gmName"), undefined, {
@@ -355,6 +359,7 @@ class Tests {
     });
 
     let orte = uuid();
+    let orteProp1 = uuid();
     theObjectTree.setObject(
       orte,
       new StyledObject(
@@ -364,7 +369,7 @@ class Tests {
         undefined,
         [
           {
-            id: 1,
+            id: orteProp1,
             name: _("Tests_ortePropName"),
             type: "schemeTypes_map",
             params: ["500"],
@@ -378,6 +383,7 @@ class Tests {
     });
 
     let hdgID = uuid();
+    let hdgProp1 = uuid();
     theObjectTree.setObject(
       hdgID,
       new StyledObject(
@@ -396,7 +402,7 @@ class Tests {
         },
         [
           {
-            id: 1,
+            id: hdgProp1,
             name: _("Tests_hdgProp"),
             type: "schemeTypes_editor",
             params: ["200"],
@@ -404,7 +410,7 @@ class Tests {
         ],
         {
           [orte]: {
-            1: {
+            [orteProp1]: {
               zoom: 13,
               center: { lat: 48.89739604037151, lng: 9.23338924842275 },
               marker: [
@@ -427,7 +433,7 @@ class Tests {
             },
           },
           [hdgID]: {
-            1: {
+            [hdgProp1]: {
               ops: [
                 {
                   insert: _("Tests_hdgValue3"),

@@ -15,7 +15,7 @@ const translationSchemeValues = {
     Scheme_name: "Bezeichnung",
     Scheme_type: "Typ",
     Scheme_parameters: "Parameter",
-    Scheme_relationReverse: `Rückbeziehung <i class="fas fa-info-circle" title='Beschreibung der Beziehung des anderen Objekts zu diesem.\nWenn die Beziehung z.B. "Sohn von" ist, könnte die Rückbeziehung "Mutter/Vater von" lauten.\nWenn hier ein Text eingegeben wird, wird dies bei allen Objekt mit dieser Beziehung berücksichtigt.'></i>`,
+    Scheme_relationReverse: `Rückbeziehung <i class="fas fa-info-circle" title='Beschreibung der Beziehung des anderen Objekts zu diesem.\nWenn die Beziehung z.B. "Sohn von" ist, könnte die Rückbeziehung "Mutter/Vater von" lauten.\nWenn hier ein Text eingegeben wird, wird dies bei allen Objekten mit dieser Beziehung berücksichtigt.'></i>`,
     Scheme_elementHeight: "Höhe in Pixel",
     Scheme_checkTrue: "ja",
     Scheme_checkFalse: "nein",

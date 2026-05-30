@@ -374,19 +374,45 @@ class ObjectTree {
       if (theShiftKey) {
         movingNodes = [data.node.id, ...data.node.children_d];
       }
-      // when moving object tree nodes me must get rid of properties from former parents to keep the objects clean
+      // when moving object tree nodes me must copy properties from former parents into  the object itself to not loose them
       let propertyNodes = [
         data.node.id,
-        data.parent,
-        ...this.#treeDiv.jstree().get_node(data.parent).parents,
+        ...this.#treeDiv.jstree().get_node(data.node.id).parents,
       ];
       movingNodes.forEach((objectID) => {
         let props = this.#objects[objectID].properties;
-        Object.keys(props).forEach((id) => {
-          if (!propertyNodes.includes(id)) {
-            delete props[id];
+        let scheme = this.#objects[objectID].scheme;
+        for (let parentID of [
+          data.old_parent,
+          ...this.#treeDiv.jstree().get_node(data.old_parent).parents,
+        ]) {
+          if (!propertyNodes.includes(parentID)) {
+            if (!(objectID in props)) {
+              props[objectID] = {};
+            }
+            // iterate thru scheme of parent in reverse order
+            for (
+              let i = this.#objects[parentID].scheme.length - 1;
+              i >= 0;
+              i--
+            ) {
+              // we must create a new id to avoid id collision when later moving object back to former parent
+              let propID = this.#objects[parentID].scheme[i].id;
+              let newPropID = uuid();
+              scheme.unshift(
+                Object.assign({}, this.#objects[parentID].scheme[i], {
+                  id: newPropID,
+                }),
+              );
+              if (props[parentID] && propID in props[parentID]) {
+                props[objectID][newPropID] = JSON.parse(
+                  JSON.stringify(props[parentID][propID]),
+                );
+                delete props[objectID][propID];
+              }
+            }
           }
-        });
+        }
         propertyNodes.push(objectID);
       });
 
@@ -422,10 +448,7 @@ class ObjectTree {
         .rename_node(node, this.#objects[newID].decoratedName());
 
       if (theShiftKey) {
-        this.#copyChildren(node, originalNode, {
-          ...Object.fromEntries(node.parents.map((x) => [x, x])),
-          [originalNode.id]: node.id,
-        });
+        this.#copyChildren(node, originalNode);
       } else {
         [...node.children].forEach((id) => {
           this.#treeDiv.jstree().delete_node(id);
@@ -1444,43 +1467,68 @@ class ObjectTree {
    *
    * @param {DOMNode} toNode
    * @param {DOMNode} fromNode
-   * @param {Object} parentsMap
    * @returns {StyledObject}
    */
   #cloneObject(
     toNode,
     fromNode,
-    parentsMap = Object.fromEntries(toNode.parents.map((x) => [x, x])),
   ) {
-    // the set of properties that should be cloned depends on the scheme of the cloned object, thus on its place in the tree
-    let toProperties = {};
-    Object.keys(this.#objects[fromNode.id].properties).forEach((id) => {
-      if (id == fromNode.id) {
-        // files are cloned by same id, so different objects may refer to the same file (lying in tmpDir or in the database)
-        toProperties[toNode.id] = JSON.parse(
-          JSON.stringify(this.#objects[fromNode.id].properties[id]),
-        );
-      } else if (id in parentsMap) {
-        toProperties[parentsMap[id]] = JSON.parse(
-          JSON.stringify(this.#objects[fromNode.id].properties[id]),
-        );
-      }
-    });
+    // on alt key clone the object without scheme and properties
     if (theAltKey)
       return new StyledObject(
         toNode.id,
         this.#objects[fromNode.id].name,
         JSON.parse(JSON.stringify(this.#objects[fromNode.id].decoration)),
       );
-    else
-      return new StyledObject(
-        toNode.id,
-        _("objects_objectCopy", { name: this.#objects[fromNode.id].name }),
-        JSON.parse(JSON.stringify(this.#objects[fromNode.id].decoration)),
-        JSON.parse(JSON.stringify(this.#objects[fromNode.id].styleProperties)),
-        JSON.parse(JSON.stringify(this.#objects[fromNode.id].scheme)),
-        toProperties,
-      );
+
+    // else we preserve the scheme and all necessary properties
+    let propertyNodes = [
+      toNode.id,
+      ...this.#treeDiv.jstree().get_node(toNode.id).parents,
+    ];
+
+    let props = {}; //this.#objects[fromNode.id].properties;
+    let scheme = []; //this.#objects[fromNode.id].scheme;
+    for (let id of [
+      fromNode.id,
+      ...this.#treeDiv.jstree().get_node(fromNode.id).parents,
+    ]) {
+      if (propertyNodes.includes(id)) {
+        if (this.#objects[fromNode.id].properties[id] != undefined)
+          props[id] = JSON.parse(
+            JSON.stringify(this.#objects[fromNode.id].properties[id]),
+          );
+      } else {
+        // iterate thru scheme of former parent in reverse order
+        for (let i = this.#objects[id].scheme.length - 1; i >= 0; i--) {
+          // we must create a new id to avoid id collision when later moving object back to former parent
+          let propID = this.#objects[id].scheme[i].id;
+          let newPropID = uuid();
+          scheme.unshift(
+            Object.assign({}, this.#objects[id].scheme[i], {
+              id: newPropID,
+            }),
+          );
+          if (!(toNode.id in props)) {
+            props[toNode.id] = {};
+          }
+          if (this.#objects[fromNode.id].properties[id] && propID in this.#objects[fromNode.id].properties[id]) {
+            props[toNode.id][newPropID] = JSON.parse(
+              JSON.stringify(this.#objects[fromNode.id].properties[id][propID]),
+            );
+          }
+        }
+      }
+    }
+
+    return new StyledObject(
+      toNode.id,
+      _("objects_objectCopy", { name: this.#objects[fromNode.id].name }),
+      JSON.parse(JSON.stringify(this.#objects[fromNode.id].decoration)),
+      JSON.parse(JSON.stringify(this.#objects[fromNode.id].styleProperties)),
+      scheme,
+      props,
+    );
   }
 
   /**
@@ -1488,9 +1536,8 @@ class ObjectTree {
    *
    * @param {DOMNode} node
    * @param {DOmNode} originalNode
-   * @param {Object} parentsMap
    */
-  #copyChildren(node, originalNode, parentsMap) {
+  #copyChildren(node, originalNode) {
     for (let i = 0; i < node.children.length; i++) {
       let child = this.#treeDiv.jstree().get_node(node.children[i]);
       let originalChild = this.#treeDiv
@@ -1498,18 +1545,12 @@ class ObjectTree {
         .get_node(originalNode.children[i]);
       let newID = uuid();
       this.#treeDiv.jstree().set_id(child, newID);
-      this.#objects[newID] = this.#cloneObject(child, originalChild, {
-        ...parentsMap,
-        [originalChild.id]: child.id,
-      });
+      this.#objects[newID] = this.#cloneObject(child, originalChild);
       this.#treeDiv
         .jstree()
         .rename_node(child, this.#objects[newID].decoratedName());
 
-      this.#copyChildren(child, originalChild, {
-        ...parentsMap,
-        [originalChild.id]: child.id,
-      });
+      this.#copyChildren(child, originalChild);
     }
   }
 

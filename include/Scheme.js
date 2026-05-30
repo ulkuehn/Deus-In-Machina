@@ -381,6 +381,13 @@ class Scheme {
       ...this.#parentSchemes,
       { id: this.#objectID, scheme: this.#scheme },
     ].forEach((idScheme) => {
+      let objectName = "";
+      for (let object of objects) {
+        if (object.id == idScheme.id) {
+          objectName = object.name;
+          break;
+        }
+      }
       idScheme.scheme.forEach((item) => {
         if (item.type == "schemeTypes_header") {
           $propertiesGrid.append(
@@ -389,7 +396,9 @@ class Scheme {
                 style: "grid-column:1/span 4; justify-self:stretch",
                 class: "section-header",
               })
-              .html(Util.escapeHTML(item.name)),
+              .html(
+                `<span title="${Util.escapeHTML(objectName)}">${Util.escapeHTML(item.name)}</span>`,
+              ),
           );
         } else {
           let value = null;
@@ -401,7 +410,7 @@ class Scheme {
           }
 
           // user info
-          let info = item.name ? Util.escapeHTML(item.name) : _(item.type);
+          let info = `<span title="${Util.escapeHTML(objectName)}">${item.name ? Util.escapeHTML(item.name) : _(item.type)}</span>`;
           if (item.type == "schemeTypes_relation" && item.params[0]) {
             info += ` <i class="fa-solid fa-arrow-right-arrow-left" title='${_("Scheme_reverseInfo", { relation: item.params[0] })}'></i>`;
           }
@@ -1458,9 +1467,10 @@ class Scheme {
     let that = this;
     this.#properties = {};
     $propertiesGrid.find("[id^=property_]").each(function () {
-      // id is uuid prepended with a "_", so we need to stuff "_" back in after splitting :-(
-      let [, , id, no] = $(this).attr("id").split("_");
+      // id and no are uuids prepended with a "_", so we need to stuff "_" back in after splitting :-(
+      let [, , id, , no] = $(this).attr("id").split("_");
       id = "_" + id;
+      no = "_" + no;
       if (!(id in that.#properties)) {
         that.#properties[id] = {};
       }
@@ -1516,9 +1526,10 @@ class Scheme {
     });
     // radios
     $propertiesGrid.find("input[name^='property_']:checked").each(function () {
-      // id is uuid prepended with a "_", so we need to stuff "_" back in after splitting :-(
-      let [, , id, no] = $(this).attr("name").split("_");
+      // id and no are uuids prepended with a "_", so we need to stuff "_" back in after splitting :-(
+      let [, , id, , no] = $(this).attr("name").split("_");
       id = "_" + id;
+      no = "_" + no;
       if (!(id in that.#properties)) {
         that.#properties[id] = {};
       }
@@ -1621,7 +1632,17 @@ class Scheme {
               .append($select),
           );
           // param field(s)
-          if (scheme.type in Scheme.params) {
+          if (scheme.type == "schemeTypes_header") {
+            $schemeGrid.append(
+              $("<div>")
+                .attr({
+                  style: "grid-column:4/span 2",
+                })
+                .html(
+                  '<hr style="border:none; border-top: 2px dotted var(--foreground-color);">',
+                ),
+            );
+          } else if (scheme.type in Scheme.params) {
             let i = 0;
             Scheme.params[scheme.type].forEach((param) => {
               $schemeGrid.append(
@@ -1732,7 +1753,17 @@ class Scheme {
       );
       // param field(s)
       let type = $(`#schemeType_${this.#scheme[itemNo].id}_${itemNo}`).val();
-      if (type in Scheme.params) {
+      if (type == "schemeTypes_header") {
+        $schemeGrid.append(
+          $("<div>")
+            .attr({
+              style: "grid-column:4/span 2",
+            })
+            .html(
+              '<hr style="border:none; border-top: 2px dotted var(--foreground-color);">',
+            ),
+        );
+      } else if (type in Scheme.params) {
         let i = 0;
         Scheme.params[type].forEach((param) => {
           $schemeGrid.append(
@@ -1788,7 +1819,9 @@ class Scheme {
   saveItems($schemeGrid) {
     let scheme = this.#scheme;
     $schemeGrid.find("[id^=scheme]").each(function () {
-      let [name, id, no, i] = $(this).attr("id").split("_");
+      // id is uuid prepended with a "_", so we need to stuff "_" back in after splitting :-(
+      let [name, , id, no, i] = $(this).attr("id").split("_");
+      id = "_" + id;
       name = name.slice(6).toLowerCase();
       if (!scheme[no]) {
         scheme[no] = { id: id };
@@ -1813,14 +1846,14 @@ class Scheme {
    */
   addItem($schemeGrid, buttonHTML) {
     this.saveItems($schemeGrid);
-    let maxID = 0;
-    this.#scheme.forEach((item) => {
-      if (maxID < item.id) {
-        maxID = item.id;
-      }
-    });
+    // let maxID = 0;
+    // this.#scheme.forEach((item) => {
+    //   if (maxID < item.id) {
+    //     maxID = item.id;
+    //   }
+    // });
     this.#scheme.push({
-      id: parseInt(maxID) + 1,
+      id: uuid(), // parseInt(maxID) + 1,
       name: "",
     });
     this.fillScheme($schemeGrid, buttonHTML);
