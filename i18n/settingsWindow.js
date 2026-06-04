@@ -148,6 +148,11 @@ const translationSettingsWindow = {
       "settingsWindow_lockedBackgroundColor":
         "Hintergrundfarbe gesperrter Texte",
       "settingsWindow_lockedOpacity": `Kontrast gesperrter Texte <i class="fas fa-info-circle" title="0 = kein Kontrast (unsichtbar), 100 = voller Kontrast (normal)"></i>`,
+      "settingsWindow_textName": "Anzeige des Textnamens im Editor",
+      "textName_none": "nicht anzeigen",
+      "textName_top": "oberhalb des Texts (statisch)",
+      "textName_left": "linker Rand (Popup)",
+      "settingsWindow_textNamePath": "gesamten Textpfad anzeigen",
       "settingsWindow_editorBars": "Menü- und Statusleiste",
       "settingsWindow_contrastLevel": `Kontrast zum Editor <i class="fas fa-info-circle" title="negativ für dunklen Kontrast, positiv für hellen Kontrast, bei Wert 0 ohne Kontrast"></i>`,
       "settingsWindow_borderLine": "Trennlinie zum Editor",
@@ -584,6 +589,11 @@ const translationSettingsWindow = {
       "settingsWindow_lockedBackgroundColor":
         "Background Color of locked Texts",
       "settingsWindow_lockedOpacity": `Contrast of locked Texts <i class="fas fa-info-circle" title="0 = no contrast (invisible), 100 = full contrast (fully visible)"></i>`,
+      "settingsWindow_textName": "Display Text Name in Editor",
+      "textName_none": "do not display",
+      "textName_top": "above the text (static)",
+      "textName_left": "left side (popup)",
+      "settingsWindow_textNamePath": "Show full path",
       "settingsWindow_editorBars": "Menu and Status bars",
       "settingsWindow_contrastLevel": `Contrast to the Editor <i class="fas fa-info-circle" title="negative for dark contrast, positive for light contrast, 0 for no contrast"></i>`,
       "settingsWindow_borderLine": "Border line to Editor",

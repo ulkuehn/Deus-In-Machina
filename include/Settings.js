@@ -383,6 +383,13 @@ class Settings {
           default: 50,
         },
         {
+          type: "select",
+          name: "textName",
+          values: ["textName_none", "textName_top", "textName_left"],
+          default: "textName_none",
+        },
+        { type: "check", name: "textNamePath", default: false },
+        {
           type: "separator",
           name: "settingsWindow_editorBars",
         },

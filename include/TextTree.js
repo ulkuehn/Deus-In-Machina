@@ -629,12 +629,12 @@ class TextTree {
       return (
         `${Util.escapeHTML(
           this.#texts[id].name,
-        )} <span style="opacity:0.5"><i class="fa-solid fa-arrow-left-long"></i> ` +
+        )} <span style="opacity:0.75"><i class="fa-solid fa-arrow-left-long"></i> ` +
         path +
         "</span>"
       );
     } else {
-      let path = `<span style="opacity:0.5">`;
+      let path = `<span style="opacity:0.75">`;
       this.getParents(id)
         .slice(0, -1)
         .forEach((p) => {

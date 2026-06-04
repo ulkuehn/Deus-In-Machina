@@ -1149,6 +1149,7 @@ class TextEditor {
    * @param {String[]} textIDs
    */
   showTextsInEditor(textIDs) {
+    let settings = theSettings.effectiveSettings();
     ipcRenderer.invoke("mainProcess_busyOverlayWindow", 500);
     this.allEditorsSaved().then(() => {
       if (textIDs.length) {
@@ -1182,6 +1183,46 @@ class TextEditor {
           this.#editors[textID].quill.enable(
             theTextTree.getText(textID).editable,
           );
+          
+          // show text name above editor
+          if (settings.textName == "textName_top")
+            $newEditor.first().prepend(
+              $("<div>")
+                .attr({
+                  style: `position:relative; top:0px; text-align:center; display:block; background:linear-gradient(90deg, transparent, 5%, ${Util.blackOrWhite(settings.textBackgroundColor || settings.generalBackgroundColor)}80, 95%, transparent); color:${settings.textBackgroundColor || settings.generalBackgroundColor};`,
+                })
+                .html(
+                  settings.textNamePath
+                    ? theTextTree.getPath(textID, true)
+                    : theTextTree.getText(textID).name,
+                ),
+            );
+          // show text name as popup triggered by bar on the left side of editor
+          if (settings.textName == "textName_left") {
+            let $nameBar = $("<div>").attr({
+              style: `z-index:5; position:absolute; top:${settings.textSeparatorAbove}px; left:0px; width:5px; height:calc(100% - ${settings.textSeparatorAbove}px); background:linear-gradient(180deg, transparent, 5%, ${Util.blackOrWhite(settings.textBackgroundColor || settings.generalBackgroundColor)}80, 95%, transparent);`,
+            });
+            let $namePopup = $("<div>")
+              .attr({
+                style: `position:absolute; top:0px; left:5px; width:100%; text-align:center; display:none; background:linear-gradient(90deg, ${Util.blackOrWhite(settings.textBackgroundColor || settings.generalBackgroundColor)}C0, 95%, transparent); color:${settings.textBackgroundColor || settings.generalBackgroundColor};`,
+              })
+              .html(
+                settings.textNamePath
+                  ? theTextTree.getPath(textID, true)
+                  : theTextTree.getText(textID).name,
+              );
+            $nameBar.on("mouseenter", (e) => {
+              let rect = $nameBar[0].getBoundingClientRect();
+              console.log(rect, e.clientY);
+              $namePopup.css("display", "block");
+              $namePopup.css("top", e.clientY - rect.top + "px");
+            });
+            $nameBar.on("mouseleave", () => {
+              $namePopup.css("display", "none");
+            });
+            $newEditor.append($nameBar);
+            $newEditor.append($namePopup);
+          }
 
           // editor context menu definition
           $(`#edi${textID}`).contextMenu({

@@ -411,6 +411,7 @@ class ObjectTree {
                 delete props[objectID][propID];
               }
             }
+            if (parentID in props) delete props[parentID];
           }
         }
         propertyNodes.push(objectID);
@@ -1469,10 +1470,7 @@ class ObjectTree {
    * @param {DOMNode} fromNode
    * @returns {StyledObject}
    */
-  #cloneObject(
-    toNode,
-    fromNode,
-  ) {
+  #cloneObject(toNode, fromNode) {
     // on alt key clone the object without scheme and properties
     if (theAltKey)
       return new StyledObject(
@@ -1512,7 +1510,10 @@ class ObjectTree {
           if (!(toNode.id in props)) {
             props[toNode.id] = {};
           }
-          if (this.#objects[fromNode.id].properties[id] && propID in this.#objects[fromNode.id].properties[id]) {
+          if (
+            this.#objects[fromNode.id].properties[id] &&
+            propID in this.#objects[fromNode.id].properties[id]
+          ) {
             props[toNode.id][newPropID] = JSON.parse(
               JSON.stringify(this.#objects[fromNode.id].properties[id][propID]),
             );
