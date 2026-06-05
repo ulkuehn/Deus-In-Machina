@@ -665,6 +665,7 @@ class TextTree {
       }
     }
     this.#treeDiv.jstree().rename_node(id, this.#texts[id].decoratedName());
+    theTextEditor.renameTexts(id);
 
     var $node = this.#treeDiv.jstree().get_node(id, true);
     $node.css(
@@ -1424,6 +1425,8 @@ class TextTree {
         this.#editMode = false;
         this.#texts[id].name = txt;
         this.#treeDiv.jstree().set_text(node, this.#texts[id].decoratedName());
+        // possibly reflect name change in editor (might concern other texts if this is text further up in the hierarchy)
+        theTextEditor.renameTexts(id);
         // possibly reflect name change in status bar
         if (theTextEditor.selectedEditor) {
           theTextEditor.setStatusBar(theTextEditor.selectedEditor);
@@ -1608,9 +1611,7 @@ class TextTree {
     }
 
     // branch info part (if it is a branch, i.e. has children)
-    if (
-      this.#treeDiv.jstree().is_parent(nodeID)
-    ) {
+    if (this.#treeDiv.jstree().is_parent(nodeID)) {
       let text = this.#texts[nodeID];
       // the count includes the node itself to cover the whole subtree
       let texts = 1;
