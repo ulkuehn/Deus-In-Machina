@@ -127,7 +127,7 @@ ipcRenderer.on(
         $grid,
         $("<div>")
           .attr({
-            style: `height:calc(100vh - 60px); overflow-y:auto; padding:20px; color:#000000; background-color:#ffffff; ${profile.exportType == "html" ? "" : "white-space:pre-wrap;"
+            style: `height:calc(100vh - 60px); overflow-y:auto; padding:20px; color:#000000; background-color:#ffffff; user-select:text; ${profile.exportType == "html" ? "" : "white-space:pre-wrap;"
               }`,
           })
           .html(
