@@ -1201,7 +1201,7 @@ class TextEditor {
           // show text name as popup triggered by bar on the left side of editor
           if (settings.textName == "textName_left") {
             let $nameBar = $("<div>").attr({
-              style: `position:absolute; top:${settings.textSeparatorAbove}px; left:0px; width:5px; height:calc(100% - ${settings.textSeparatorAbove}px); background:linear-gradient(180deg, transparent, 5%, ${Util.blackOrWhite(settings.textBackgroundColor || settings.generalBackgroundColor)}80, 95%, transparent);`,
+              style: `position:absolute; top:${settings.textSeparatorAbove}px; left:0px; width:5px; height:calc(100% - ${settings.textSeparatorAbove}px); background:linear-gradient(180deg, transparent, 5%, ${Util.blackOrWhite(settings.textBackgroundColor || settings.generalBackgroundColor)}20, 95%, transparent);`,
             });
             let $namePopup = $("<div>")
               .attr({

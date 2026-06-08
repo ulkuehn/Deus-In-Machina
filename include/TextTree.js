@@ -256,15 +256,9 @@ class TextTree {
 
     this.#treeDiv.on("hover_node.jstree", (e, data) => {
       let $node = this.#treeDiv.jstree().get_node(data.node.id, true);
-      let walker = document.createTreeWalker(
-        $node[0],
-        NodeFilter.SHOW_TEXT,
-        null,
-        false,
-      );
-      let textNode = walker.nextNode();
+      let decorationNodes = $node[0].childNodes[1].childNodes[2].childNodes;
       let range = document.createRange();
-      range.selectNodeContents(textNode);
+      range.selectNodeContents(decorationNodes[decorationNodes.length - 1]);
       let rect = range.getBoundingClientRect();
       let right = rect.left + rect.width - this.#treeDiv.width();
       if (right > 0) {

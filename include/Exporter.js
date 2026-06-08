@@ -1199,7 +1199,7 @@ class Exporter {
       (id) =>
         (formatCSS += Formats.toCSS(
           id,
-          theFormats.getFormat(id),
+          formats[id],
           undefined,
           undefined,
           undefined,
@@ -1219,8 +1219,8 @@ class Exporter {
   static objects2CSS(domID, objects) {
     let objectCSS = `<style id="${domID}">\n`;
     Object.keys(objects).forEach((id) => {
-      objectCSS += `.object${id}-true { ${theObjectTree.getObject(id).toCSS("text")} }\n`;
-      objectCSS += `.object${id}-true img { ${theObjectTree.getObject(id).toCSS("image")} }\n`;
+      objectCSS += `.object${id}-true { ${objects[id].toCSS("text")} }\n`;
+      objectCSS += `.object${id}-true img { ${objects[id].toCSS("image")} }\n`;
     });
     return objectCSS + "</style>\n";
   }
@@ -1361,10 +1361,20 @@ class Exporter {
         resolve([
           `${Exporter.formats2CSS(
             "formatSheet",
-            this.#usedFormats,
+            Object.fromEntries(
+              Object.keys(this.#usedFormats).map((id) => [
+                id,
+                theFormats.getFormat(id),
+              ]),
+            ),
           )}${Exporter.objects2CSS(
             "objectSheet",
-            this.#usedObjects,
+            Object.fromEntries(
+              Object.keys(this.#usedObjects).map((id) => [
+                id,
+                theObjectTree.getObject(id),
+              ]),
+            ),
           )}${Exporter.fonts2CSS("fontSheet", theFonts.availableFamilies)}`,
           result,
         ]);
@@ -1520,14 +1530,24 @@ class Exporter {
                           fd,
                           Exporter.formats2CSS(
                             "formatSheet",
-                            this.#usedFormats,
+                            Object.fromEntries(
+                              Object.keys(this.#usedFormats).map((id) => [
+                                id,
+                                theFormats.getFormat(id),
+                              ]),
+                            ),
                           ),
                         );
                         fs.writeSync(
                           fd,
                           Exporter.objects2CSS(
                             "objectSheet",
-                            this.#usedObjects,
+                            Object.fromEntries(
+                              Object.keys(this.#usedObjects).map((id) => [
+                                id,
+                                theObjectTree.getObject(id),
+                              ]),
+                            ),
                           ),
                         );
                         fs.writeSync(fd, `</head>\n<body>\n`);
