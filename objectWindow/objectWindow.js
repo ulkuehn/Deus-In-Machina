@@ -267,7 +267,11 @@ ipcRenderer.on(
           if (reference.text == text.id) {
             reference.citations.forEach((c) => {
               quoteList.push([
-                pre + Util.escapeHTML(text.name) + post,
+                pre +
+                  (settings.quotesTextPath
+                    ? text.path
+                    : Util.escapeHTML(text.name)) +
+                  post,
                 pre +
                   c.parts
                     .map((part) =>
@@ -304,15 +308,16 @@ ipcRenderer.on(
       pagingType: "full_numbers",
       pageLength: 10,
       lengthMenu: [
-        [5, 10, 25, -1],
-        [5, 10, 25, _("dataTables_lengthAll")],
+        5,
+        10,
+        25,
+        { label: _("dataTables_lengthAll"), value: 999999 },
       ],
       autoWidth: false,
       order: [[1, "asc"]],
       columns: [
         {
           title: _("objectReferences_text"),
-          width: "25%",
           searchable: false,
           orderable: false,
         },

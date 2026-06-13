@@ -199,8 +199,10 @@ ipcRenderer.on(
       pagingType: "full_numbers",
       pageLength: 10,
       lengthMenu: [
-        [5, 10, 25, -1],
-        [5, 10, 25, _("dataTables_lengthAll")],
+        5,
+        10,
+        25,
+        { label: _("dataTables_lengthAll"), value: 999999 },
       ],
       autoWidth: false,
       columns: [

@@ -110,18 +110,18 @@ ipcRenderer.on("objectSearchWindow_init", (event, [settings]) => {
     pagingType: "full_numbers",
     pageLength: 10,
     lengthMenu: [
-      [5, 10, 25, -1],
-      [5, 10, 25, _("dataTables_lengthAll")],
+      5,
+      10,
+      25,
+      { label: _("dataTables_lengthAll"), value: 999999 },
     ],
     autoWidth: false,
     columns: [
       {
         title: _("objectSearchWindow_resultName"),
-        width: "20%",
       },
       {
         title: _("objectSearchWindow_resultInfo"),
-        width: "20%",
         orderable: false,
       },
       { title: _("objectSearchWindow_resultValue"), orderable: false },
@@ -314,7 +314,9 @@ function searchTab() {
       .attr({
         style: "grid-column:3/span 5",
       })
-      .html(`<label for="searchPropertyNames">${_("objectSearchWindow_propertyNames")}</label>`),
+      .html(
+        `<label for="searchPropertyNames">${_("objectSearchWindow_propertyNames")}</label>`,
+      ),
   );
   $searchGrid.append(
     $("<div>")
@@ -350,7 +352,9 @@ function searchTab() {
       .attr({
         style: "grid-column:3/span 5",
       })
-      .html(`<label for="searchTexts">${_("objectSearchWindow_texts")}</label>`),
+      .html(
+        `<label for="searchTexts">${_("objectSearchWindow_texts")}</label>`,
+      ),
   );
 
   return $searchGrid;
@@ -364,21 +368,23 @@ ipcRenderer.on("objectSearchWindow_result", (event, results) => {
   results.forEach((result) => {
     result.result.forEach((r) => {
       table.push([
-        `<i class="fa-solid fa-arrow-up-right-from-square" style="cursor:pointer; margin-right:10px" onclick="showObject('${result.id
+        `<i class="fa-solid fa-arrow-up-right-from-square" style="cursor:pointer; margin-right:10px" onclick="showObject('${
+          result.id
         }',false)" oncontextmenu="showObject('${result.id}',true)" title="${_(
           "objectSearchWindow_showObject",
         )}")></i>${result.name}`,
         _(`objectSearchWindow_${r.type}`, { type: _(r.info) }),
         r.value[0] +
-        `<span style="color:#000000; background-color:#ffff00">` +
-        r.value[1] +
-        "</span>" +
-        r.value[2],
+          `<span style="color:#000000; background-color:#ffff00">` +
+          r.value[1] +
+          "</span>" +
+          r.value[2],
       ]);
     });
   });
   $("#results").DataTable().clear();
   $("#results").DataTable().rows.add(table).draw();
+  $("#results").DataTable().columns.adjust().draw(false);
 });
 
 /**

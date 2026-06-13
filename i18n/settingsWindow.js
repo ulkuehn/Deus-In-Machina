@@ -98,7 +98,7 @@ const translationSettingsWindow = {
       "settingsWindow_TTBackgroundColor": "Textnavigator",
       "settingsWindow_TCLBackgroundColor": "Textlistennavigator",
       "settingsWindow_TEBackgroundColor": `Editor <i class="fas fa-info-circle" title="der Hintergrund des Fokuseditors wird in dem entsprechenden Tab festgelegt"></i>`,
-      "settingsWindow_ORBackgroundColor": "Objektreferenzen / Zitate",
+      "settingsWindow_ORBackgroundColor": "Zitate (Objektreferenzen)",
       "settingsWindow_OTBackgroundColor": "Objektnavigator",
       "settingsWindow_windowBackgroundColors":
         "Hintergrundfarben von weiteren Fenstern",
@@ -314,6 +314,18 @@ const translationSettingsWindow = {
       "settingsWindow_textCollectionTreeContextMenuTime":
         "Zeitpunkte anzeigen (erzeugt, verändert)",
 
+      // settingTabs_quotes
+      "settingsWindow_showQuotes": "Darstellung",
+      "settingsWindow_quotesObjectPath": "gesamten Objektpfad anzeigen",
+      "settingsWindow_quotesTextPath": "gesamten Textpfad anzeigen",
+      "settingsWindow_imageReference": `Darstellung von Bildern`,
+      "imageReferenceFull": "wie im Editor",
+      "imageReferenceThumb": "Miniaturbild",
+      "imageReferenceText": "Text mit Metadaten",
+      "imageReferenceIcon": "Icon",
+      "imageReferenceIconLarge": "großes Icon",
+      "imageReferenceEmpty": "nichts",
+
       // settingTabs_objectTree
       "settingsWindow_objectTreeStyle": "Darstellung",
       "settingsWindow_objectTreeEmptyIcon": `Kennzeichnung von Objekten ohne Textbezug <i class="fa-solid fa-link-slash">`,
@@ -386,14 +398,6 @@ const translationSettingsWindow = {
       "settingsWindow_imageAlignment": "Anordnung",
       "settingsWindow_imageWidth": `Bildbreite beim Einfügen begrenzen <i class="fas fa-info-circle" title="Wert 0 deaktiviert die Breitenbegrenzung"></i>`,
       "settingsWindow_imageHeight": `Bildhöhe beim Einfügen begrenzen <i class="fas fa-info-circle" title="Wert 0 deaktiviert die Höhenbegrenzung"></i>`,
-      "settingsWindow_imageObjectReference": "Bilder in Objektreferenzen",
-      "settingsWindow_imageReference": `Darstellung`,
-      "imageReferenceFull": "wie im Editor",
-      "imageReferenceThumb": "als Miniaturbild",
-      "imageReferenceText": "Text mit Metadaten",
-      "imageReferenceIcon": "Icon",
-      "imageReferenceIconLarge": "großes Icon",
-      "imageReferenceEmpty": "nichts",
 
       // settingTabs_import
       "settingsWindow_importFile": "Import aus Dateien",
@@ -540,7 +544,7 @@ const translationSettingsWindow = {
       "settingsWindow_TTBackgroundColor": "Text Navigator",
       "settingsWindow_TCLBackgroundColor": "Text Collection Navigator",
       "settingsWindow_TEBackgroundColor": `Editor <i class="fas fa-info-circle" title="the focus editor's background is set in the respective tab"></i>`,
-      "settingsWindow_ORBackgroundColor": "Object References / Quotes",
+      "settingsWindow_ORBackgroundColor": "Quotes (Object References)",
       "settingsWindow_OTBackgroundColor": "Object Navigator",
       "settingsWindow_windowBackgroundColors":
         "Background Colors of additional Windows",
@@ -747,6 +751,18 @@ const translationSettingsWindow = {
       "settingsWindow_textCollectionTreeContextMenuTime":
         "Show Timestamps (created, last changed)",
 
+      // settingTabs_quotes
+      "settingsWindow_showQuotes": "Style",
+      "settingsWindow_quotesObjectPath": "show full Object Path",
+      "settingsWindow_quotesTextPath": "show full Text Path",
+      "settingsWindow_imageReference": `Show Images as`,
+      "imageReferenceFull": "in the Editor",
+      "imageReferenceThumb": "Thumbnail",
+      "imageReferenceText": "Text with Metadata",
+      "imageReferenceIcon": "Icon",
+      "imageReferenceIconLarge": "large Icon",
+      "imageReferenceEmpty": "empty",
+
       // settingTabs_objectTree
       "settingsWindow_objectTreeStyle": "Style",
       "settingsWindow_objectTreeEmptyIcon": `Label Objects unrelated to Texts <i class="fa-solid fa-link-slash">`,
@@ -817,14 +833,6 @@ const translationSettingsWindow = {
       "settingsWindow_imageAlignment": "Default alignment",
       "settingsWindow_imageWidth": `Limit Image width on insert <i class="fas fa-info-circle" title="set to 0 for no limitation"></i>`,
       "settingsWindow_imageHeight": `Limit Image height on insert <i class="fas fa-info-circle" title="set to 0 for no limitation"></i>`,
-      "settingsWindow_imageObjectReference": "Images in Object references",
-      "settingsWindow_imageReference": `Show as`,
-      "imageReferenceFull": "in the Editor",
-      "imageReferenceThumb": "Thumbnail",
-      "imageReferenceText": "Text with Metadata",
-      "imageReferenceIcon": "Icon",
-      "imageReferenceIconLarge": "large Icon",
-      "imageReferenceEmpty": "empty",
 
       // settingTabs_import
       "settingsWindow_importFile": "File Import",

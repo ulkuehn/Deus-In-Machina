@@ -1353,7 +1353,7 @@ ipcRenderer.on(
         id,
         new StyledObject(...JSON.parse(currentObject)),
         files,
-        tmpDir
+        tmpDir,
       ),
     );
   },
@@ -1783,7 +1783,9 @@ ipcRenderer.on(
         if (result.length) {
           foundObjects.push({
             id: objectID,
-            name: theObjectTree.getObject(objectID).name,
+            name: theSettings.effectiveSettings().quotesObjectPath
+              ? theObjectTree.getPath(objectID, true)
+              : Util.endSpellcheck(theObjectTree.getObject(objectID).name),
             result: result,
           });
         }

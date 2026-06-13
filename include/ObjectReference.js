@@ -111,7 +111,7 @@ class ObjectReference {
             if (text.id in objectReferences[objectID]) {
               let lastPush =
                 objectReferences[objectID][text.id][
-                objectReferences[objectID][text.id].length - 1
+                  objectReferences[objectID][text.id].length - 1
                 ];
               if (lastPush.pos + lastPush.len == pos) {
                 lastPush.text += deltaOP.insert;
@@ -150,7 +150,11 @@ class ObjectReference {
               }
               citation.push({ content: ref.content, html: ref.html });
               pos = ref.pos + ref.len + 1;
-              len += ref.len + (typeof ref.content == "string" && ref.content.endsWith("\n") ? 1 : 0);
+              len +=
+                ref.len +
+                (typeof ref.content == "string" && ref.content.endsWith("\n")
+                  ? 1
+                  : 0);
             });
             citations.push({
               pos: startPos,
@@ -211,10 +215,13 @@ class ObjectReference {
         lengthMenu: _("dataTables_lengthMenu"),
         search: _("objectReferences_search"),
       },
+      autoWidth: false,
       pagingType: "full_numbers",
       lengthMenu: [
-        [5, 10, 25, -1],
-        [5, 10, 25, _("dataTables_lengthAll")],
+        5,
+        10,
+        25,
+        { label: _("dataTables_lengthAll"), value: 999999 },
       ],
       order: [[2, "asc"]],
       columns: [
@@ -222,13 +229,11 @@ class ObjectReference {
           title: _("objectReferences_object"),
           searchable: false,
           orderable: false,
-          width: "15%",
         },
         {
           title: _("objectReferences_text"),
           searchable: false,
           orderable: false,
-          width: "15%",
         },
         {
           title: _("objectReferences_quote"),
@@ -293,13 +298,15 @@ class ObjectReference {
       theObjectTree.getChecked(),
       settings.imageReference,
     ).forEach((r) => {
-      let objectName = Util.escapeHTML(theObjectTree.getObject(r.object).name);
       r.references.forEach((rr) => {
-        let textName = Util.escapeHTML(theTextTree.getText(rr.text).name);
         rr.citations.forEach((c) => {
           tableData.push([
-            objectName,
-            textName,
+            settings.quotesObjectPath
+              ? theObjectTree.getPath(r.object, true)
+              : Util.escapeHTML(theObjectTree.getObject(r.object).name),
+            settings.quotesTextPath
+              ? theTextTree.getPath(rr.text, true)
+              : Util.escapeHTML(theTextTree.getText(rr.text).name),
             c.parts
               .map((part) =>
                 part.html ? part.content : Util.escapeHTML(part.content),
@@ -317,5 +324,6 @@ class ObjectReference {
 
     $("#object-reference-table").DataTable().clear();
     $("#object-reference-table").DataTable().rows.add(tableData).draw();
+    $("#object-reference-table").DataTable().columns.adjust().draw(false);
   }
 }

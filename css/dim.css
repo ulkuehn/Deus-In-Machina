@@ -199,6 +199,13 @@ select {
   font-size: 16px !important;
 }
 
+.pathElement {
+  opacity: 0.5;
+}
+.pathElement:hover {
+  opacity: 1;
+}
+
 /* style data tables */
 select,
 option,

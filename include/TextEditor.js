@@ -1206,7 +1206,7 @@ class TextEditor {
             let $namePopup = $("<div>")
               .attr({
                 id: `name${textID}`,
-                style: `position:absolute; top:0px; left:5px; width:100%; text-align:center; display:none; background:linear-gradient(90deg, ${Util.blackOrWhite(settings.textBackgroundColor || settings.generalBackgroundColor)}C0, 95%, transparent); color:${settings.textBackgroundColor || settings.generalBackgroundColor};`,
+                style: `position:absolute; top:0px; left:0px; width:100%; text-align:center; padding:5px 0 5px 0; display:none; background:linear-gradient(90deg, transparent, 5%, ${Util.blackOrWhite(settings.textBackgroundColor || settings.generalBackgroundColor)}C0, 95%, transparent); color:${settings.textBackgroundColor || settings.generalBackgroundColor};`,
               })
               .html(
                 settings.textNamePath
@@ -1218,7 +1218,7 @@ class TextEditor {
               $namePopup.css("display", "block");
               $namePopup.css("top", e.clientY - rect.top + "px");
             });
-            $nameBar.on("mouseleave", () => {
+            $namePopup.on("mouseleave", () => {
               $namePopup.css("display", "none");
             });
             $newEditor.append($nameBar);

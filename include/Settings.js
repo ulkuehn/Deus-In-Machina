@@ -386,7 +386,7 @@ class Settings {
           type: "select",
           name: "textName",
           values: ["textName_none", "textName_top", "textName_left"],
-          default: "textName_none",
+          default: "textName_left",
         },
         { type: "check", name: "textNamePath", default: false },
         {
@@ -1015,6 +1015,31 @@ class Settings {
         },
       ],
     },
+    // quotes
+    {
+      tab: "settingTabs_quotes",
+      settings: [
+        {
+          type: "separator",
+          name: "settingsWindow_showQuotes",
+        },
+        { type: "check", name: "quotesObjectPath", default: true },
+        { type: "check", name: "quotesTextPath", default: true },
+        {
+          type: "select",
+          name: "imageReference",
+          values: [
+            "imageReferenceFull",
+            "imageReferenceThumb",
+            "imageReferenceText",
+            "imageReferenceIcon",
+            "imageReferenceIconLarge",
+            "imageReferenceEmpty",
+          ],
+          default: "imageReferenceThumb",
+        },
+      ],
+    },
     // object tree
     {
       tab: "settingTabs_objectTree",
@@ -1336,23 +1361,6 @@ class Settings {
           default: 500,
           unitI18n: "units_pixel",
           unit: "px",
-        },
-        {
-          type: "separator",
-          name: "settingsWindow_imageObjectReference",
-        },
-        {
-          type: "select",
-          name: "imageReference",
-          values: [
-            "imageReferenceFull",
-            "imageReferenceThumb",
-            "imageReferenceText",
-            "imageReferenceIcon",
-            "imageReferenceIconLarge",
-            "imageReferenceEmpty",
-          ],
-          default: "imageReferenceThumb",
         },
       ],
     },

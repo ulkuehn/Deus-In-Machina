@@ -713,39 +713,25 @@ class ObjectTree {
    * @returns {String}
    */
   getPath(id, leafFirst = false) {
-    if (leafFirst) {
-      let path = "";
-      this.getParents(id)
+    if (leafFirst)
+      return `${Util.escapeHTML(
+        this.#objects[id].name,
+      )}<span class="pathElement">${this.getParents(id)
         .slice(0, -1)
         .reverse()
-        .forEach((p) => {
-          path += `${Util.escapeHTML(
-            p,
-          )} <i class="fa-solid fa-arrow-left-long"></i> `;
-        });
-      return (
-        `${Util.escapeHTML(
-          this.#objects[id].name,
-        )} <span style="opacity:0.5"><i class="fa-solid fa-arrow-left-long"></i> ` +
-        path +
-        "</span>"
-      );
-    } else {
-      let path = `<span style="opacity:0.5">`;
-      this.getParents(id)
+        .map(
+          (p) =>
+            ` <i class="fa-solid fa-arrow-left-long"></i> ${Util.escapeHTML(p)}`,
+        )
+        .join("")}</span>`;
+    else
+      return `<span class="pathElement">${this.getParents(id)
         .slice(0, -1)
-        .forEach((p) => {
-          path += `<i class="fa-solid fa-arrow-right-long"></i> ${Util.escapeHTML(
-            p,
-          )} `;
-        });
-      return (
-        path +
-        `<i class="fa-solid fa-arrow-right-long"></i></span> ${Util.escapeHTML(
-          this.#objects[id].name,
-        )}`
-      );
-    }
+        .map(
+          (p) =>
+            `${Util.escapeHTML(p)} <i class="fa-solid fa-arrow-right-long"></i> `,
+        )
+        .join("")}</span>${Util.escapeHTML(this.#objects[id].name)}`;
   }
 
   /**
@@ -1078,13 +1064,14 @@ class ObjectTree {
   /**
    * get ids of all nodes in sequential order with checked info
    *
-   * @returns {Object[]} array of {id:{String}, name:{String}, check:{Boolean}}
+   * @returns {Object[]} array of {id:{String}, name:{String}, path:{String}, checked:{Boolean}}
    */
   getCheckInfo() {
     return this.#allNodesDepthFirst().map((id) => {
       return {
         id: id,
         name: this.#objects[id].name,
+        path: this.getPath(id, true),
         checked: this.#treeDiv.jstree().is_checked(id),
       };
     });
