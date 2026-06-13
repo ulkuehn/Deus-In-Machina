@@ -22,9 +22,8 @@ class Scheme {
    * list of available information types
    * @static
    */
-  static #types = [
+  static types = [
     "schemeTypes_header", // named separator
-    "schemeTypes_relation", // connection to another object
     "schemeTypes_checkbox", // checkbox
     "schemeTypes_range", // numerical slider
     "schemeTypes_select", // dropdown
@@ -34,6 +33,7 @@ class Scheme {
     "schemeTypes_editor", // richt text editor
     "schemeTypes_date", // calendar (single date)
     "schemeTypes_dateRange", // calendar (date range)
+    "schemeTypes_relation", // connection to another object
     "schemeTypes_map", // geographical map
     "schemeTypes_file", // file attachment
     "schemeTypes_webpage", // pdf copy of web page
@@ -1614,7 +1614,7 @@ class Scheme {
             class: "form-select form-select-sm",
             disabled: true,
           });
-          Scheme.#types.forEach((type) => {
+          Scheme.types.forEach((type) => {
             $select.append(
               $("<option>")
                 .attr({
@@ -1734,7 +1734,7 @@ class Scheme {
         class: "form-select form-select-sm",
         id: `schemeType_${this.#scheme[itemNo].id}_${itemNo}`,
       });
-      Scheme.#types.forEach((type) => {
+      Scheme.types.forEach((type) => {
         $select.append(
           $("<option>")
             .attr({

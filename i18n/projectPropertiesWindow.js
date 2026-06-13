@@ -13,6 +13,7 @@ const { translationCategories } = require("./include/categories.js");
 const { translationColorPicker } = require("./include/colorpicker.js");
 const { translationUnits } = require("./include/units.js");
 const { translationWordcloud } = require("./include/wordcloud.js");
+const { translationSchemeTypes } = require("./include/SchemeTypes.js");
 
 const translationProjectPropertiesWindow = {
   // German
@@ -26,6 +27,7 @@ const translationProjectPropertiesWindow = {
       ...translationColorPicker.de,
       ...translationUnits.de,
       ...translationWordcloud.de,
+      ...translationSchemeTypes.de,
 
       projectPropertiesWindow_titleTab: "Titeldaten",
       projectPropertiesWindow_categoriesTab: "Textkategorien",
@@ -59,6 +61,7 @@ const translationProjectPropertiesWindow = {
       ...translationColorPicker.en,
       ...translationUnits.en,
       ...translationWordcloud.en,
+      ...translationSchemeTypes.en,
 
       projectPropertiesWindow_titleTab: "Cover data",
       projectPropertiesWindow_categoriesTab: "Text Categories",

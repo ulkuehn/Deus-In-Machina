@@ -223,27 +223,27 @@ ipcRenderer.on(
           render: function (data, type, row) {
             return type == "display"
               ? _(
-                "statistics_wordFrequency",
-                Math.round(statistics.words / data),
-                {
-                  absolute: data,
-                  relative:
-                    data / statistics.words > 1 / 100
-                      ? Number.parseFloat(
-                        (data / statistics.words) * 100,
-                      ).toLocaleString(theLanguage, {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1,
-                      }) + " %"
-                      : Number.parseFloat(
-                        (data / statistics.words) * 1000,
-                      ).toLocaleString(theLanguage, {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1,
-                      }) + " &permil;",
-                  every: Math.round(statistics.words / data),
-                },
-              )
+                  "statistics_wordFrequency",
+                  Math.round(statistics.words / data),
+                  {
+                    absolute: data,
+                    relative:
+                      data / statistics.words > 1 / 100
+                        ? Number.parseFloat(
+                            (data / statistics.words) * 100,
+                          ).toLocaleString(theLanguage, {
+                            minimumFractionDigits: 1,
+                            maximumFractionDigits: 1,
+                          }) + " %"
+                        : Number.parseFloat(
+                            (data / statistics.words) * 1000,
+                          ).toLocaleString(theLanguage, {
+                            minimumFractionDigits: 1,
+                            maximumFractionDigits: 1,
+                          }) + " &permil;",
+                    every: Math.round(statistics.words / data),
+                  },
+                )
               : data;
           },
         },
@@ -713,6 +713,33 @@ function statisticsTab(statistics) {
       .html(_("statistics_objectsWithTexts", statistics.objectsWithTexts)),
   );
 
+  // properties
+  $grid.append(
+    $("<div>")
+      .attr({
+        style: "grid-column:1/span 2; justify-self:stretch;",
+        class: "section-header",
+      })
+      .html(_("statistics_properties")),
+  );
+  for (let [k, v] of Object.entries(statistics.properties)) {
+    console.log({ k }, { v });
+    $grid.append(
+      $("<div>")
+        .attr({
+          style: "grid-column:1/span 1; justify-self:end;",
+        })
+        .html(v.toLocaleString(theLanguage)),
+    );
+    $grid.append(
+      $("<div>")
+        .attr({
+          style: "grid-column:2/span 1; justify-self:start;",
+        })
+        .html(`${_("statistics_propTimes")} "${_(k)}"`),
+    );
+  }
+
   return $grid;
 }
 
@@ -752,11 +779,11 @@ function projectTab(settings, project) {
       .html(
         project[0]
           ? new Timestamp(project[0]).toLocalString(
-            settings.dateTimeFormatLong,
-          ) +
-          ` (${_("time_timePassed", {
-            time: new Timestamp(project[0]).timeToNow(),
-          })})`
+              settings.dateTimeFormatLong,
+            ) +
+              ` (${_("time_timePassed", {
+                time: new Timestamp(project[0]).timeToNow(),
+              })})`
           : "---",
       ),
   );
@@ -784,11 +811,11 @@ function projectTab(settings, project) {
       .html(
         project[1]
           ? new Timestamp(project[1]).toLocalString(
-            settings.dateTimeFormatLong,
-          ) +
-          ` (${_("time_timePassed", {
-            time: new Timestamp(project[1]).timeToNow(),
-          })})`
+              settings.dateTimeFormatLong,
+            ) +
+              ` (${_("time_timePassed", {
+                time: new Timestamp(project[1]).timeToNow(),
+              })})`
           : "---",
       ),
   );
@@ -839,8 +866,8 @@ function projectTab(settings, project) {
       .html(
         project[3]
           ? `<i class="fa-solid fa-up-right-from-square" onclick="ipcRenderer.invoke('mainProcess_openFileInExplorer', thePath)" title="${_(
-            "projectPropertiesWindow_exploreFileTitle",
-          )}" style="cursor:pointer; margin-right:10px"></i>${project[3]}`
+              "projectPropertiesWindow_exploreFileTitle",
+            )}" style="cursor:pointer; margin-right:10px"></i>${project[3]}`
           : "---",
       ),
   );

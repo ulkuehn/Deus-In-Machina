@@ -1073,6 +1073,7 @@ class Project {
     let statistics = {
       texts: Object.keys(theTextTree.texts).length,
       objects: Object.keys(theObjectTree.objects).length,
+      properties: Object.fromEntries(Scheme.types.slice(1).map(t=>[t,0])),
       textsWithObjects: 0,
       objectsWithTexts: 0,
       objectCharacters: 0,
@@ -1111,10 +1112,19 @@ class Project {
         statistics.textsWithObjects += 1;
       }
     });
+
     for (let objectID in theObjectTree.objects) {
-      if (Object.keys(theObjectTree.getObject(objectID).texts).length > 0) {
+      let object = theObjectTree.getObject(objectID);
+      if (Object.keys(object.texts).length > 0) {
         statistics.objectsWithTexts += 1;
       }
+      Object.keys(object.properties).forEach((oID)=>{
+        let o = theObjectTree.getObject(oID)
+        for (let s of o.scheme){
+          if (s.id in object.properties[oID])
+            statistics.properties[s.type]++
+        }
+      })
     }
 
     return statistics;

@@ -77,6 +77,9 @@ const translationStatistics = {
       [1, 1, "davon ist Texten zugeordnet"],
       [2, null, "davon sind Texten zugeordnet"],
     ],
+    // properties
+    statistics_properties: "Von allen Objekten verwendete Eigenschaften",
+    statistics_propTimes: "mal",
   },
   // English
   en: {
@@ -149,6 +152,9 @@ const translationStatistics = {
       [1, 1, "of which is connected to Texts"],
       [2, null, "of which are connected to Texts"],
     ],
+    // properties
+    statistics_properties: "Properties used by all Objects",
+    statistics_propTimes: "times",
   },
 };
 
