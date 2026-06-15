@@ -78,7 +78,7 @@ const translationStatistics = {
       [2, null, "davon sind Texten zugeordnet"],
     ],
     // properties
-    statistics_properties: "Von allen Objekten verwendete Eigenschaften",
+    statistics_properties: "Von den Objekten verwendete Eigenschaften",
     statistics_propTimes: "mal",
   },
   // English

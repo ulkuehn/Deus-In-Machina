@@ -311,6 +311,31 @@ ipcRenderer.on("rendererProcess_openProjectProperties", () => {
   ipcRenderer.invoke("mainProcess_loggingVerbose", [
     "rendererProcess_openProjectProperties",
   ]);
+  let fileInformation = [];
+  Object.keys(theFiles).forEach((fileID) => {
+    let objects = [];
+    for (let [objectID, object] of Object.entries(theObjectTree.objects)) {
+      let object = theObjectTree.getObject(objectID);
+      Object.values(object.properties).forEach((propSet) => {
+        Object.values(propSet).forEach((prop) => {
+          if ("id" in prop && prop.id == fileID) {
+            objects.push({
+              id: objectID,
+              name: object.name,
+              path: theObjectTree.getPath(objectID,true),
+              web: "url" in prop,
+            });
+          }
+        });
+      });
+    }
+    fileInformation.push({
+      id:fileID,
+      extension: theFiles[fileID].extension,
+      size: theFiles[fileID].size,
+      objects: objects,
+    });
+  });
   ipcRenderer.invoke("mainProcess_openWindow", [
     "properties",
     theSettings.effectiveSettings().closingType,
@@ -330,6 +355,7 @@ ipcRenderer.on("rendererProcess_openProjectProperties", () => {
       theProperties.categories,
       theProject.statistics(),
       theProject.properties(),
+      fileInformation,
     ],
   ]);
 });

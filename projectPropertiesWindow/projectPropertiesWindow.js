@@ -31,6 +31,7 @@ let theCategories;
  * @param {Object} categories project categories for text status, type etc
  * @param {Object} statistics project statistics
  * @param {String[]} properties project properties e.g. meta info
+ * @param {Object[]} files project file information
  */
 ipcRenderer.on(
   "projectPropertiesWindow_init",
@@ -45,6 +46,7 @@ ipcRenderer.on(
       categories,
       statistics,
       properties,
+      files,
     ],
   ) => {
     ipcRenderer.invoke("mainProcess_loggingVerbose", [
@@ -57,7 +59,10 @@ ipcRenderer.on(
       { categories },
       { statistics },
       { properties },
+      { files },
     ]);
+    console.log(files);
+
     theLanguage = settings.language;
     thePath = properties[3];
 
@@ -143,6 +148,16 @@ ipcRenderer.on(
       statisticsTab(statistics),
     );
 
+    // add files tab
+    Util.addTab(
+      $tabs,
+      $content,
+      false,
+      "filesTab",
+      _("projectPropertiesWindow_filesTab"),
+      `<table id="filelist" class="display" width="100%"></table>`,
+    );
+
     // add wordlist tab
     Util.addTab(
       $tabs,
@@ -175,6 +190,54 @@ ipcRenderer.on(
     );
 
     Util.initTabs();
+
+    // populate filelist table
+    $("#filelist").DataTable({
+      data: files.map((file) => [
+        file.id,
+        file.extension,
+        Util.formatBytes(file.size),
+        file.size,
+        file.objects
+          .map((o) =>
+            settings.quotesObjectPath ? o.path : Util.escapeHTML(o.name),
+          )
+          .join("<br"),
+      ]),
+      language: {
+        info: _("dataTables_info"),
+        infoEmpty: _("dataTables_empty"),
+        emptyTable: _("statistics_wordlistEmpty"),
+        paginate: {
+          first: _("dataTables_firstPage"),
+          previous: _("dataTables_previousPage"),
+          last: _("dataTables_lastPage"),
+          next: _("dataTables_nextPage"),
+        },
+        lengthMenu: _("dataTables_lengthMenu"),
+        search: _("statistics_wordlistSearch"),
+      },
+      pagingType: "full_numbers",
+      pageLength: 10,
+      lengthMenu: [
+        5,
+        10,
+        25,
+        { label: _("dataTables_lengthAll"), value: 999999 },
+      ],
+      autoWidth: false,
+      columns: [
+        {
+          title: _(""),
+          searchable: false,
+          orderable: false,
+        },
+        { title: _("") },
+        { title: _(""), orderData: [3, 2], className: "dt-body-right" },
+        { type: "num", visible: false },
+        { title: _("") },
+      ],
+    });
 
     // populate wordlist table
     let wordList = [];
@@ -723,7 +786,6 @@ function statisticsTab(statistics) {
       .html(_("statistics_properties")),
   );
   for (let [k, v] of Object.entries(statistics.properties)) {
-    console.log({ k }, { v });
     $grid.append(
       $("<div>")
         .attr({
@@ -742,6 +804,14 @@ function statisticsTab(statistics) {
 
   return $grid;
 }
+
+/**
+ * implement files tab
+ *
+ * @param {*} files
+ * @returns {Object} jquery grid
+ */
+function filesTab(files) {}
 
 /**
  * implement project infos tab
