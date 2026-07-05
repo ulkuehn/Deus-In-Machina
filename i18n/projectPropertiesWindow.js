@@ -32,6 +32,7 @@ const translationProjectPropertiesWindow = {
       projectPropertiesWindow_titleTab: "Titeldaten",
       projectPropertiesWindow_categoriesTab: "Textkategorien",
       projectPropertiesWindow_projectTab: "Projektinformationen",
+      projectPropertiesWindow_filesTab: "Dateien",
 
       projectPropertiesWindow_title: "Titel",
       projectPropertiesWindow_subtitle: "Untertitel",
@@ -48,6 +49,13 @@ const translationProjectPropertiesWindow = {
       projectPropertiesWindow_timeSince: "vor %{time}",
       projectPropertiesWindow_password: "Passwort",
       projectPropertiesWindow_confirmPassword: "Passwortbestätigung",
+
+      projectPropertiesWindow_fileInfo: "Dateipfad / URL",
+      projectPropertiesWindow_fileType: "Typ",
+      projectPropertiesWindow_fileSize: "Größe",
+      projectPropertiesWindow_fileObject: "Objekt",
+      projectPropertiesWindow_openFile: `gespeicherte Datei öffnen`,
+      projectPropertiesWindow_openURL: `URL direkt öffnen`,
     },
   }),
   // English
@@ -66,6 +74,7 @@ const translationProjectPropertiesWindow = {
       projectPropertiesWindow_titleTab: "Cover data",
       projectPropertiesWindow_categoriesTab: "Text Categories",
       projectPropertiesWindow_projectTab: "Project Information",
+      projectPropertiesWindow_filesTab: "Files",
 
       projectPropertiesWindow_title: "Title",
       projectPropertiesWindow_subtitle: "Subtitle",
@@ -82,6 +91,13 @@ const translationProjectPropertiesWindow = {
       projectPropertiesWindow_timeSince: "%{time} ago",
       projectPropertiesWindow_password: "Password",
       projectPropertiesWindow_confirmPassword: "Comfirm Password",
+
+      projectPropertiesWindow_fileInfo: "Path / URL",
+      projectPropertiesWindow_fileType: "Type",
+      projectPropertiesWindow_fileSize: "Size",
+      projectPropertiesWindow_fileObject: "Object",
+      projectPropertiesWindow_openFile: `Open saved File`,
+      projectPropertiesWindow_openURL: `Open URL directly`,
     },
   }),
 };

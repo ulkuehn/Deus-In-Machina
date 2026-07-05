@@ -234,28 +234,32 @@ class Util {
    *
    * @param {number} bytes The bytes to format
    * @param {number} decimals Number of decimals to display
+   * @param {Boolean} html true:format as non-breakable html, false:just text
    * @return {string} Formatted byte size
    */
-  static formatBytes(bytes, decimals = 1) {
-    if (!+bytes) return `0 ${_("units_byte")}`;
-    if (decimals < 0) decimals = 0;
+  static formatBytes(bytes, decimals = 1, html = false) {
+    let r = "";
+    if (!+bytes) r = `0 ${_("units_byte")}`;
+    else {
+      if (decimals < 0) decimals = 0;
 
-    const oneK = 1024;
-    const sizes = [
-      "units_byte",
-      "units_kilobyte",
-      "units_megabyte",
-      "units_gigabyte",
-      "units_terrabyte",
-      "PiB",
-      "EiB",
-      "ZiB",
-      "YiB",
-    ];
+      let oneK = 1024;
+      let sizes = [
+        "units_byte",
+        "units_kilobyte",
+        "units_megabyte",
+        "units_gigabyte",
+        "units_terrabyte",
+        "PiB",
+        "EiB",
+        "ZiB",
+        "YiB",
+      ];
+      let i = Math.floor(Math.log(bytes) / Math.log(oneK));
 
-    const i = Math.floor(Math.log(bytes) / Math.log(oneK));
-
-    return `${parseFloat((bytes / Math.pow(oneK, i)).toFixed(decimals))} ${_(sizes[i])}`;
+      r = `${parseFloat((bytes / Math.pow(oneK, i)).toFixed(decimals))} ${_(sizes[i])}`;
+    }
+    return html ? `<span style="white-space:nowrap">${r}</span>` : r;
   }
 
   /**

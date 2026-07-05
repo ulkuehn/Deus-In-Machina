@@ -312,30 +312,24 @@ ipcRenderer.on("rendererProcess_openProjectProperties", () => {
     "rendererProcess_openProjectProperties",
   ]);
   let fileInformation = [];
-  Object.keys(theFiles).forEach((fileID) => {
-    let objects = [];
-    for (let [objectID, object] of Object.entries(theObjectTree.objects)) {
-      let object = theObjectTree.getObject(objectID);
-      Object.values(object.properties).forEach((propSet) => {
-        Object.values(propSet).forEach((prop) => {
-          if ("id" in prop && prop.id == fileID) {
-            objects.push({
-              id: objectID,
-              name: object.name,
-              path: theObjectTree.getPath(objectID,true),
-              web: "url" in prop,
-            });
-          }
-        });
-      });
-    }
-    fileInformation.push({
-      id:fileID,
-      extension: theFiles[fileID].extension,
-      size: theFiles[fileID].size,
-      objects: objects,
-    });
-  });
+  for (let [objectID, object] of Object.entries(theObjectTree.objects)) {
+    Object.values(object.properties).forEach((propSet) => {
+      Object.values(propSet).forEach((prop) => {
+        if ("id" in prop && prop.id in theFiles) {
+          fileInformation.push({
+            fileID: prop.id,
+            extension: theFiles[prop.id].extension,
+            size: theFiles[prop.id].size,
+            info: prop.url ?? prop.filePath,
+            web: "url" in prop,
+            objectID: objectID,
+            objectName: object.name,
+            objectPath: theObjectTree.getPath(objectID, true),
+          });
+        }
+      })
+    })
+  }
   ipcRenderer.invoke("mainProcess_openWindow", [
     "properties",
     theSettings.effectiveSettings().closingType,

@@ -61,7 +61,6 @@ ipcRenderer.on(
       { properties },
       { files },
     ]);
-    console.log(files);
 
     theLanguage = settings.language;
     thePath = properties[3];
@@ -191,19 +190,8 @@ ipcRenderer.on(
 
     Util.initTabs();
 
-    // populate filelist table
+    // create filelist table
     $("#filelist").DataTable({
-      data: files.map((file) => [
-        file.id,
-        file.extension,
-        Util.formatBytes(file.size),
-        file.size,
-        file.objects
-          .map((o) =>
-            settings.quotesObjectPath ? o.path : Util.escapeHTML(o.name),
-          )
-          .join("<br"),
-      ]),
       language: {
         info: _("dataTables_info"),
         infoEmpty: _("dataTables_empty"),
@@ -228,16 +216,43 @@ ipcRenderer.on(
       autoWidth: false,
       columns: [
         {
-          title: _(""),
-          searchable: false,
-          orderable: false,
+          title: _("projectPropertiesWindow_fileInfo"),
+          render: function (data, type, row) {
+            return type == "display"
+              ? `<span style="cursor:pointer" title='${_("projectPropertiesWindow_openFile")}' onclick="ipcRenderer.invoke('mainProcess_loadFile', '${data.id}','${data.extension}', true)">${data.info}</span>`
+              : data.info;
+          },
         },
-        { title: _("") },
-        { title: _(""), orderData: [3, 2], className: "dt-body-right" },
+        {
+          title: _("projectPropertiesWindow_fileType"),
+        },
+        {
+          title: _("projectPropertiesWindow_fileSize"),
+          orderData: [3, 2],
+          className: "dt-body-right",
+        },
         { type: "num", visible: false },
-        { title: _("") },
+        { title: _("projectPropertiesWindow_fileObject") },
       ],
     });
+    $("#filelist").DataTable().clear();
+    $("#filelist")
+      .DataTable()
+      .rows.add(
+        files.map((file) => [
+          { info: file.info, id: file.fileID, extension: file.extension },
+          file.web
+            ? `<button class="btn btn-sm simple-btn" style="cursor:pointer" title='${_("projectPropertiesWindow_openURL")}' onclick='ipcRenderer.invoke("mainProcess_openURL", "${file.info}");'><i class="fa-solid fa-globe"></i></button>`
+            : file.extension,
+          Util.formatBytes(file.size,undefined,true),
+          file.size,
+          settings.quotesObjectPath
+            ? file.objectPath
+            : Util.escapeHTML(file.objectName),
+        ]),
+      )
+      .draw();
+    $("#filelist").DataTable().columns.adjust().draw(false);
 
     // populate wordlist table
     let wordList = [];
@@ -804,14 +819,6 @@ function statisticsTab(statistics) {
 
   return $grid;
 }
-
-/**
- * implement files tab
- *
- * @param {*} files
- * @returns {Object} jquery grid
- */
-function filesTab(files) {}
 
 /**
  * implement project infos tab

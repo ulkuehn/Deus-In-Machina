@@ -1113,34 +1113,19 @@ class Project {
       }
     });
 
-    for (let objectID in theObjectTree.objects) {
-      let object = theObjectTree.getObject(objectID);
-      if (Object.keys(object.texts).length > 0) {
+    for (let [objectID, object] of Object.entries(theObjectTree.objects)) {
+      if (Object.keys(object.texts).length > 0)
         statistics.objectsWithTexts += 1;
-      }
-      Object.keys(object.properties).forEach((oID) => {
-        let o = theObjectTree.getObject(oID);
-        for (let s of o.scheme) {
-          if (s.id in object.properties[oID]) statistics.properties[s.type]++;
+      Object.keys(object.properties).forEach((schemeObjectID) => {
+        let schemeObject = theObjectTree.getObject(schemeObjectID);
+        for (let s of schemeObject.scheme) {
+          if (s.id in object.properties[schemeObjectID])
+            statistics.properties[s.type]++;
         }
       });
     }
 
     return statistics;
-  }
-
-  /**
-   * collect info of all files used in the project
-   */
-  files() {
-    try {
-      this.#database
-        .prepare("select extension,size from files")
-        .all()
-        .map((x) => console.log(x));
-    } catch (err) {
-      return null;
-    }
   }
 
   /**
