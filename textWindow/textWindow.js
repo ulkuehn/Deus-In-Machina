@@ -268,6 +268,7 @@ ipcRenderer.on(
         info: _("dataTables_info"),
         infoEmpty: _("dataTables_empty"),
         emptyTable: _("statistics_wordlistEmpty"),
+        zeroRecords: _("statistics_wordlistEmpty"),
         paginate: {
           first: _("dataTables_firstPage"),
           previous: _("dataTables_previousPage"),

@@ -315,7 +315,7 @@ ipcRenderer.on("rendererProcess_openProjectProperties", () => {
   for (let [objectID, object] of Object.entries(theObjectTree.objects)) {
     Object.values(object.properties).forEach((propSet) => {
       Object.values(propSet).forEach((prop) => {
-        if ("id" in prop && prop.id in theFiles) {
+        if (typeof prop == "object" && "id" in prop && prop.id in theFiles) {
           fileInformation.push({
             fileID: prop.id,
             extension: theFiles[prop.id].extension,

@@ -9,8 +9,10 @@ const translationDataTables = {
   // German
   de: {
     dataTables_filtered: "(aus insgesamt _MAX_ Einträgen gefiltert)",
-    dataTables_info: "Zeile _START_ bis _END_ von ingesamt _TOTAL_ Zeilen",
+    dataTables_info: "Zeile _START_ bis _END_ von _TOTAL_ Zeilen",
     dataTables_empty: "",
+    dataTables_emptyInfo: "keine Einträge vorhanden",
+    dataTables_search: "Filter",
     dataTables_firstPage: "<<",
     dataTables_previousPage: "<",
     dataTables_lastPage: ">>",
@@ -20,9 +22,11 @@ const translationDataTables = {
   },
   // English
   en: {
-    dataTables_filtered: "(filtered from _MAX_ entries)",
+    dataTables_filtered: "(filtered from a total of _MAX_ entries)",
     dataTables_info: "Showing _START_ to _END_ of _TOTAL_ entries",
     dataTables_empty: "",
+    dataTables_emptyInfo: "No entries to show",
+    dataTables_search: "Filter",
     dataTables_firstPage: "<<",
     dataTables_previousPage: "<",
     dataTables_lastPage: ">>",

@@ -217,6 +217,7 @@ ipcRenderer.on(
         info: _("dataTables_info"),
         infoEmpty: _("dataTables_empty"),
         emptyTable: _("statistics_wordlistEmpty"),
+        zeroRecords: _("dataTables_emptyInfo"),
         paginate: {
           first: _("dataTables_firstPage"),
           previous: _("dataTables_previousPage"),
@@ -253,27 +254,27 @@ ipcRenderer.on(
           render: function (data, type, row) {
             return type == "display"
               ? _(
-                "statistics_wordFrequency",
-                Math.round(statistics.words / data),
-                {
-                  absolute: data,
-                  relative:
-                    data / statistics.words > 1 / 100
-                      ? Number.parseFloat(
-                        (data / statistics.words) * 100,
-                      ).toLocaleString(theLanguage, {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1,
-                      }) + " %"
-                      : Number.parseFloat(
-                        (data / statistics.words) * 1000,
-                      ).toLocaleString(theLanguage, {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1,
-                      }) + " &permil;",
-                  every: Math.round(statistics.words / data),
-                },
-              )
+                  "statistics_wordFrequency",
+                  Math.round(statistics.words / data),
+                  {
+                    absolute: data,
+                    relative:
+                      data / statistics.words > 1 / 100
+                        ? Number.parseFloat(
+                            (data / statistics.words) * 100,
+                          ).toLocaleString(theLanguage, {
+                            minimumFractionDigits: 1,
+                            maximumFractionDigits: 1,
+                          }) + " %"
+                        : Number.parseFloat(
+                            (data / statistics.words) * 1000,
+                          ).toLocaleString(theLanguage, {
+                            minimumFractionDigits: 1,
+                            maximumFractionDigits: 1,
+                          }) + " &permil;",
+                    every: Math.round(statistics.words / data),
+                  },
+                )
               : data;
           },
         },

@@ -99,6 +99,7 @@ ipcRenderer.on("objectSearchWindow_init", (event, [settings]) => {
       info: _("dataTables_info"),
       infoEmpty: _("dataTables_empty"),
       emptyTable: _("objectSearchWindow_resultEmpty"),
+      zeroRecords: _("objectSearchWindow_resultEmpty"),
       paginate: {
         first: _("dataTables_firstPage"),
         previous: _("dataTables_previousPage"),

@@ -195,7 +195,10 @@ ipcRenderer.on(
       language: {
         info: _("dataTables_info"),
         infoEmpty: _("dataTables_empty"),
-        emptyTable: _("statistics_wordlistEmpty"),
+        infoFiltered: _("dataTables_filtered"),
+        emptyTable: _("dataTables_emptyInfo"),
+        zeroRecords: _("dataTables_emptyInfo"),
+        search: _("dataTables_search"),
         paginate: {
           first: _("dataTables_firstPage"),
           previous: _("dataTables_previousPage"),
@@ -203,7 +206,6 @@ ipcRenderer.on(
           next: _("dataTables_nextPage"),
         },
         lengthMenu: _("dataTables_lengthMenu"),
-        search: _("statistics_wordlistSearch"),
       },
       pagingType: "full_numbers",
       pageLength: 10,
@@ -225,14 +227,16 @@ ipcRenderer.on(
         },
         {
           title: _("projectPropertiesWindow_fileType"),
+          searchable: false,
         },
         {
           title: _("projectPropertiesWindow_fileSize"),
           orderData: [3, 2],
           className: "dt-body-right",
+          searchable: false,
         },
         { type: "num", visible: false },
-        { title: _("projectPropertiesWindow_fileObject") },
+        { title: _("projectPropertiesWindow_fileObject"), searchable: false },
       ],
     });
     $("#filelist").DataTable().clear();
@@ -244,7 +248,7 @@ ipcRenderer.on(
           file.web
             ? `<button class="btn btn-sm simple-btn" style="cursor:pointer" title='${_("projectPropertiesWindow_openURL")}' onclick='ipcRenderer.invoke("mainProcess_openURL", "${file.info}");'><i class="fa-solid fa-globe"></i></button>`
             : file.extension,
-          Util.formatBytes(file.size,undefined,true),
+          Util.formatBytes(file.size, undefined, true),
           file.size,
           settings.quotesObjectPath
             ? file.objectPath
@@ -264,7 +268,9 @@ ipcRenderer.on(
       language: {
         info: _("dataTables_info"),
         infoEmpty: _("dataTables_empty"),
+        infoFiltered: _("dataTables_filtered"),
         emptyTable: _("statistics_wordlistEmpty"),
+        zeroRecords: _("dataTables_emptyInfo"),
         paginate: {
           first: _("dataTables_firstPage"),
           previous: _("dataTables_previousPage"),
